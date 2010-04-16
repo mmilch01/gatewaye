@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry kind="lib" path="lib/dcm4che.jar" sourcepath="D:/Libs/dcm4che-1.4.27_src/src/java"/>
+	<classpathentry kind="lib" path="lib/log4j-1.2.15.jar"/>
+	<classpathentry kind="lib" path="lib/jai_imageio_api.jar"/>
+	<classpathentry kind="lib" path="lib/dcm4che-audit-2.0.21.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
