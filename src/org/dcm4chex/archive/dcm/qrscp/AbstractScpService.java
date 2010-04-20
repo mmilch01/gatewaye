@@ -83,6 +83,7 @@ import org.dcm4che.net.DcmServiceRegistry;
 import org.dcm4che.net.PDataTF;
 import org.dcm4che.net.UserIdentityNegotiator;
 import org.dcm4che.server.DcmHandler;
+import org.dcm4che.server.ServerFactory;
 import org.dcm4che.util.DTFormat;
 import org.dcm4che2.audit.message.AuditMessage;
 import org.dcm4che2.audit.message.QueryMessage;
@@ -173,6 +174,7 @@ public abstract class AbstractScpService /*extends ServiceMBeanSupport*/ {
 
 //!!    protected TemplatesDelegate templates = new TemplatesDelegate(this);
 
+    public DcmHandler getDcmHandler(){return dcmHandler;}
     private static final NotificationFilterSupport callingAETsChangeFilter = new NotificationFilterSupport();
     static {
         callingAETsChangeFilter.enableType(CallingAetChanged.class.getName());
@@ -667,17 +669,21 @@ public abstract class AbstractScpService /*extends ServiceMBeanSupport*/ {
         return c >= '0' && c <= '9';
     }
 
-    protected void startService() throws Exception {
+    public void startService() throws Exception {
 //!! TODO: enter server start code (IMPORTANT).
 
-/*    	
-        logDir = new File(ServerConfigLocator.locate().getServerHomeDir(),
-                "log");
-        userIdentityNegotiator = (UserIdentityNegotiator) server.invoke(
-                dcmServerName, "userIdentityNegotiator", null, null);
-        dcmHandler = (DcmHandler) server.invoke(dcmServerName, "dcmHandler",
-                null, null);
+        logDir = new File("./logs");
+//!!        	new File(ServerConfigLocator.locate().getServerHomeDir(),"log");        	
+        AssociationFactory af=AssociationFactory.getInstance();
+        AcceptorPolicy policy=af.newAcceptorPolicy();
+        userIdentityNegotiator = policy.getUserIdentityNegotiator();
+        DcmServiceRegistry registry=af.newDcmServiceRegistry();        
+        dcmHandler = ServerFactory.getInstance().newDcmHandler(policy, registry);
+//        dcmHandler.
+//!!        dcmHandler = (DcmHandler) server.invoke(dcmServerName, "dcmHandler", null, null);
         bindDcmServices(dcmHandler.getDcmServiceRegistry());
+        
+/*
         server.addNotificationListener(dcmServerName, callingAETChangeListener,
                 callingAETsChangeFilter, null);
         server.addNotificationListener(aeServiceName, aetChangeListener,
@@ -687,7 +693,7 @@ public abstract class AbstractScpService /*extends ServiceMBeanSupport*/ {
         
     }
 
-    protected void stopService() throws Exception {
+    public void stopService() throws Exception {
         disableService();
         unbindDcmServices(dcmHandler.getDcmServiceRegistry());
         dcmHandler = null;

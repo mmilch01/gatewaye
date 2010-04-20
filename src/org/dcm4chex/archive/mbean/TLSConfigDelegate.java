@@ -192,7 +192,7 @@ public final class TLSConfigDelegate {
     public Socket createSocket(AEDTO localAE, AEDTO remoteAE)
             throws IOException {
         String[] cipherSuites = remoteAE.getCipherSuites();
-        Socket s = SocketFactory.getDefault().createSocket();  
+        Socket s = SocketFactory.getDefault().createSocket();
 //!!   	socketFactory(cipherSuites).createSocket();
         s.bind(toBindPoint(localAE));
         s.connect(toEndPoint(remoteAE));

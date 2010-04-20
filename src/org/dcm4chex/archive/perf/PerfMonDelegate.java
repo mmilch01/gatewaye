@@ -53,7 +53,6 @@ public class PerfMonDelegate {
     public void assocEstStart(Association assoc, int command) {
         if (perfMonServiceName == null)
             return;
-
         try {
             server.invoke(
                     perfMonServiceName,

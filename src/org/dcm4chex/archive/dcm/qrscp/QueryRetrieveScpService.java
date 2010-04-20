@@ -1166,7 +1166,7 @@ public class QueryRetrieveScpService extends AbstractScpService {
     }
 
     void logInstancesSent(RemoteNode node, InstancesAction action) {
-/*    	
+/*
         if (auditLogger.isAuditLogIHEYr4()) {
             try {
                 server.invoke(auditLogger.getAuditLoggerName(), "logInstancesSent", new Object[] {
@@ -1176,7 +1176,7 @@ public class QueryRetrieveScpService extends AbstractScpService {
                 log.warn("Audit Log failed:", e);
             }
         }
-*/        
+*/
     }
 
     protected void logInstancesSent(Association moveOrGetAs,
