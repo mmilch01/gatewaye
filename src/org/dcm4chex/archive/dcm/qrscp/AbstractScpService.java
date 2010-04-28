@@ -671,13 +671,15 @@ public abstract class AbstractScpService /*extends ServiceMBeanSupport*/ {
 
     public void startService() throws Exception {
 //!! TODO: enter server start code (IMPORTANT).
-
         logDir = new File("./logs");
-//!!        	new File(ServerConfigLocator.locate().getServerHomeDir(),"log");        	
+//!!        	new File(ServerConfigLocator.locate().getServerHomeDir(),"log");
         AssociationFactory af=AssociationFactory.getInstance();
         AcceptorPolicy policy=af.newAcceptorPolicy();
+//        policy.putPresContext(UIDs.StudyRootQueryRetrieveInformationModelFIND, UIDs.ExplicitVRLittleEndian)
+//        policy.putPresContext(asuid, tsuids)
+//        UIDs.JPEGBaseline
         userIdentityNegotiator = policy.getUserIdentityNegotiator();
-        DcmServiceRegistry registry=af.newDcmServiceRegistry();        
+        DcmServiceRegistry registry=af.newDcmServiceRegistry();
         dcmHandler = ServerFactory.getInstance().newDcmHandler(policy, registry);
 //        dcmHandler.
 //!!        dcmHandler = (DcmHandler) server.invoke(dcmServerName, "dcmHandler", null, null);

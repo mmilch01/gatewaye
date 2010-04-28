@@ -259,6 +259,7 @@ public class QueryRetrieveScpService extends AbstractScpService {
     private Map privateTSuidMap = new LinkedHashMap();
 
     public QueryRetrieveScpService() {
+    	log=Logger.getRootLogger();
     	moveScp = createMoveScp();
         getScp = createGetScp();
     	dicomFindScp = createFindScp();
@@ -1011,7 +1012,6 @@ public class QueryRetrieveScpService extends AbstractScpService {
                 getScp);
         services.bind(UIDs.PatientStudyOnlyQueryRetrieveInformationModelGET,
                 getScp);
-
         dcmHandler.addAssociationListener(dicomFindScp);
         dcmHandler.addAssociationListener(moveScp);
     }

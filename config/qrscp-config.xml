@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<attribute-list date="20100423111741" id="dcm4chee.archive:service=QueryRetrieveScp">
+<attribute name="CalledAETitles" type="java.lang.String">DCM4CHEE</attribute>
+<attribute name="CallingAETitles" type="java.lang.String">ANY</attribute>
+<attribute name="LocalStorageAETitle" type="java.lang.String">DCM4CHEE</attribute>
+<attribute name="SupplementIssuerOfPatientID" type="java.lang.Boolean">false</attribute>
+<attribute name="SendWithDefaultTransferSyntaxToAETitles" type="java.lang.String">NONE</attribute>
+<attribute name="OfferNoPixelDataTransferSyntaxToAETitles" type="java.lang.String">NONE</attribute>
+<attribute name="OfferNoPixelDataDeflateTransferSyntaxToAETitles" type="java.lang.String">NONE</attribute>
+<attribute name="SendNoPixelDataToAETitles" type="java.lang.String">NONE</attribute>
+<attribute name="IgnoreUnsupportedSOPClassFailures" type="java.lang.String">NONE</attribute>
+<attribute name="PIXQueryCallingAETitles" type="java.lang.String">ANY</attribute>
+<attribute name="PIXQueryIssuersOfPatientID" type="java.lang.String">SSN</attribute>
+<attribute name="PIXQueryDefaultIssuerOfPatientID" type="java.lang.String">DCM4CHEE</attribute>
+<attribute name="CoerceRequestPatientIds" type="java.lang.Boolean">false</attribute>
+<attribute name="CoerceRequestPatientIdsAETitles" type="java.lang.String">NONE</attribute>
+<attribute name="UnrestrictedQueryPermissionsToAETitles" type="java.lang.String">ANY</attribute>
+<attribute name="UnrestrictedReadPermissionsToAETitles" type="java.lang.String">ANY</attribute>
+<attribute name="UnrestrictedExportPermissionsToAETitles" type="java.lang.String">ANY</attribute>
+<attribute name="HideWithoutIssuerOfPatientIDFromAETitles" type="java.lang.String">NONE</attribute>
+<attribute name="IgnorableSOPClasses" type="java.lang.String">            BasicTextSR            EnhancedSR            ComprehensiveSR            ProcedureLogStorage            MammographyCADSR            KeyObjectSelectionDocument            ChestCADSR            XRayRadiationDoseSR            TwelveLeadECGWaveformStorage            GeneralECGWaveformStorage            AmbulatoryECGWaveformStorage            HemodynamicWaveformStorage            CardiacElectrophysiologyWaveformStorage            BasicVoiceAudioWaveformStorage            MRSpectroscopyStorage            GrayscaleSoftcopyPresentationStateStorage            ColorSoftcopyPresentationStateStorage            PseudoColorSoftcopyPresentationStateStorage            BlendingSoftcopyPresentationStateStorage            RawDataStorage            SpatialRegistrationStorage            SpatialFiducialsStorage            RealWorldValueMappingStorage            StereometricRelationshipStorage            EncapsulatedPDFStorage            RTDoseStorage            RTStructureSetStorage            RTBeamsTreatmentRecordStorage            RTPlanStorage            RTBrachyTreatmentRecordStorage            RTTreatmentSummaryRecordStorage            RTIonPlanStorage            RTIonBeamsTreatmentRecordStorage            StandaloneOverlayStorage            StandaloneCurveStorage            StandaloneModalityLUTStorage            StandaloneVOILUTStorage            StandalonePETCurveStorage            AgfaAttributePresentationState            SiemensCSANonImageStorage            StructuredReportTextStorageRetired            StructuredReportAudioStorageRetired            StructuredReportDetailStorageRetired            StructuredComprehensiveStorageRetired                       </attribute>
+<attribute name="RequestStorageCommitFromAETitles" type="java.lang.String">NONE</attribute>
+<attribute name="NoMatchForNoValue" type="java.lang.Boolean">true</attribute>
+<attribute name="AcceptedStandardSOPClasses" type="java.lang.String">            PatientRootQueryRetrieveInformationModelFIND            PatientRootQueryRetrieveInformationModelGET            PatientRootQueryRetrieveInformationModelMOVE            StudyRootQueryRetrieveInformationModelFIND            StudyRootQueryRetrieveInformationModelGET            StudyRootQueryRetrieveInformationModelMOVE            PatientStudyOnlyQueryRetrieveInformationModelFIND            PatientStudyOnlyQueryRetrieveInformationModelGET            PatientStudyOnlyQueryRetrieveInformationModelMOVE            </attribute>
+<attribute name="AcceptedTransferSyntaxForStandardSOPClasses" type="java.lang.String">            ImplicitVRLittleEndian          </attribute>
+<attribute name="AcceptedPrivateSOPClasses" type="java.lang.String">            Dcm4cheStudyRootQueryRetrieveInformationModelFIND            Dcm4cheBlockedStudyRootQueryRetrieveInformationModelFIND            </attribute>
+<attribute name="AcceptedTransferSyntaxForPrivateSOPClasses" type="java.lang.String">            DeflatedExplicitVRLittleEndian            ExplicitVRLittleEndian            ImplicitVRLittleEndian          </attribute>
+<attribute name="MaximumBlockedFindResponse" type="java.lang.Integer">1000</attribute>
+<attribute name="LogAETitles" type="java.lang.String">NONE</attribute>
+<attribute name="CoerceConfigDirectory" type="java.lang.String">conf/dcm4chee-ae</attribute>
+<attribute name="WriteCoercionXmlLog" type="java.lang.Boolean">false</attribute>
+<attribute name="SendPendingCMoveResponse" type="java.lang.Boolean">true</attribute>
+<attribute name="PendingCMoveResponseInterval" type="java.lang.Long">5000</attribute>
+<attribute name="SendPendingCGetResponse" type="java.lang.Boolean">false</attribute>
+<attribute name="PendingCGetResponseInterval" type="java.lang.Long">5000</attribute>
+<attribute name="ForwardAsMoveOriginator" type="java.lang.Boolean">true</attribute>
+<attribute name="RecordStudyAccessTime" type="java.lang.Boolean">true</attribute>
+<attribute name="CheckMatchingKeySupported" type="java.lang.Boolean">true</attribute>
+<attribute name="MaximumUIDsPerMoveRequest" type="java.lang.Integer">100</attribute>
+<attribute name="MaximumPDULength" type="java.lang.Integer">16352</attribute>
+<attribute name="MaximumOperationsInvoked" type="java.lang.Integer">1</attribute>
+<attribute name="MaximumOperationsPerformed" type="java.lang.Integer">1</attribute>
+<attribute name="MaximumStorageOperationsInvoked" type="java.lang.Integer">0</attribute>
+<attribute name="AcceptTimeout" type="java.lang.Integer">10000</attribute>
+<attribute name="DIMSETimeout" type="java.lang.Integer">60000</attribute>
+<attribute name="SocketCloseDelay" type="java.lang.Integer">50</attribute>
+<attribute name="TcpNoDelay" type="java.lang.Boolean">true</attribute>
+<attribute name="SendBufferSize" type="java.lang.Integer">0</attribute>
+<attribute name="ReceiveBufferSize" type="java.lang.Integer">0</attribute>
+<attribute name="BufferSize" type="java.lang.Integer">8192</attribute>
+<attribute name="RetrieveWithoutLeftJoins" type="java.lang.Boolean">false</attribute>
+<attribute name="LazyFetchSeriesAttrsOnImageLevelQuery" type="java.lang.Boolean">false</attribute>
+<attribute name="CacheSeriesAttrsOnImageLevelQuery" type="java.lang.Boolean">true</attribute>
+<attribute name="AccessBlobAsLongVarBinaryOnQuery" type="java.lang.Boolean">true</attribute>
+<attribute name="AccessSeriesBlobAsLongVarBinaryOnImageLevelQuery" type="java.lang.Boolean">false</attribute>
+<attribute name="LazyFetchSeriesAttrsOnRetrieve" type="java.lang.Boolean">false</attribute>
+<attribute name="CacheSeriesAttrsOnRetrieve" type="java.lang.Boolean">true</attribute>
+<attribute name="CacheSeriesAttrsOnRetrieveMaxSize" type="java.lang.Integer">100</attribute>
+<attribute name="CacheSeriesAttrsOnRetrieveCurrencyTimeLimit" type="java.lang.String">1m</attribute>
+<attribute name="AccessBlobAsLongVarBinaryOnRetrieve" type="java.lang.Boolean">true</attribute>
+<attribute name="AccessSeriesBlobAsLongVarBinaryOnRetrieve" type="java.lang.Boolean">false</attribute>
+<attribute name="QueryTransactionIsolationLevel" type="java.lang.String">DEFAULT</attribute>
+<attribute name="RetrieveTransactionIsolationLevel" type="java.lang.String">DEFAULT</attribute>
+<attribute name="DcmServerName" type="javax.management.ObjectName">dcm4chee.archive:service=DcmServer</attribute>
+<attribute name="DicomSecurityServiceName" type="javax.management.ObjectName">dcm4chee.archive:service=DicomSecurity</attribute>
+<attribute name="StgCmtScuScpName" type="javax.management.ObjectName">dcm4chee.archive:service=StgCmtScuScp</attribute>
+<attribute name="TarRetrieverName" type="javax.management.ObjectName">dcm4chee.archive:service=TarRetriever</attribute>
+<attribute name="TLSConfigName" type="javax.management.ObjectName">dcm4chee.archive:service=TLSConfig</attribute>
+<attribute name="AuditLoggerName" type="javax.management.ObjectName">dcm4chee.archive:service=AuditLogger</attribute>
+<attribute name="AEServiceName" type="javax.management.ObjectName">dcm4chee.archive:service=AE</attribute>
+<attribute name="TemplatesServiceName" type="javax.management.ObjectName">dcm4chee.archive:service=Templates</attribute>
+<attribute name="PixQueryServiceName" type="javax.management.ObjectName">dcm4chee.archive:service=PIXQuery</attribute>
+</attribute-list>

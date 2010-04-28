@@ -72,6 +72,7 @@ import org.dcm4chex.archive.ejb.jdbc.QueryCmd;
 import org.dcm4chex.archive.perf.PerfCounterEnum;
 import org.dcm4chex.archive.perf.PerfMonDelegate;
 import org.dcm4chex.archive.perf.PerfPropertyEnum;
+import org.nrg.xnat.gateway.XNATGatewayServer;
 //!!import org.jboss.logging.Logger;
 
 /**
@@ -125,6 +126,9 @@ public class FindScp extends DcmServiceBase implements AssociationListener {
     public final void setPerfMonServiceName(ObjectName perfMonServiceName) {
         perfMon.setPerfMonServiceName(perfMonServiceName);
     }
+    /* This function is called to produce C-Find requests.
+     * @see org.dcm4che.net.DcmServiceBase#doCFind(org.dcm4che.net.ActiveAssociation, org.dcm4che.net.Dimse, org.dcm4che.data.Command)
+     */
     protected MultiDimseRsp doCFind(ActiveAssociation assoc, Dimse rq,
             Command rspCmd) throws IOException, DcmServiceException {
         Association a = assoc.getAssociation();
@@ -307,12 +311,16 @@ public class FindScp extends DcmServiceBase implements AssociationListener {
     protected MultiDimseRsp newMultiCFindRsp(Dataset rqData,
             boolean hideWithoutIssuerOfPID, boolean otherPIDinRQ,
             Subject subject) throws SQLException {
+/*    	
         QueryCmd queryCmd = QueryCmd.create(rqData, filterResult,
                 service.isNoMatchForNoValue(), hideWithoutIssuerOfPID, subject);
         queryCmd.execute();
         if (!otherPIDinRQ) // remove OPIDSeq added by pixQuery
             rqData.remove(Tags.OtherPatientIDSeq);
-        return new MultiCFindRsp(queryCmd);
+*/
+    	return XNATGatewayServer.getInstance().getMultiCFindRsp(rqData);
+    	
+//        return new MultiCFindRsp(queryCmd);
     }
 
     protected Dataset getDataset(QueryCmd queryCmd) throws SQLException,

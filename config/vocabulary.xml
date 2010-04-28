@@ -1,0 +1,94 @@
+<vocabulary>
+<!--
+Note: xnat_column_alias is a vocabulary-defined key that is used internally for 
+entry indexing. It should be unique throughout the vocabulary.
+ -->
+
+<!-- PatientID -->
+<entry dicom_group="0010" dicom_element="0020" xnat_element_name="xnat:subjectData" 
+		xnat_field_id="xnat:subjectData/ID" xnat_header="PatientID" search_column_alias="patid" >
+	<criterion search_schema_field="xnat:subjectData/ID" method="OR" comparison_type="LIKE"/>
+</entry>
+
+<!-- Patient Name -->
+<entry dicom_group="0010" dicom_element="0010" xnat_element_name="xnat:subjectData"
+		xnat_field_id="xnat:subjectData/label" xnat_header="PatientName" search_column_alias="patname">
+	<criterion search_schema_field="xnat:subjectData/label" method="OR" comparison_type="LIKE"/>
+</entry>
+
+<!-- Patient Sex -->
+<entry dicom_group="0010" dicom_element="0040" xnat_element_name="xnat:subjectData"
+		xnat_field_id="xnat:demographicData/gender" xnat_header="PatientSex" search_column_alias="patsex">
+	<criterion search_schema_field="xnat:subjectData/gender" method="OR" comparison_type="LIKE"/>		
+	<value_map dcm_val="M" xnat_val="male"/>
+	<value_map dcm_val="F" xnat_val="female"/>
+</entry>
+
+<!-- Patient Birth Date -->
+<entry dicom_group="0010" dicom_element="0030" xnat_element_name="xnat:subjectData"
+		xnat_field_id="xnat:demographicData/dob" xnat_header="PatientDOB" search_column_alias="patdob">
+	<criterion search_schema_field="xnat:subjectData/dob" method="OR" comparison_type="LIKE"/>
+</entry>
+
+<!-- Study instance UID  -->
+<entry dicom_group="0020" dicom_element="000D" xnat_element_name="xnat:mrSessionData" 
+		 xnat_field_id="xnat:mrSessionData/ID" xnat_header="ID" search_column_alias="stinstuid">
+</entry>
+
+<!-- Study accession number  -->
+<entry dicom_group="0008" dicom_element="0050" xnat_element_name="xnat:mrSessionData" 
+		xnat_field_id="xnat:mrSessionData/label" xnat_header="Label" search_column_alias="staccessionnum">
+</entry>
+
+<!-- Referring physician -->
+<entry dicom_group="0008" dicom_element="0090" xnat_element_name="xnat:mrSessionData"
+		xnat_field_id="xnat:mrSessionData/investigator/lastname" xnat_header="Investigator"	search_column_alias="strefphysician">
+</entry>
+
+<!-- Study description -->
+<entry dicom_group="0008" dicom_element="1030" xnat_element_name="xnat:mrSessionData"
+		xnat_field_id="xnat:mrSessionData/session_type" xnat_header="TYPE"	search_column_alias="stdescr">
+</entry>
+
+<!-- Study modality -->
+<entry dicom_group="0008" dicom_element="0061" xnat_element_name="xnat:mrSessionData"
+		xnat_field_id="xnat:mrSessionData/modality" xnat_header="MODALITY"	search_column_alias="stmodality">
+</entry>
+
+<!-- Study date -->
+<entry dicom_group="0008" dicom_element="0020" xnat_element_name="xnat:mrSessionData"
+		xnat_field_id="xnat:mrSessionData/date" xnat_header="DATE"	search_column_alias="stdate">
+</entry>
+
+<!-- Study time -->
+<entry dicom_group="0008" dicom_element="0030" xnat_element_name="xnat:mrSessionData"
+		xnat_field_id="xnat:mrSessionData/time" xnat_header="TIME"	search_column_alias="sttime">
+</entry>
+
+<!-- Series instance UID --> 
+<entry dicom_group="0020" dicom_element="000E" xnat_element_name="xnat:mrScanData"
+		xnat_field_id="xnat:mrScanData/ID" xnat_header="Scan"	search_column_alias="id">
+</entry>
+
+<!-- Series modality --> 
+<entry dicom_group="0008" dicom_element="0060" xnat_element_name="xnat:mrScanData"
+		xnat_field_id="xnat:mrScanData/modality" xnat_header="modality"	search_column_alias="sermodality">
+</entry>
+
+<!-- Series number  
+<entry dicom_group="0020" dicom_element="0011" xnat_element_name="xnat:mrScanData"
+		xnat_field_id="xnat:mrScanData/ID" xnat_header="Scan" search_column_alias="id">
+</entry>
+-->
+
+<!-- Series description --> 
+<entry dicom_group="0008" dicom_element="103E" xnat_element_name="xnat:mrScanData"
+		xnat_field_id="xnat:mrScanData/type" xnat_header="Type"	search_column_alias="series_description">
+</entry>
+
+<!-- Series number of images --> 
+<entry dicom_group="0020" dicom_element="1209" xnat_element_name="xnat:mrScanData"
+		xnat_field_id="xnat:mrScanData/frames" xnat_header="Files"	search_column_alias="sernumimages">
+</entry>
+
+</vocabulary>
