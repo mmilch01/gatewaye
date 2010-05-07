@@ -41,44 +41,50 @@ package org.dcm4chex.archive.exceptions;
 
 /**
  * @author gunter.zeilinger@tiani.com
- * @version $Revision: 3258 $ $Date: 2007-04-10 13:13:17 +0200 (Tue, 10 Apr 2007) $
+ * @version $Revision: 3258 $ $Date: 2007-04-10 13:13:17 +0200 (Tue, 10 Apr
+ *          2007) $
  * @since 20.04.2004
  */
-public class NoPresContextException extends Exception {
+public class NoPresContextException extends Exception
+{
 
 	private static final long serialVersionUID = 3545240219440724020L;
 
 	/**
      * 
      */
-    public NoPresContextException() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
+	public NoPresContextException()
+	{
+		super();
+		// TODO Auto-generated constructor stub
+	}
 
-    /**
-     * @param message
-     */
-    public NoPresContextException(String message) {
-        super(message);
-        // TODO Auto-generated constructor stub
-    }
+	/**
+	 * @param message
+	 */
+	public NoPresContextException(String message)
+	{
+		super(message);
+		// TODO Auto-generated constructor stub
+	}
 
-    /**
-     * @param cause
-     */
-    public NoPresContextException(Throwable cause) {
-        super(cause);
-        // TODO Auto-generated constructor stub
-    }
+	/**
+	 * @param cause
+	 */
+	public NoPresContextException(Throwable cause)
+	{
+		super(cause);
+		// TODO Auto-generated constructor stub
+	}
 
-    /**
-     * @param message
-     * @param cause
-     */
-    public NoPresContextException(String message, Throwable cause) {
-        super(message, cause);
-        // TODO Auto-generated constructor stub
-    }
+	/**
+	 * @param message
+	 * @param cause
+	 */
+	public NoPresContextException(String message, Throwable cause)
+	{
+		super(message, cause);
+		// TODO Auto-generated constructor stub
+	}
 
 }

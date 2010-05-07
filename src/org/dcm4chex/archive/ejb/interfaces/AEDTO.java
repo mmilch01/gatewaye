@@ -44,154 +44,172 @@ import java.util.StringTokenizer;
 
 /**
  * <description>
- *
+ * 
  * @see <related>
- * @author  <a href="mailto:gunter@tiani.com">gunter zeilinger</a>
- * @version $Revision: 6844 $ $Date: 2008-08-22 14:23:10 +0200 (Fri, 22 Aug 2008) $
+ * @author <a href="mailto:gunter@tiani.com">gunter zeilinger</a>
+ * @version $Revision: 6844 $ $Date: 2008-08-22 14:23:10 +0200 (Fri, 22 Aug
+ *          2008) $
  * @since July 23, 2002
- *
- * <p><b>Revisions:</b>
- *
- * <p><b>yyyymmdd author:</b>
- * <ul>
- * <li> explicit fix description (no line numbers but methods) go
- *            beyond the cvs commit message
- * </ul>
+ * 
+ *        <p>
+ *        <b>Revisions:</b>
+ * 
+ *        <p>
+ *        <b>yyyymmdd author:</b>
+ *        <ul>
+ *        <li>explicit fix description (no line numbers but methods) go beyond
+ *        the cvs commit message
+ *        </ul>
  */
-public class AEDTO implements Serializable {
+public class AEDTO implements Serializable
+{
 
-    // Constants -----------------------------------------------------
-    static final long serialVersionUID = 9128665077590256461L;
-    static final String[] EMPTY_STRING_ARRAY = {
-    };
+	// Constants -----------------------------------------------------
+	static final long serialVersionUID = 9128665077590256461L;
+	static final String[] EMPTY_STRING_ARRAY = {};
 
-    // Variables -----------------------------------------------------
-    private final long pk;
-    private String title;
-    private final String hostname;
-    private final int port;
-    private final String cipherSuites;
-    private final String issuer;
-    private final String userID;
-    private final String passwd;
-    private final String fsGroupID;
-    private final String desc;
-    private final String wadoUrl;
+	// Variables -----------------------------------------------------
+	private final long pk;
+	private String title;
+	private final String hostname;
+	private final int port;
+	private final String cipherSuites;
+	private final String issuer;
+	private final String userID;
+	private final String passwd;
+	private final String fsGroupID;
+	private final String desc;
+	private final String wadoUrl;
 
-    // Constructors --------------------------------------------------
-    public AEDTO(
-        long pk,
-        String title,
-        String hostname,
-        int port,
-        String cipherSuites,
-        String issuer,
-        String userID,
-        String passwd,
-        String fsGroupID,
-        String desc, 
-        String wadoUrl) {
-        this.pk = pk;
-        this.title = title;
-        this.hostname = hostname;
-        this.port = port;
-        this.cipherSuites = cipherSuites;
-        this.issuer = issuer;
-        this.userID = userID;
-        this.passwd = passwd;
-        this.fsGroupID = fsGroupID;
-        this.desc = desc;
-        this.wadoUrl = wadoUrl;
-    }
+	// Constructors --------------------------------------------------
+	public AEDTO(long pk, String title, String hostname, int port,
+			String cipherSuites, String issuer, String userID, String passwd,
+			String fsGroupID, String desc, String wadoUrl)
+	{
+		this.pk = pk;
+		this.title = title;
+		this.hostname = hostname;
+		this.port = port;
+		this.cipherSuites = cipherSuites;
+		this.issuer = issuer;
+		this.userID = userID;
+		this.passwd = passwd;
+		this.fsGroupID = fsGroupID;
+		this.desc = desc;
+		this.wadoUrl = wadoUrl;
+	}
 
-    /**
-     * @return pk
-     */
-    public final long getPk() {
-        return pk;
-    }
+	/**
+	 * @return pk
+	 */
+	public final long getPk()
+	{
+		return pk;
+	}
 
-    /** Getter for property title.
-     * @return Value of property title.
-     */
-    public java.lang.String getTitle() {
-        return title;
-    }
-    
-    public void setTitle(String title) {
-        this.title = title;
-    }
+	/**
+	 * Getter for property title.
+	 * 
+	 * @return Value of property title.
+	 */
+	public java.lang.String getTitle()
+	{
+		return title;
+	}
 
-    /** Getter for property host.
-     * @return Value of property host.
-     */
-    public java.lang.String getHostName() {
-        return hostname;
-    }
+	public void setTitle(String title)
+	{
+		this.title = title;
+	}
 
-    /** Getter for property port.
-     * @return Value of property port.
-     */
-    public int getPort() {
-        return port;
-    }
+	/**
+	 * Getter for property host.
+	 * 
+	 * @return Value of property host.
+	 */
+	public java.lang.String getHostName()
+	{
+		return hostname;
+	}
 
-    /** Getter for property cipherSuites.
-     * @return Value of property cipherSuites.
-     */
-    public java.lang.String[] getCipherSuites() {
-        if (cipherSuites == null || cipherSuites.length() == 0) {
-            return EMPTY_STRING_ARRAY;
-        }
-        StringTokenizer stk = new StringTokenizer(cipherSuites, " ,");
-        String[] retval = new String[stk.countTokens()];
-        for (int i = 0; i < retval.length; ++i) {
-            retval[i] = stk.nextToken();
-        }
-        return retval;
-    }
+	/**
+	 * Getter for property port.
+	 * 
+	 * @return Value of property port.
+	 */
+	public int getPort()
+	{
+		return port;
+	}
 
-    /** Getter for property cipherSuites.
-     * @return Value of property cipherSuites.
-     */
-    public java.lang.String getCipherSuitesAsString() {
-        return cipherSuites;
-    }
+	/**
+	 * Getter for property cipherSuites.
+	 * 
+	 * @return Value of property cipherSuites.
+	 */
+	public java.lang.String[] getCipherSuites()
+	{
+		if (cipherSuites == null || cipherSuites.length() == 0)
+		{
+			return EMPTY_STRING_ARRAY;
+		}
+		StringTokenizer stk = new StringTokenizer(cipherSuites, " ,");
+		String[] retval = new String[stk.countTokens()];
+		for (int i = 0; i < retval.length; ++i)
+		{
+			retval[i] = stk.nextToken();
+		}
+		return retval;
+	}
 
-    public boolean isTLS() {
-        return cipherSuites != null && cipherSuites.length() != 0;
-    }
-    
-    public String getIssuerOfPatientID() {
-        return issuer;        
-    }
-    
-    public String getUserID() {
-        return userID;        
-    }
-    
-    public String getPassword() {
-        return passwd;        
-    }
-    
-    public final String getFileSystemGroupID() {
-        return fsGroupID;
-    }
-    
-    public String getDescription() {
-        return desc;        
-    }
-    
-    public String getWadoUrl() {
-        return wadoUrl;
-    }
+	/**
+	 * Getter for property cipherSuites.
+	 * 
+	 * @return Value of property cipherSuites.
+	 */
+	public java.lang.String getCipherSuitesAsString()
+	{
+		return cipherSuites;
+	}
 
-    public String toString() {
-        return (isTLS() ? "dicom-tls://" : "dicom://")
-            + title
-            + '@'
-            + hostname
-            + ':'
-            + port;
-    }
+	public boolean isTLS()
+	{
+		return cipherSuites != null && cipherSuites.length() != 0;
+	}
+
+	public String getIssuerOfPatientID()
+	{
+		return issuer;
+	}
+
+	public String getUserID()
+	{
+		return userID;
+	}
+
+	public String getPassword()
+	{
+		return passwd;
+	}
+
+	public final String getFileSystemGroupID()
+	{
+		return fsGroupID;
+	}
+
+	public String getDescription()
+	{
+		return desc;
+	}
+
+	public String getWadoUrl()
+	{
+		return wadoUrl;
+	}
+
+	public String toString()
+	{
+		return (isTLS() ? "dicom-tls://" : "dicom://") + title + '@' + hostname
+				+ ':' + port;
+	}
 }

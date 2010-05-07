@@ -42,37 +42,43 @@ package org.dcm4chex.archive.util;
 /**
  * 
  * @author gunter.zeilinger@tiani.com
- * @version $Revision: 2506 $ $Date: 2006-05-31 15:24:50 +0200 (Wed, 31 May 2006) $
+ * @version $Revision: 2506 $ $Date: 2006-05-31 15:24:50 +0200 (Wed, 31 May
+ *          2006) $
  * @since 16.12.2003
  */
-public class HomeFactoryException extends Exception {
+public class HomeFactoryException extends Exception
+{
 
-    /**
+	/**
      * 
      */
-    public HomeFactoryException() {
-        super();
-    }
+	public HomeFactoryException()
+	{
+		super();
+	}
 
-    /**
-     * @param message
-     */
-    public HomeFactoryException(String message) {
-        super(message);
-    }
+	/**
+	 * @param message
+	 */
+	public HomeFactoryException(String message)
+	{
+		super(message);
+	}
 
-    /**
-     * @param cause
-     */
-    public HomeFactoryException(Throwable cause) {
-        super(cause);
-    }
+	/**
+	 * @param cause
+	 */
+	public HomeFactoryException(Throwable cause)
+	{
+		super(cause);
+	}
 
-    /**
-     * @param message
-     * @param cause
-     */
-    public HomeFactoryException(String message, Throwable cause) {
-        super(message, cause);
-    }
+	/**
+	 * @param message
+	 * @param cause
+	 */
+	public HomeFactoryException(String message, Throwable cause)
+	{
+		super(message, cause);
+	}
 }

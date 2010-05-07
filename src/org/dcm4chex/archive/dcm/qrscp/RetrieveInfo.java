@@ -56,7 +56,7 @@ import org.dcm4che.dict.UIDs;
 import org.dcm4che.net.AAssociateRQ;
 import org.dcm4che.net.AssociationFactory;
 import org.dcm4chex.archive.common.Availability;
-import org.dcm4chex.archive.ejb.jdbc.FileInfo;
+import org.nrg.xnat.gateway.FileInfo;
 
 /**
  * @author gunter.zeilinger@tiani.com
@@ -64,252 +64,292 @@ import org.dcm4chex.archive.ejb.jdbc.FileInfo;
  * @since 23.03.2005
  */
 
-final class RetrieveInfo {
+final class RetrieveInfo
+{
 
-    private static final String[] IVR_LE_TS = { UIDs.ImplicitVRLittleEndian };
+	private static final String[] IVR_LE_TS = {UIDs.ImplicitVRLittleEndian};
 
-    private static final String[] EVR_LE_TS = { UIDs.ExplicitVRLittleEndian };
+	private static final String[] EVR_LE_TS = {UIDs.ExplicitVRLittleEndian};
 
-    private static final String[] NO_PIXEL_TS = { UIDs.NoPixelData };
-    
-    private static final String[] NO_PIXEL_DEFL_TS = { UIDs.NoPixelDataDeflate,
-        UIDs.NoPixelData };
-    
-    private static final boolean isNativeLE_TS(String uid) {
-        return UIDs.ExplicitVRLittleEndian.equals(uid)
-            || UIDs.ImplicitVRLittleEndian.equals(uid);
-    }
+	private static final String[] NO_PIXEL_TS = {UIDs.NoPixelData};
 
-    private static class IuidsAndTsuids {
-        final Set<String> iuids = new HashSet<String>();
-        final Set<String> tsuids = new HashSet<String>();
-    }
-    
-    private final int size;
-    private final Map<String, IuidsAndTsuids> iuidsAndTsuidsByCuid =
-            new HashMap<String, IuidsAndTsuids>();
-    private final Map<String, List<FileInfo>> localFilesByIuid =
-            new LinkedHashMap<String, List<FileInfo>>();
-    private final Map<String, Set<String>> iuidsByRemoteAET =
-            new HashMap<String, Set<String>>();
-    private final Map<String, Set<String>> iuidsByExternalAET =
-            new HashMap<String, Set<String>>();
-    private final Set<String> notAvailableIuids = new HashSet<String>();
-    private final Set<String> availableIuids = new HashSet<String>();
-    private final Set<String> studyIuids = new HashSet<String>();
-    private final Set<String> seriesIuids = new HashSet<String>();
-    private Map.Entry<String, Set<String>> curMoveForward;
+	private static final String[] NO_PIXEL_DEFL_TS = {UIDs.NoPixelDataDeflate,
+			UIDs.NoPixelData};
 
-    private boolean externalRetrieveAET;
-    
-    RetrieveInfo(QueryRetrieveScpService service, FileInfo[][] instInfos) {
-        FileInfo[] fileInfos;
-        FileInfo fileInfo;
-        String iuid;
-        this.size = instInfos.length;
-        for (int i = 0; i < size; ++i) {
-            fileInfos = instInfos[i];
-            iuid = fileInfos[0].sopIUID;
-            studyIuids.add(fileInfos[0].studyIUID);
-            seriesIuids.add(fileInfos[0].seriesIUID);
-            for (int j = 0; j < fileInfos.length; j++) {
-                fileInfo = fileInfos[j];
-                if (fileInfo.fileRetrieveAET != null 
-                        && (fileInfo.availability == Availability.ONLINE
-                                || fileInfo.availability == Availability.NEARLINE)) {
-                    if (service.isLocalRetrieveAET(fileInfo.fileRetrieveAET)) {
-                        putLocalFile(fileInfo);
-                    } else {
-                        putIuid(iuidsByRemoteAET, fileInfo.fileRetrieveAET, iuid);
-                    }
-                } else if (fileInfo.extRetrieveAET != null) {
-                    putIuid(iuidsByExternalAET, fileInfo.extRetrieveAET, iuid);
-                }
-            }
-        }
-    }
+	private static final boolean isNativeLE_TS(String uid)
+	{
+		return UIDs.ExplicitVRLittleEndian.equals(uid)
+				|| UIDs.ImplicitVRLittleEndian.equals(uid);
+	}
 
-    private void putLocalFile(FileInfo fileInfo) {
-        String iuid = fileInfo.sopIUID;
-        String cuid = fileInfo.sopCUID;
-        IuidsAndTsuids iuidsAndTsuids = iuidsAndTsuidsByCuid.get(cuid);
-        if (iuidsAndTsuids == null) {
-            iuidsAndTsuids = new IuidsAndTsuids();
-            iuidsAndTsuidsByCuid.put(cuid, iuidsAndTsuids);
-        }
-        iuidsAndTsuids.iuids.add(iuid);
-        iuidsAndTsuids.tsuids.add(fileInfo.tsUID);
-        List<FileInfo> localFiles = localFilesByIuid.get(iuid);
-        if (localFiles == null) {
-            localFiles = new ArrayList<FileInfo>();
-            localFilesByIuid.put(iuid, localFiles);
-        }
-        localFiles.add(fileInfo);
-        availableIuids.add(iuid);
-        notAvailableIuids.remove(iuid);
-    }
+	private static class IuidsAndTsuids
+	{
+		final Set<String> iuids = new HashSet<String>();
+		final Set<String> tsuids = new HashSet<String>();
+	}
 
-    private void putIuid(Map<String, Set<String>> iuidsByAET, String aet,
-            String iuid) {
-        Set<String> iuids = iuidsByAET.get(aet);
-        if (iuids == null) {
-            iuids = new LinkedHashSet<String>();
-            iuidsByAET.put(aet, iuids);
-        }
-        iuids.add(iuid);
-        availableIuids.add(iuid);
-        notAvailableIuids.remove(iuid);
-    }
-    
-    public void addPresContext(AAssociateRQ rq,
-            boolean sendWithDefaultTransferSyntax,
-            boolean offerNoPixelData,
-            boolean offerNoPixelDataDeflate) {
-        String cuid;
-        String tsuid;
-        IuidsAndTsuids iuidsAndTsuids;
-        AssociationFactory asf = AssociationFactory.getInstance();
-        Iterator<Map.Entry<String, IuidsAndTsuids>> it =
-                iuidsAndTsuidsByCuid.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry<String, IuidsAndTsuids> entry = it.next();
-            cuid = entry.getKey();
-            iuidsAndTsuids = entry.getValue();
-            if (sendWithDefaultTransferSyntax) {
-                rq.addPresContext(asf.newPresContext(rq.nextPCID(), cuid, 
-                        UIDs.ImplicitVRLittleEndian)); 
-                continue;
-            }
-            rq.addPresContext(asf.newPresContext(rq.nextPCID(), cuid, 
-                    IVR_LE_TS));
-            rq.addPresContext(asf.newPresContext(rq.nextPCID(), cuid, 
-                    EVR_LE_TS));
-            if (offerNoPixelDataDeflate) {
-                rq.addPresContext(asf.newPresContext(rq.nextPCID(), cuid, 
-                        NO_PIXEL_DEFL_TS));
-            } else if (offerNoPixelData) {
-                rq.addPresContext(asf.newPresContext(rq.nextPCID(), cuid, 
-                        NO_PIXEL_TS));
-            }
-            Iterator<String> it2 = iuidsAndTsuids.tsuids.iterator();
-            while (it2.hasNext()) {
-                tsuid = it2.next();
-                if (!isNativeLE_TS(tsuid)) {
-                    rq.addPresContext(asf.newPresContext(rq.nextPCID(), cuid, 
-                            new String[] { tsuid }));
-                }
-            }
-        }        
-    }
+	private final int size;
+	private final Map<String, IuidsAndTsuids> iuidsAndTsuidsByCuid = new HashMap<String, IuidsAndTsuids>();
+	private final Map<String, List<FileInfo>> localFilesByIuid = new LinkedHashMap<String, List<FileInfo>>();
+	private final Map<String, Set<String>> iuidsByRemoteAET = new HashMap<String, Set<String>>();
+	private final Map<String, Set<String>> iuidsByExternalAET = new HashMap<String, Set<String>>();
+	private final Set<String> notAvailableIuids = new HashSet<String>();
+	private final Set<String> availableIuids = new HashSet<String>();
+	private final Set<String> studyIuids = new HashSet<String>();
+	private final Set<String> seriesIuids = new HashSet<String>();
+	private Map.Entry<String, Set<String>> curMoveForward;
 
-    public Iterator<String> getCUIDs() {
-        return iuidsAndTsuidsByCuid.keySet().iterator();
-    }
-    
-    public Set<String> removeInstancesOfClass(String cuid) {
-        IuidsAndTsuids iuidsAndTsuids = iuidsAndTsuidsByCuid.get(cuid);
-        Iterator<String> it = iuidsAndTsuids.iuids.iterator();
-        String iuid;
-        while (it.hasNext()) {
-            iuid = it.next();
-            localFilesByIuid.remove(iuid);
-            removeIuid(iuidsByRemoteAET, iuid);
-            removeIuid(iuidsByExternalAET, iuid);
-        }
-        return iuidsAndTsuids.iuids;
-    }
+	private boolean externalRetrieveAET;
 
-    private void removeIuid(Map<String, Set<String>> iuidsByAET, String iuid) {
-        Iterator<Set<String>> it = iuidsByAET.values().iterator();
-        Set<String> iuids;
-        while (it.hasNext()) {
-            iuids = it.next();
-            iuids.remove(iuid);
-            if (iuids.isEmpty())
-                it.remove();
-        }
-    }
+	RetrieveInfo(QueryRetrieveScpService service, FileInfo[][] instInfos)
+	{
+		FileInfo[] fileInfos;
+		FileInfo fileInfo;
+		String iuid;
+		this.size = instInfos.length;
+		for (int i = 0; i < size; ++i)
+		{
+			fileInfos = instInfos[i];
+			iuid = fileInfos[0].sopIUID;
+			studyIuids.add(fileInfos[0].studyIUID);
+			seriesIuids.add(fileInfos[0].seriesIUID);
+			for (int j = 0; j < fileInfos.length; j++)
+			{
+				fileInfo = fileInfos[j];
 
-    private static final Comparator<Map.Entry<String, Set<String>>>
-            ASC_IUIDS_SIZE = new Comparator<Map.Entry<String, Set<String>>>() {
+				if (fileInfo.fileRetrieveAET != null
+						&& (fileInfo.availability == Availability.ONLINE || fileInfo.availability == Availability.NEARLINE))
+				{
+					if (service.isLocalRetrieveAET(fileInfo.fileRetrieveAET))
+					{
+						putLocalFile(fileInfo);
+					} else
+					{
+						putIuid(iuidsByRemoteAET, fileInfo.fileRetrieveAET,
+								iuid);
+					}
+				} else if (fileInfo.extRetrieveAET != null)
+				{
+					putIuid(iuidsByExternalAET, fileInfo.extRetrieveAET, iuid);
+				}
 
-        public int compare(Map.Entry<String, Set<String>> o1,
-                Map.Entry<String, Set<String>> o2) {
-            return o1.getValue().size() - o2.getValue().size();
-        }
-    };
+			}
+		}
+	}
 
-    public boolean nextMoveForward() {
-        if (!iuidsByRemoteAET.isEmpty()) {
-            externalRetrieveAET = false;
-            curMoveForward = removeNextRemoteAET(iuidsByRemoteAET);
-            return true;
-        }
-        if (!iuidsByExternalAET.isEmpty()) {
-            externalRetrieveAET = true;
-            curMoveForward = removeNextRemoteAET(iuidsByExternalAET);
-            return true;
-        }
-        curMoveForward = null;
-        return false;
-    }
+	private void putLocalFile(FileInfo fileInfo)
+	{
+		String iuid = fileInfo.sopIUID;
+		String cuid = fileInfo.sopCUID;
+		IuidsAndTsuids iuidsAndTsuids = iuidsAndTsuidsByCuid.get(cuid);
+		if (iuidsAndTsuids == null)
+		{
+			iuidsAndTsuids = new IuidsAndTsuids();
+			iuidsAndTsuidsByCuid.put(cuid, iuidsAndTsuids);
+		}
+		iuidsAndTsuids.iuids.add(iuid);
+		iuidsAndTsuids.tsuids.add(fileInfo.tsUID);
+		List<FileInfo> localFiles = localFilesByIuid.get(iuid);
+		if (localFiles == null)
+		{
+			localFiles = new ArrayList<FileInfo>();
+			localFilesByIuid.put(iuid, localFiles);
+		}
+		localFiles.add(fileInfo);
+		availableIuids.add(iuid);
+		notAvailableIuids.remove(iuid);
+	}
 
-    private Map.Entry<String, Set<String>>
-            removeNextRemoteAET(Map<String, Set<String>> iuidsByAET) {
-        Map.Entry<String, Set<String>> entry =
-                Collections.max(iuidsByAET.entrySet(), ASC_IUIDS_SIZE);
-        iuidsByAET.remove(entry.getKey());
-        Set<String> iuids = entry.getValue();
-        String iuid;
-        Iterator<String> it = iuids.iterator();
-        while (it.hasNext()) {
-            iuid = it.next();
-            removeIuid(iuidsByRemoteAET, iuid);
-            removeIuid(iuidsByExternalAET, iuid);            
-        }
-        return entry;
-    }
+	private void putIuid(Map<String, Set<String>> iuidsByAET, String aet,
+			String iuid)
+	{
+		Set<String> iuids = iuidsByAET.get(aet);
+		if (iuids == null)
+		{
+			iuids = new LinkedHashSet<String>();
+			iuidsByAET.put(aet, iuids);
+		}
+		iuids.add(iuid);
+		availableIuids.add(iuid);
+		notAvailableIuids.remove(iuid);
+	}
 
-    public final Collection<List<FileInfo>> getLocalFiles() {
-        return localFilesByIuid.values();
-    }
+	public void addPresContext(AAssociateRQ rq,
+			boolean sendWithDefaultTransferSyntax, boolean offerNoPixelData,
+			boolean offerNoPixelDataDeflate)
+	{
+		String cuid;
+		String tsuid;
+		IuidsAndTsuids iuidsAndTsuids;
+		AssociationFactory asf = AssociationFactory.getInstance();
+		Iterator<Map.Entry<String, IuidsAndTsuids>> it = iuidsAndTsuidsByCuid
+				.entrySet().iterator();
+		while (it.hasNext())
+		{
+			Map.Entry<String, IuidsAndTsuids> entry = it.next();
+			cuid = entry.getKey();
+			iuidsAndTsuids = entry.getValue();
+			if (sendWithDefaultTransferSyntax)
+			{
+				rq.addPresContext(asf.newPresContext(rq.nextPCID(), cuid,
+						UIDs.ImplicitVRLittleEndian));
+				continue;
+			}
+			rq.addPresContext(asf
+					.newPresContext(rq.nextPCID(), cuid, IVR_LE_TS));
+			rq.addPresContext(asf
+					.newPresContext(rq.nextPCID(), cuid, EVR_LE_TS));
+			if (offerNoPixelDataDeflate)
+			{
+				rq.addPresContext(asf.newPresContext(rq.nextPCID(), cuid,
+						NO_PIXEL_DEFL_TS));
+			} else if (offerNoPixelData)
+			{
+				rq.addPresContext(asf.newPresContext(rq.nextPCID(), cuid,
+						NO_PIXEL_TS));
+			}
+			Iterator<String> it2 = iuidsAndTsuids.tsuids.iterator();
+			while (it2.hasNext())
+			{
+				tsuid = it2.next();
+				if (!isNativeLE_TS(tsuid))
+				{
+					rq.addPresContext(asf.newPresContext(rq.nextPCID(), cuid,
+							new String[]{tsuid}));
+				}
+			}
+		}
+	}
 
-    public final Set<String> removeLocalIUIDs() {
-        Set<String> iuids = localFilesByIuid.keySet();
-        for (Iterator<String> iter = iuids.iterator(); iter.hasNext();) {
-            String iuid = iter.next();
-            removeIuid(iuidsByRemoteAET, iuid);
-            removeIuid(iuidsByExternalAET, iuid);
-        }
-        return iuids;
-    }
+	public Iterator<String> getCUIDs()
+	{
+		return iuidsAndTsuidsByCuid.keySet().iterator();
+	}
 
-    public final String getMoveForwardAET() {
-        return curMoveForward != null ? curMoveForward.getKey() : null;
-    }
+	public Set<String> removeInstancesOfClass(String cuid)
+	{
+		IuidsAndTsuids iuidsAndTsuids = iuidsAndTsuidsByCuid.get(cuid);
+		Iterator<String> it = iuidsAndTsuids.iuids.iterator();
+		String iuid;
+		while (it.hasNext())
+		{
+			iuid = it.next();
+			localFilesByIuid.remove(iuid);
+			removeIuid(iuidsByRemoteAET, iuid);
+			removeIuid(iuidsByExternalAET, iuid);
+		}
+		return iuidsAndTsuids.iuids;
+	}
 
-    public final Set<String> getMoveForwardUIDs() {
-        return curMoveForward != null ? curMoveForward.getValue() : null;
-    }
+	private void removeIuid(Map<String, Set<String>> iuidsByAET, String iuid)
+	{
+		Iterator<Set<String>> it = iuidsByAET.values().iterator();
+		Set<String> iuids;
+		while (it.hasNext())
+		{
+			iuids = it.next();
+			iuids.remove(iuid);
+			if (iuids.isEmpty())
+				it.remove();
+		}
+	}
 
-    public final boolean isExternalRetrieveAET() {
-        return externalRetrieveAET;
-    }
+	private static final Comparator<Map.Entry<String, Set<String>>> ASC_IUIDS_SIZE = new Comparator<Map.Entry<String, Set<String>>>()
+	{
 
-    public final Set<String> getNotAvailableIUIDs() {
-        return notAvailableIuids;
-    }
+		public int compare(Map.Entry<String, Set<String>> o1,
+				Map.Entry<String, Set<String>> o2)
+		{
+			return o1.getValue().size() - o2.getValue().size();
+		}
+	};
 
-    public final Set<String> getAvailableIUIDs() {
-        return availableIuids;
-    }
+	public boolean nextMoveForward()
+	{
+		if (!iuidsByRemoteAET.isEmpty())
+		{
+			externalRetrieveAET = false;
+			curMoveForward = removeNextRemoteAET(iuidsByRemoteAET);
+			return true;
+		}
+		if (!iuidsByExternalAET.isEmpty())
+		{
+			externalRetrieveAET = true;
+			curMoveForward = removeNextRemoteAET(iuidsByExternalAET);
+			return true;
+		}
+		curMoveForward = null;
+		return false;
+	}
 
-    public final Set<String> getStudyIUIDs() {
-        return studyIuids;
-    }
+	private Map.Entry<String, Set<String>> removeNextRemoteAET(
+			Map<String, Set<String>> iuidsByAET)
+	{
+		Map.Entry<String, Set<String>> entry = Collections.max(iuidsByAET
+				.entrySet(), ASC_IUIDS_SIZE);
+		iuidsByAET.remove(entry.getKey());
+		Set<String> iuids = entry.getValue();
+		String iuid;
+		Iterator<String> it = iuids.iterator();
+		while (it.hasNext())
+		{
+			iuid = it.next();
+			removeIuid(iuidsByRemoteAET, iuid);
+			removeIuid(iuidsByExternalAET, iuid);
+		}
+		return entry;
+	}
 
-    public final Set<String> getSeriesIUIDs() {
-        return seriesIuids;
-    }
+	public final Collection<List<FileInfo>> getLocalFiles()
+	{
+		return localFilesByIuid.values();
+	}
+
+	public final Set<String> removeLocalIUIDs()
+	{
+		Set<String> iuids = localFilesByIuid.keySet();
+		for (Iterator<String> iter = iuids.iterator(); iter.hasNext();)
+		{
+			String iuid = iter.next();
+			removeIuid(iuidsByRemoteAET, iuid);
+			removeIuid(iuidsByExternalAET, iuid);
+		}
+		return iuids;
+	}
+
+	public final String getMoveForwardAET()
+	{
+		return curMoveForward != null ? curMoveForward.getKey() : null;
+	}
+
+	public final Set<String> getMoveForwardUIDs()
+	{
+		return curMoveForward != null ? curMoveForward.getValue() : null;
+	}
+
+	public final boolean isExternalRetrieveAET()
+	{
+		return externalRetrieveAET;
+	}
+
+	public final Set<String> getNotAvailableIUIDs()
+	{
+		return notAvailableIuids;
+	}
+
+	public final Set<String> getAvailableIUIDs()
+	{
+		return availableIuids;
+	}
+
+	public final Set<String> getStudyIUIDs()
+	{
+		return studyIuids;
+	}
+
+	public final Set<String> getSeriesIUIDs()
+	{
+		return seriesIuids;
+	}
 
 }

@@ -41,29 +41,35 @@ package org.dcm4chex.archive.config;
 
 /**
  * @author gunter.zeilinger@tiani.com
- * @version $Revision: 2010 $ $Date: 2005-10-06 21:55:27 +0200 (Thu, 06 Oct 2005) $
+ * @version $Revision: 2010 $ $Date: 2005-10-06 21:55:27 +0200 (Thu, 06 Oct
+ *          2005) $
  * @since Sep 13, 2005
  */
-public class DicomPriority {
+public class DicomPriority
+{
 	private static final String LOW = "LOW";
 	private static final String HIGH = "HIGH";
 	private static final String MEDIUM = "MEDIUM";
-	private static final String[] MAP = { MEDIUM, HIGH, LOW };
+	private static final String[] MAP = {MEDIUM, HIGH, LOW};
 
-	public static String toString(int code) {
-		try {
+	public static String toString(int code)
+	{
+		try
+		{
 			return MAP[code];
-		} catch (IndexOutOfBoundsException e) {
+		} catch (IndexOutOfBoundsException e)
+		{
 			throw new IllegalArgumentException("code: " + code);
 		}
 	}
 
-	public static int toCode(String s) {
+	public static int toCode(String s)
+	{
 		if (s.equalsIgnoreCase(HIGH))
 			return 1;
 		if (s.equalsIgnoreCase(LOW))
 			return 2;
 		return 0;
 	}
-	
+
 }

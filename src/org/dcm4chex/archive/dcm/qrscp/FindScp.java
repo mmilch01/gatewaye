@@ -66,8 +66,7 @@ import org.dcm4che.net.DcmServiceBase;
 import org.dcm4che.net.DcmServiceException;
 import org.dcm4che.net.Dimse;
 import org.dcm4che.net.DimseListener;
-import org.dcm4che.net.PDU;
-import org.dcm4chex.archive.ejb.jdbc.QueryCmd;
+import org.dcm4che.net.PDU; //import org.dcm4chex.archive.ejb.jdbc.QueryCmd;
 
 import org.dcm4chex.archive.perf.PerfCounterEnum;
 import org.dcm4chex.archive.perf.PerfMonDelegate;
@@ -81,386 +80,418 @@ import org.nrg.xnat.gateway.XNATGatewayServer;
  *          2008) $
  * @since 31.08.2003
  */
-public class FindScp extends DcmServiceBase implements AssociationListener {
-    protected static final int PID = 0;
-    protected static final int ISSUER = 1;
-    private static final String QUERY_XSL = "cfindrq.xsl";
-    private static final String RESULT_XSL = "cfindrsp.xsl";
-    private static final String QUERY_XML = "-cfindrq.xml";
-    private static final String RESULT_XML = "-cfindrsp.xml";
+public class FindScp extends DcmServiceBase implements AssociationListener
+{
+	protected static final int PID = 0;
+	protected static final int ISSUER = 1;
+	private static final String QUERY_XSL = "cfindrq.xsl";
+	private static final String RESULT_XSL = "cfindrsp.xsl";
+	private static final String QUERY_XML = "-cfindrq.xml";
+	private static final String RESULT_XML = "-cfindrsp.xml";
 
-    private static final MultiDimseRsp NO_MATCH_RSP = new MultiDimseRsp() {
+	private static final MultiDimseRsp NO_MATCH_RSP = new MultiDimseRsp()
+	{
 
-        public DimseListener getCancelListener() {
-            return null;
-        }
+		public DimseListener getCancelListener()
+		{
+			return null;
+		}
 
-        public Dataset next(ActiveAssociation assoc, Dimse rq, Command rspCmd)
-                throws DcmServiceException {
-            rspCmd.putUS(Tags.Status, Status.Success);
-            return null;
-        }
+		public Dataset next(ActiveAssociation assoc, Dimse rq, Command rspCmd)
+				throws DcmServiceException
+		{
+			rspCmd.putUS(Tags.Status, Status.Success);
+			return null;
+		}
 
-        public void release() {
-        }
-    };
+		public void release()
+		{
+		}
+	};
 
-    protected final QueryRetrieveScpService service;
+	protected final QueryRetrieveScpService service;
 
-    protected final boolean filterResult;
+	protected final boolean filterResult;
 
-    protected final Logger log;
+	protected final Logger log;
 
-    private PerfMonDelegate perfMon;
+	private PerfMonDelegate perfMon;
 
-    public FindScp(QueryRetrieveScpService service, boolean filterResult) {
-        this.service = service;
-        this.log = service.getLog();
-        this.filterResult = filterResult;
-        perfMon = new PerfMonDelegate(service.server,log);
-    }
-    public final ObjectName getPerfMonServiceName() {
-        return perfMon.getPerfMonServiceName();
-    }
+	public FindScp(QueryRetrieveScpService service, boolean filterResult)
+	{
+		this.service = service;
+		this.log = service.getLog();
+		this.filterResult = filterResult;
+		perfMon = new PerfMonDelegate(service.server, log);
+	}
+	public final ObjectName getPerfMonServiceName()
+	{
+		return perfMon.getPerfMonServiceName();
+	}
 
-    public final void setPerfMonServiceName(ObjectName perfMonServiceName) {
-        perfMon.setPerfMonServiceName(perfMonServiceName);
-    }
-    /* This function is called to produce C-Find requests.
-     * @see org.dcm4che.net.DcmServiceBase#doCFind(org.dcm4che.net.ActiveAssociation, org.dcm4che.net.Dimse, org.dcm4che.data.Command)
-     */
-    protected MultiDimseRsp doCFind(ActiveAssociation assoc, Dimse rq,
-            Command rspCmd) throws IOException, DcmServiceException {
-        Association a = assoc.getAssociation();
-        String callingAET = a.getCallingAET();
-        try {
-          perfMon.start(assoc, rq, PerfCounterEnum.C_FIND_SCP_QUERY_DB);
+	public final void setPerfMonServiceName(ObjectName perfMonServiceName)
+	{
+		perfMon.setPerfMonServiceName(perfMonServiceName);
+	}
+	/*
+	 * This function is called to produce C-Find requests.
+	 * 
+	 * @see
+	 * org.dcm4che.net.DcmServiceBase#doCFind(org.dcm4che.net.ActiveAssociation,
+	 * org.dcm4che.net.Dimse, org.dcm4che.data.Command)
+	 */
+	protected MultiDimseRsp doCFind(ActiveAssociation assoc, Dimse rq,
+			Command rspCmd) throws IOException, DcmServiceException
+	{
+		Association a = assoc.getAssociation();
+		String callingAET = a.getCallingAET();
+		try
+		{
+			perfMon.start(assoc, rq, PerfCounterEnum.C_FIND_SCP_QUERY_DB);
 
-            Dataset rqData = rq.getDataset();
-            perfMon.setProperty(assoc, rq, PerfPropertyEnum.REQ_DIMSE, rq);
+			Dataset rqData = rq.getDataset();
+			perfMon.setProperty(assoc, rq, PerfPropertyEnum.REQ_DIMSE, rq);
 
-            if (log.isDebugEnabled()) 
-            {
-                log.debug("Identifier:\n");
-                log.debug(rqData);
-            }
+			if (log.isDebugEnabled())
+			{
+				log.debug("Identifier:\n");
+				log.debug(rqData);
+			}
 
-            service.logDIMSE(a, QUERY_XML, rqData);
-            service.logDicomQuery(a, rq.getCommand().getAffectedSOPClassUID(),
-                    rqData);
-            
-//!!        Dataset coerce = service.getCoercionAttributesFor(callingAET,
-//!!                   QUERY_XSL, rqData, a);                    
-//!!            if (coerce != null) {
-//!!                service.coerceAttributes(rqData, coerce);
-//!!            }
-            
-            service.supplementIssuerOfPatientID(rqData, callingAET);
-            boolean otherPIDinRQ = rqData.contains(Tags.OtherPatientIDSeq);
-            if (!isUniversalMatching(rqData.getString(Tags.PatientID))
-                    && service.isPixQueryCallingAET(callingAET)) {
-                pixQuery(rqData);
-            }
-            boolean hideWithoutIssuerOfPID = 
-                    service.isHideWithoutIssuerOfPIDFromAET(callingAET);
-            MultiDimseRsp rsp;
-            if (service.hasUnrestrictedQueryPermissions(callingAET)) {
-                rsp = newMultiCFindRsp(rqData, hideWithoutIssuerOfPID,
-                        otherPIDinRQ, null);
-            } else {
-                Subject subject = (Subject) a.getProperty("user");
-                if (subject != null) {
-                    rsp = newMultiCFindRsp(rqData, hideWithoutIssuerOfPID,
-                            otherPIDinRQ, subject);
-                } else {
-                	log.info("Missing user identification -> no records returned");
-                    rsp = NO_MATCH_RSP;
-                }
-            }
-            perfMon.stop(assoc, rq, PerfCounterEnum.C_FIND_SCP_QUERY_DB);
-            return rsp;
-        } catch (Exception e) {
-        	log.error("Query DB failed:", e);
-            throw new DcmServiceException(Status.UnableToProcess, e);
-        }
-    }
+			service.logDIMSE(a, QUERY_XML, rqData);
+			service.logDicomQuery(a, rq.getCommand().getAffectedSOPClassUID(),
+					rqData);
 
-    private boolean isUniversalMatching(String key) {
-        if (key == null) {
-            return true;
-        }
-        char[] a = key.toCharArray();
-        for (int i = 0; i < a.length; i++) {
-            if (a[i] != '*') {
-                return false;
-            }
-        }
-        return true;
-    }
+			// !! Dataset coerce = service.getCoercionAttributesFor(callingAET,
+			// !! QUERY_XSL, rqData, a);
+			// !! if (coerce != null) {
+			// !! service.coerceAttributes(rqData, coerce);
+			// !! }
 
-    private boolean isWildCardMatching(String key) {
-        return key.indexOf('*') != -1 || key.indexOf('?') != -1;
-    }
+			service.supplementIssuerOfPatientID(rqData, callingAET);
+			boolean otherPIDinRQ = rqData.contains(Tags.OtherPatientIDSeq);
+			if (!isUniversalMatching(rqData.getString(Tags.PatientID))
+					&& service.isPixQueryCallingAET(callingAET))
+			{
+				pixQuery(rqData);
+			}
+			boolean hideWithoutIssuerOfPID = service
+					.isHideWithoutIssuerOfPIDFromAET(callingAET);
+			MultiDimseRsp rsp;
+			if (service.hasUnrestrictedQueryPermissions(callingAET))
+			{
+				rsp = newMultiCFindRsp(rqData, hideWithoutIssuerOfPID,
+						otherPIDinRQ, null);
+			} else
+			{
+				Subject subject = (Subject) a.getProperty("user");
+				if (subject != null)
+				{
+					rsp = newMultiCFindRsp(rqData, hideWithoutIssuerOfPID,
+							otherPIDinRQ, subject);
+				} else
+				{
+					log
+							.info("Missing user identification -> no records returned");
+					rsp = NO_MATCH_RSP;
+				}
+			}
+			perfMon.stop(assoc, rq, PerfCounterEnum.C_FIND_SCP_QUERY_DB);
+			return rsp;
+		} catch (Exception e)
+		{
+			log.error("Query DB failed:", e);
+			throw new DcmServiceException(Status.UnableToProcess, e);
+		}
+	}
 
-    protected void pixQuery(Dataset rqData) throws DcmServiceException {
-        ArrayList<String[]> result = new ArrayList<String[]>();
-        boolean updateRQ = pixQuery(rqData, result);
-        DcmElement opidsq = rqData.get(Tags.OtherPatientIDSeq);
-        if (opidsq != null) {
-            for (int i = 0, n = opidsq.countItems(); i < n; i++) {
-                if (pixQuery(opidsq.getItem(i), result)) {
-                    updateRQ = true;
-                }
-            }
-        }
-        if (updateRQ && !result.isEmpty()) {
-            Pattern pid0 = toPattern(rqData.getString(Tags.PatientID));
-            Pattern issuer0 = toPattern(rqData.getString(Tags.IssuerOfPatientID));
-            int n = result.size();
-            int matchInx = -1;
-            int pidMatchOnlyInx = -1;
-            for (int i = 0; i < n; i++) {
-                String[] pid = (String[]) result.get(i);
-                if (pid0 == null || pid0.matcher(pid[PID]).matches()) {
-                    if (issuer0 == null
-                            || issuer0.matcher(pid[ISSUER]).matches()) {
-                        matchInx = i;
-                        break;
-                    } else if (pidMatchOnlyInx == -1) {
-                        pidMatchOnlyInx = i;
-                    }
-                }
-            }
-            setPID(rqData, result.remove(matchInx >= 0 ? matchInx
-                    : pidMatchOnlyInx >= 0 ? pidMatchOnlyInx : 0));
-            opidsq = rqData.putSQ(Tags.OtherPatientIDSeq);
-            for (String[] pids:result) setPID(opidsq.addNewItem(), pids);
-        }
-    }
+	private boolean isUniversalMatching(String key)
+	{
+		if (key == null)
+		{
+			return true;
+		}
+		char[] a = key.toCharArray();
+		for (int i = 0; i < a.length; i++)
+		{
+			if (a[i] != '*')
+			{
+				return false;
+			}
+		}
+		return true;
+	}
 
-    private static Pattern toPattern(String wc) {
-        if (wc == null) {
-            return null;
-        }
-        if (wc.indexOf('*') == -1 && wc.indexOf('?') == -1) {
-            return Pattern.compile(wc);
-        }
-        StringBuilder sb = new StringBuilder(wc.length() + 16);
-        StringTokenizer tokens = new StringTokenizer(wc, "*?.", true);
-        while (tokens.hasMoreTokens()) {
-            String token = tokens.nextToken();
-            if (token.equals("*")) {
-                token = ".*";
-            } else if (token.equals("?")) {
-                token = ".";
-            } else if (token.equals(".")) {
-                token = "\\.";
-            }
-            sb.append(token);
-        }
-        return Pattern.compile(sb.toString());
-    }
+	private boolean isWildCardMatching(String key)
+	{
+		return key.indexOf('*') != -1 || key.indexOf('?') != -1;
+	}
 
-    private void setPID(Dataset rqData, String[] pid) {
-        rqData.putLO(Tags.PatientID, pid[PID]);
-        rqData.putLO(Tags.IssuerOfPatientID, pid[ISSUER]);
-    }
+	protected void pixQuery(Dataset rqData) throws DcmServiceException
+	{
+		ArrayList<String[]> result = new ArrayList<String[]>();
+		boolean updateRQ = pixQuery(rqData, result);
+		DcmElement opidsq = rqData.get(Tags.OtherPatientIDSeq);
+		if (opidsq != null)
+		{
+			for (int i = 0, n = opidsq.countItems(); i < n; i++)
+			{
+				if (pixQuery(opidsq.getItem(i), result))
+				{
+					updateRQ = true;
+				}
+			}
+		}
+		if (updateRQ && !result.isEmpty())
+		{
+			Pattern pid0 = toPattern(rqData.getString(Tags.PatientID));
+			Pattern issuer0 = toPattern(rqData
+					.getString(Tags.IssuerOfPatientID));
+			int n = result.size();
+			int matchInx = -1;
+			int pidMatchOnlyInx = -1;
+			for (int i = 0; i < n; i++)
+			{
+				String[] pid = (String[]) result.get(i);
+				if (pid0 == null || pid0.matcher(pid[PID]).matches())
+				{
+					if (issuer0 == null
+							|| issuer0.matcher(pid[ISSUER]).matches())
+					{
+						matchInx = i;
+						break;
+					} else if (pidMatchOnlyInx == -1)
+					{
+						pidMatchOnlyInx = i;
+					}
+				}
+			}
+			setPID(rqData, result.remove(matchInx >= 0
+					? matchInx
+					: pidMatchOnlyInx >= 0 ? pidMatchOnlyInx : 0));
+			opidsq = rqData.putSQ(Tags.OtherPatientIDSeq);
+			for (String[] pids : result)
+				setPID(opidsq.addNewItem(), pids);
+		}
+	}
 
-    protected boolean skipPixQuery(String pid,String issuer) throws DcmServiceException {
-        return (!service.isPixQueryIssuer(issuer) || isWildCardMatching(pid)
-                && !service.isPixQueryLocal());
-    }
+	private static Pattern toPattern(String wc)
+	{
+		if (wc == null)
+		{
+			return null;
+		}
+		if (wc.indexOf('*') == -1 && wc.indexOf('?') == -1)
+		{
+			return Pattern.compile(wc);
+		}
+		StringBuilder sb = new StringBuilder(wc.length() + 16);
+		StringTokenizer tokens = new StringTokenizer(wc, "*?.", true);
+		while (tokens.hasMoreTokens())
+		{
+			String token = tokens.nextToken();
+			if (token.equals("*"))
+			{
+				token = ".*";
+			} else if (token.equals("?"))
+			{
+				token = ".";
+			} else if (token.equals("."))
+			{
+				token = "\\.";
+			}
+			sb.append(token);
+		}
+		return Pattern.compile(sb.toString());
+	}
 
-    protected boolean pixQuery(Dataset rqData, ArrayList result)
-            throws DcmServiceException {
-        String pid = rqData.getString(Tags.PatientID);
-        if (isUniversalMatching(pid)) {
-            return false;
-        }
-        String issuer = rqData.getString(Tags.IssuerOfPatientID);
-        if ( skipPixQuery(pid, issuer) ) {
-            addNewPidAndIssuerTo(new String[] { pid, issuer }, result);
-            return false;
-        }
-        List l = service.queryCorrespondingPIDs(pid, issuer);
-        if (l == null) {
-            // pid was not known by pix manager.
-            return false;
-        }
-        if (l.isEmpty() && !service.isPixQueryLocal()) {
-            return false;
-        }
-        for (Iterator iter = l.iterator(); iter.hasNext();) {
-            addNewPidAndIssuerTo((String[]) iter.next(), result);
-        }
-        return true;
-    }
+	private void setPID(Dataset rqData, String[] pid)
+	{
+		rqData.putLO(Tags.PatientID, pid[PID]);
+		rqData.putLO(Tags.IssuerOfPatientID, pid[ISSUER]);
+	}
 
-    private boolean addNewPidAndIssuerTo(String[] pidAndIssuer, List result) {
-        for (Iterator iter = result.iterator(); iter.hasNext();) {
-            String[] e = (String[]) iter.next();
-            if (pidAndIssuer[PID].equals(e[PID])
-                    && pidAndIssuer[ISSUER].equals(e[ISSUER])) {
-                return false;
-            }
-        }
-        result.add(pidAndIssuer);
-        return true;
-    }
+	protected boolean skipPixQuery(String pid, String issuer)
+			throws DcmServiceException
+	{
+		return (!service.isPixQueryIssuer(issuer) || isWildCardMatching(pid)
+				&& !service.isPixQueryLocal());
+	}
 
-    protected MultiDimseRsp newMultiCFindRsp(Dataset rqData,
-            boolean hideWithoutIssuerOfPID, boolean otherPIDinRQ,
-            Subject subject) throws SQLException {
-/*    	
-        QueryCmd queryCmd = QueryCmd.create(rqData, filterResult,
-                service.isNoMatchForNoValue(), hideWithoutIssuerOfPID, subject);
-        queryCmd.execute();
-        if (!otherPIDinRQ) // remove OPIDSeq added by pixQuery
-            rqData.remove(Tags.OtherPatientIDSeq);
-*/
-    	return XNATGatewayServer.getInstance().getMultiCFindRsp(rqData);
-    	
-//        return new MultiCFindRsp(queryCmd);
-    }
+	protected boolean pixQuery(Dataset rqData, ArrayList result)
+			throws DcmServiceException
+	{
+		String pid = rqData.getString(Tags.PatientID);
+		if (isUniversalMatching(pid))
+		{
+			return false;
+		}
+		String issuer = rqData.getString(Tags.IssuerOfPatientID);
+		if (skipPixQuery(pid, issuer))
+		{
+			addNewPidAndIssuerTo(new String[]{pid, issuer}, result);
+			return false;
+		}
+		List l = service.queryCorrespondingPIDs(pid, issuer);
+		if (l == null)
+		{
+			// pid was not known by pix manager.
+			return false;
+		}
+		if (l.isEmpty() && !service.isPixQueryLocal())
+		{
+			return false;
+		}
+		for (Iterator iter = l.iterator(); iter.hasNext();)
+		{
+			addNewPidAndIssuerTo((String[]) iter.next(), result);
+		}
+		return true;
+	}
 
-    protected Dataset getDataset(QueryCmd queryCmd) throws SQLException,
-            DcmServiceException {
-        return queryCmd.getDataset();
-    }
+	private boolean addNewPidAndIssuerTo(String[] pidAndIssuer, List result)
+	{
+		for (Iterator iter = result.iterator(); iter.hasNext();)
+		{
+			String[] e = (String[]) iter.next();
+			if (pidAndIssuer[PID].equals(e[PID])
+					&& pidAndIssuer[ISSUER].equals(e[ISSUER]))
+			{
+				return false;
+			}
+		}
+		result.add(pidAndIssuer);
+		return true;
+	}
 
-    protected void doMultiRsp(ActiveAssociation assoc, Dimse rq,
-            Command rspCmd, MultiDimseRsp mdr) throws IOException,
-            DcmServiceException {
-        try {
-            DimseListener cl = mdr.getCancelListener();
-            if (cl != null) {
-                assoc.addCancelListener(
-                        rspCmd.getMessageIDToBeingRespondedTo(), cl);
-            }
+	protected MultiDimseRsp newMultiCFindRsp(Dataset rqData,
+			boolean hideWithoutIssuerOfPID, boolean otherPIDinRQ,
+			Subject subject) throws SQLException
+	{
+		/*
+		 * QueryCmd queryCmd = QueryCmd.create(rqData, filterResult,
+		 * service.isNoMatchForNoValue(), hideWithoutIssuerOfPID, subject);
+		 * queryCmd.execute(); if (!otherPIDinRQ) // remove OPIDSeq added by
+		 * pixQuery rqData.remove(Tags.OtherPatientIDSeq);
+		 */
+		return XNATGatewayServer.getInstance().getMultiCFindRsp(rqData);
 
-            do {
-            perfMon.start(assoc, rq, PerfCounterEnum.C_FIND_SCP_RESP_OUT);
+		// return new MultiCFindRsp(queryCmd);
+	}
+	/*
+	 * protected Dataset getDataset(QueryCmd queryCmd) throws SQLException,
+	 * DcmServiceException { return queryCmd.getDataset(); }
+	 */
+	protected void doMultiRsp(ActiveAssociation assoc, Dimse rq,
+			Command rspCmd, MultiDimseRsp mdr) throws IOException,
+			DcmServiceException
+	{
+		try
+		{
+			DimseListener cl = mdr.getCancelListener();
+			if (cl != null)
+			{
+				assoc.addCancelListener(
+						rspCmd.getMessageIDToBeingRespondedTo(), cl);
+			}
 
-                Dataset rspData = mdr.next(assoc, rq, rspCmd);
-                Dimse rsp = fact.newDimse(rq.pcid(), rspCmd, rspData);
-                doBeforeRsp(assoc, rsp);
-                assoc.getAssociation().write(rsp);
+			do
+			{
+				perfMon.start(assoc, rq, PerfCounterEnum.C_FIND_SCP_RESP_OUT);
 
-            perfMon.setProperty(assoc, rq, PerfPropertyEnum.RSP_DATASET, rspData);
-            perfMon.stop(assoc, rq, PerfCounterEnum.C_FIND_SCP_RESP_OUT);
+				Dataset rspData = mdr.next(assoc, rq, rspCmd);
+				Dimse rsp = fact.newDimse(rq.pcid(), rspCmd, rspData);
+				doBeforeRsp(assoc, rsp);
+				assoc.getAssociation().write(rsp);
 
-                doAfterRsp(assoc, rsp);
-            } while (rspCmd.isPending());
-        } finally {
-            mdr.release();
-        }
-    }
+				perfMon.setProperty(assoc, rq, PerfPropertyEnum.RSP_DATASET,
+						rspData);
+				perfMon.stop(assoc, rq, PerfCounterEnum.C_FIND_SCP_RESP_OUT);
 
-    protected class MultiCFindRsp implements MultiDimseRsp {
+				doAfterRsp(assoc, rsp);
+			} while (rspCmd.isPending());
+		} finally
+		{
+			mdr.release();
+		}
+	}
+	/*
+	 * protected class MultiCFindRsp implements MultiDimseRsp {
+	 * 
+	 * private final QueryCmd queryCmd;
+	 * 
+	 * private boolean canceled = false;
+	 * 
+	 * private int pendingStatus = Status.Pending;
+	 * 
+	 * private int count = 0;
+	 * 
+	 * private Templates coerceTpl;
+	 * 
+	 * public MultiCFindRsp(QueryCmd queryCmd) { this.queryCmd = queryCmd; if
+	 * (queryCmd.isMatchNotSupported()) { pendingStatus = 0xff01; } else if
+	 * (service.isCheckMatchingKeySupported() &&
+	 * queryCmd.isMatchingKeyNotSupported()) { pendingStatus = 0xff01; } }
+	 * 
+	 * public DimseListener getCancelListener() { return new DimseListener() {
+	 * 
+	 * public void dimseReceived(Association assoc, Dimse dimse) { canceled =
+	 * true; } }; }
+	 * 
+	 * public Dataset next(ActiveAssociation assoc, Dimse rq, Command rspCmd)
+	 * throws DcmServiceException { if (canceled) { rspCmd.putUS(Tags.Status,
+	 * Status.Cancel); return null; } try { Association a =
+	 * assoc.getAssociation(); String callingAET = a.getCallingAET();
+	 * queryCmd.setCoercePatientIds(service
+	 * .isCoerceRequestPatientIdsAET(callingAET)); if (!queryCmd.next()) {
+	 * rspCmd.putUS(Tags.Status, Status.Success); return null; }
+	 * rspCmd.putUS(Tags.Status, pendingStatus); Dataset data =
+	 * getDataset(queryCmd); log.debug("Identifier:\n"); log.debug(data);
+	 * service.logDIMSE(a, RESULT_XML, data); /* if (count++ == 0) { coerceTpl =
+	 * service.getCoercionTemplates(callingAET, RESULT_XSL); } Dataset coerce =
+	 * service.getCoercionAttributesFor( a, RESULT_XSL, data, coerceTpl); if
+	 * (coerce != null) { service.coerceAttributes(data, coerce); } return data;
+	 * } catch (DcmServiceException e) { throw e; } catch (SQLException e) {
+	 * log.error("Retrieve DB record failed:", e); throw new
+	 * DcmServiceException(Status.UnableToProcess, e); } catch (Exception e) {
+	 * log.error("Corrupted DB record:", e); throw new
+	 * DcmServiceException(Status.UnableToProcess, e); } }
+	 * 
+	 * public void release() { queryCmd.close(); } }
+	 */
+	public void write(Association src, PDU pdu)
+	{
+		if (pdu instanceof AAssociateAC)
+			perfMon.assocEstEnd(src, Command.C_FIND_RQ);
+	}
 
-        private final QueryCmd queryCmd;
+	public void received(Association src, PDU pdu)
+	{
+		if (pdu instanceof AAssociateRQ)
+			perfMon.assocEstStart(src, Command.C_FIND_RQ);
+	}
 
-        private boolean canceled = false;
+	public void write(Association src, Dimse dimse)
+	{
+	}
 
-        private int pendingStatus = Status.Pending;
+	public void received(Association src, Dimse dimse)
+	{
+	}
 
-        private int count = 0;
+	public void error(Association src, IOException ioe)
+	{
+	}
 
-        private Templates coerceTpl;
+	public void closing(Association assoc)
+	{
+		if (assoc.getAAssociateAC() != null)
+			perfMon.assocRelStart(assoc, Command.C_FIND_RQ);
+	}
 
-        public MultiCFindRsp(QueryCmd queryCmd) {
-            this.queryCmd = queryCmd;
-            if (queryCmd.isMatchNotSupported()) {
-                pendingStatus = 0xff01;
-            } else if (service.isCheckMatchingKeySupported()
-                    && queryCmd.isMatchingKeyNotSupported()) {
-                pendingStatus = 0xff01;
-            }
-        }
-
-        public DimseListener getCancelListener() {
-            return new DimseListener() {
-
-                public void dimseReceived(Association assoc, Dimse dimse) {
-                    canceled = true;
-                }
-            };
-        }
-
-        public Dataset next(ActiveAssociation assoc, Dimse rq, Command rspCmd)
-                throws DcmServiceException {
-            if (canceled) {
-                rspCmd.putUS(Tags.Status, Status.Cancel);
-                return null;
-            }
-            try {
-                Association a = assoc.getAssociation();
-                String callingAET = a.getCallingAET();
-                queryCmd.setCoercePatientIds(service
-                        .isCoerceRequestPatientIdsAET(callingAET));
-                if (!queryCmd.next()) {
-                    rspCmd.putUS(Tags.Status, Status.Success);
-                    return null;
-                }
-                rspCmd.putUS(Tags.Status, pendingStatus);
-                Dataset data = getDataset(queryCmd);
-                log.debug("Identifier:\n");
-                log.debug(data);
-                service.logDIMSE(a, RESULT_XML, data);
-/*                
-                if (count++ == 0) {
-                    coerceTpl = service.getCoercionTemplates(callingAET, 
-                            RESULT_XSL);
-                }
-                Dataset coerce = service.getCoercionAttributesFor(
-                        a, RESULT_XSL, data, coerceTpl);
-                if (coerce != null) {
-                    service.coerceAttributes(data, coerce);
-                }
-*/                
-                return data;
-            } catch (DcmServiceException e) {
-                throw e;
-            } catch (SQLException e) {
-            	log.error("Retrieve DB record failed:", e);
-                throw new DcmServiceException(Status.UnableToProcess, e);
-            } catch (Exception e) {
-            	log.error("Corrupted DB record:", e);
-                throw new DcmServiceException(Status.UnableToProcess, e);
-            }
-        }
-
-        public void release() {
-            queryCmd.close();
-        }
-    }
-
-    public void write(Association src, PDU pdu) {
-        if (pdu instanceof AAssociateAC)
-            perfMon.assocEstEnd(src, Command.C_FIND_RQ);
-    }
-
-    public void received(Association src, PDU pdu) {
-        if (pdu instanceof AAssociateRQ)
-            perfMon.assocEstStart(src, Command.C_FIND_RQ);
-    }
-
-    public void write(Association src, Dimse dimse) {
-    }
-
-    public void received(Association src, Dimse dimse) {
-    }
-
-    public void error(Association src, IOException ioe) {
-    }
-
-    public void closing(Association assoc) {
-        if (assoc.getAAssociateAC() != null)
-            perfMon.assocRelStart(assoc, Command.C_FIND_RQ);
-    }
-
-    public void closed(Association assoc) {
-        if (assoc.getAAssociateAC() != null)
-            perfMon.assocRelEnd(assoc, Command.C_FIND_RQ);
-    }
+	public void closed(Association assoc)
+	{
+		if (assoc.getAAssociateAC() != null)
+			perfMon.assocRelEnd(assoc, Command.C_FIND_RQ);
+	}
 }

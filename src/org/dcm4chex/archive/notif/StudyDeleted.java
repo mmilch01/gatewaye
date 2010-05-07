@@ -48,30 +48,35 @@ import org.dcm4che.data.Dataset;
 
 /**
  * @author gunter.zeilinger@tiani.com
- * @version $Revision: 5320 $ $Date: 2007-10-18 11:26:00 +0200 (Thu, 18 Oct 2007) $
+ * @version $Revision: 5320 $ $Date: 2007-10-18 11:26:00 +0200 (Thu, 18 Oct
+ *          2007) $
  * @since Nov 8, 2005
  */
-public class StudyDeleted implements Serializable {
+public class StudyDeleted implements Serializable
+{
 
-    private static final long serialVersionUID = 1482944669273087613L;
-    
-    public static final NotificationFilter NOTIF_FILTER =
-            new NotificationFilter() {
-        
-        private static final long serialVersionUID = 1297300734265860374L;
+	private static final long serialVersionUID = 1482944669273087613L;
 
-        public boolean isNotificationEnabled(Notification notif) {
-            return StudyDeleted.class.getName().equals(notif.getType());
-        }
-    };
-    
-    private final Dataset ian;
+	public static final NotificationFilter NOTIF_FILTER = new NotificationFilter()
+	{
 
-    public StudyDeleted(Dataset ian) {
-        this.ian = ian;
-    }
+		private static final long serialVersionUID = 1297300734265860374L;
 
-    public final Dataset getInstanceAvailabilityNotification() {
-        return ian;
-    }
+		public boolean isNotificationEnabled(Notification notif)
+		{
+			return StudyDeleted.class.getName().equals(notif.getType());
+		}
+	};
+
+	private final Dataset ian;
+
+	public StudyDeleted(Dataset ian)
+	{
+		this.ian = ian;
+	}
+
+	public final Dataset getInstanceAvailabilityNotification()
+	{
+		return ian;
+	}
 }

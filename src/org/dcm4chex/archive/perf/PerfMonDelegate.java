@@ -17,188 +17,177 @@ import org.dcm4che.net.Dimse;
  * @version $Id: PerfMonDelegate.java 9736 2009-02-13 02:51:36Z damien_evans $
  * @since Nov 2, 2006
  */
-public class PerfMonDelegate {
+public class PerfMonDelegate
+{
 
 	protected MBeanServer server;
 	protected Logger log;
-//!! private ServiceMBeanSupport service;
+	// !! private ServiceMBeanSupport service;
 
-    private ObjectName perfMonServiceName;
+	private ObjectName perfMonServiceName;
 
-    public PerfMonDelegate(MBeanServer serv /*ServiceMBeanSupport service*/, Logger log) {
-//!!        this.service = service;
-        server=serv;
-        this.log=log;
-    }
+	public PerfMonDelegate(MBeanServer serv /* ServiceMBeanSupport service */,
+			Logger log)
+	{
+		// !! this.service = service;
+		server = serv;
+		this.log = log;
+	}
 
-    public final ObjectName getPerfMonServiceName() {
-        return perfMonServiceName;
-    }
+	public final ObjectName getPerfMonServiceName()
+	{
+		return perfMonServiceName;
+	}
 
-    /**
-     * Set the service name of performance monitoring.
-     * <p>
-     * Note that the empty string "" in xmdesc file will create ObjectName with
-     * canonical name "*:*"
-     * 
-     * @param perfMonServiceName
-     */
-    public final void setPerfMonServiceName(ObjectName perfMonServiceName) {
-        if (perfMonServiceName.getCanonicalName().equals("*:*"))
-            this.perfMonServiceName = null;
-        else
-            this.perfMonServiceName = perfMonServiceName;
-    }
+	/**
+	 * Set the service name of performance monitoring.
+	 * <p>
+	 * Note that the empty string "" in xmdesc file will create ObjectName with
+	 * canonical name "*:*"
+	 * 
+	 * @param perfMonServiceName
+	 */
+	public final void setPerfMonServiceName(ObjectName perfMonServiceName)
+	{
+		if (perfMonServiceName.getCanonicalName().equals("*:*"))
+			this.perfMonServiceName = null;
+		else
+			this.perfMonServiceName = perfMonServiceName;
+	}
 
-    public void assocEstStart(Association assoc, int command) {
-        if (perfMonServiceName == null)
-            return;
-        try {
-            server.invoke(
-                    perfMonServiceName,
-                    "assocEstStart",
-                    new Object[] { assoc, new Integer(command) },
-                    new String[] { Association.class.getName(),
-                            int.class.getName() });
-        }
-        catch (Exception e) {
-            log.fatal(
-                    "Failed to invoke operation assocEstStart on "
-                            + perfMonServiceName, e);
-        }
-    }
+	public void assocEstStart(Association assoc, int command)
+	{
+		if (perfMonServiceName == null)
+			return;
+		try
+		{
+			server.invoke(perfMonServiceName, "assocEstStart", new Object[]{
+					assoc, new Integer(command)}, new String[]{
+					Association.class.getName(), int.class.getName()});
+		} catch (Exception e)
+		{
+			log.fatal("Failed to invoke operation assocEstStart on "
+					+ perfMonServiceName, e);
+		}
+	}
 
-    public void assocEstEnd(Association assoc, int command) {
-        if (perfMonServiceName == null)
-            return;
+	public void assocEstEnd(Association assoc, int command)
+	{
+		if (perfMonServiceName == null)
+			return;
 
-        try {
-            server.invoke(
-                    perfMonServiceName,
-                    "assocEstEnd",
-                    new Object[] { assoc, new Integer(command) },
-                    new String[] { Association.class.getName(),
-                            int.class.getName() });
-        }
-        catch (Exception e) {
-            log.fatal(
-                    "Failed to invoke operation assocEstEnd on "
-                            + perfMonServiceName, e);
-        }
-    }
+		try
+		{
+			server.invoke(perfMonServiceName, "assocEstEnd", new Object[]{
+					assoc, new Integer(command)}, new String[]{
+					Association.class.getName(), int.class.getName()});
+		} catch (Exception e)
+		{
+			log.fatal("Failed to invoke operation assocEstEnd on "
+					+ perfMonServiceName, e);
+		}
+	}
 
-    public void assocRelStart(Association assoc, int command) {
-        if (perfMonServiceName == null)
-            return;
+	public void assocRelStart(Association assoc, int command)
+	{
+		if (perfMonServiceName == null)
+			return;
 
-        try {
-            server.invoke(
-                    perfMonServiceName,
-                    "assocRelStart",
-                    new Object[] { assoc, new Integer(command) },
-                    new String[] { Association.class.getName(),
-                            int.class.getName() });
-        }
-        catch (Exception e) {
-            log.fatal(
-                    "Failed to invoke operation assocRelStart on "
-                            + perfMonServiceName, e);
-        }
-    }
+		try
+		{
+			server.invoke(perfMonServiceName, "assocRelStart", new Object[]{
+					assoc, new Integer(command)}, new String[]{
+					Association.class.getName(), int.class.getName()});
+		} catch (Exception e)
+		{
+			log.fatal("Failed to invoke operation assocRelStart on "
+					+ perfMonServiceName, e);
+		}
+	}
 
-    public void assocRelEnd(Association assoc, int command) {
-        if (perfMonServiceName == null)
-            return;
+	public void assocRelEnd(Association assoc, int command)
+	{
+		if (perfMonServiceName == null)
+			return;
 
-        try {
-            server.invoke(
-                    perfMonServiceName,
-                    "assocRelEnd",
-                    new Object[] { assoc, new Integer(command) },
-                    new String[] { Association.class.getName(),
-                            int.class.getName() });
-        }
-        catch (Exception e) {
-            log.fatal(
-                    "Failed to invoke operation assocRelEnd on "
-                            + perfMonServiceName, e);
-        }
-    }
+		try
+		{
+			server.invoke(perfMonServiceName, "assocRelEnd", new Object[]{
+					assoc, new Integer(command)}, new String[]{
+					Association.class.getName(), int.class.getName()});
+		} catch (Exception e)
+		{
+			log.fatal("Failed to invoke operation assocRelEnd on "
+					+ perfMonServiceName, e);
+		}
+	}
 
-    public void start(ActiveAssociation assoc, Dimse rq, int counterEnum) {
-        if (perfMonServiceName == null)
-            return;
+	public void start(ActiveAssociation assoc, Dimse rq, int counterEnum)
+	{
+		if (perfMonServiceName == null)
+			return;
 
-        try {
-            server.invoke(
-                    perfMonServiceName,
-                    "start",
-                    new Object[] { assoc, rq, new Integer(counterEnum) },
-                    new String[] { ActiveAssociation.class.getName(),
-                            Dimse.class.getName(), int.class.getName() });
-        }
-        catch (Exception e) {
-            log
-                    .error(
-                            "Failed to invoke operation start on "
-                                    + perfMonServiceName, e);
-        }
-    }
+		try
+		{
+			server.invoke(perfMonServiceName, "start", new Object[]{assoc, rq,
+					new Integer(counterEnum)}, new String[]{
+					ActiveAssociation.class.getName(), Dimse.class.getName(),
+					int.class.getName()});
+		} catch (Exception e)
+		{
+			log.error("Failed to invoke operation start on "
+					+ perfMonServiceName, e);
+		}
+	}
 
-    /**
-     * Set the value to a performance monitoring property. It's up to the
-     * counter to utilize the value.
-     * 
-     * @param assoc
-     *                The ActiveAssociation object
-     * @param rq
-     *                The Dimse object
-     * @param perfPropEnum
-     *                The performance property enum
-     * @param data
-     *                The value
-     * @throws Exception
-     */
-    public void setProperty(ActiveAssociation assoc, Dimse rq,
-            int perfPropEnum, Object data) {
-        if (perfMonServiceName == null)
-            return;
+	/**
+	 * Set the value to a performance monitoring property. It's up to the
+	 * counter to utilize the value.
+	 * 
+	 * @param assoc
+	 *            The ActiveAssociation object
+	 * @param rq
+	 *            The Dimse object
+	 * @param perfPropEnum
+	 *            The performance property enum
+	 * @param data
+	 *            The value
+	 * @throws Exception
+	 */
+	public void setProperty(ActiveAssociation assoc, Dimse rq,
+			int perfPropEnum, Object data)
+	{
+		if (perfMonServiceName == null)
+			return;
 
-        try {
-            server
-                    .invoke(
-                            perfMonServiceName,
-                            "setProperty",
-                            new Object[] { assoc, rq,
-                                    new Integer(perfPropEnum), data },
-                            new String[] { ActiveAssociation.class.getName(),
-                                    Dimse.class.getName(), int.class.getName(),
-                                    Object.class.getName() });
-        }
-        catch (Exception e) {
-            log
-                    .fatal(
-                            "Failed to invoke operation start on "
-                                    + perfMonServiceName, e);
-        }
-    }
+		try
+		{
+			server.invoke(perfMonServiceName, "setProperty", new Object[]{
+					assoc, rq, new Integer(perfPropEnum), data}, new String[]{
+					ActiveAssociation.class.getName(), Dimse.class.getName(),
+					int.class.getName(), Object.class.getName()});
+		} catch (Exception e)
+		{
+			log.fatal("Failed to invoke operation start on "
+					+ perfMonServiceName, e);
+		}
+	}
 
-    public void stop(ActiveAssociation assoc, Dimse rq, int counterEnum) {
-        if (perfMonServiceName == null)
-            return;
+	public void stop(ActiveAssociation assoc, Dimse rq, int counterEnum)
+	{
+		if (perfMonServiceName == null)
+			return;
 
-        try {
-            server.invoke(
-                    perfMonServiceName,
-                    "stop",
-                    new Object[] { assoc, rq, new Integer(counterEnum) },
-                    new String[] { ActiveAssociation.class.getName(),
-                            Dimse.class.getName(), int.class.getName() });
-        }
-        catch (Exception e) {
-            log.fatal(
-                    "Failed to invoke operation stop on " + perfMonServiceName,
-                    e);
-        }
-    }
+		try
+		{
+			server.invoke(perfMonServiceName, "stop", new Object[]{assoc, rq,
+					new Integer(counterEnum)}, new String[]{
+					ActiveAssociation.class.getName(), Dimse.class.getName(),
+					int.class.getName()});
+		} catch (Exception e)
+		{
+			log.fatal("Failed to invoke operation stop on "
+					+ perfMonServiceName, e);
+		}
+	}
 }

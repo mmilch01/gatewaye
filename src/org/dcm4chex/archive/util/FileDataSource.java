@@ -70,427 +70,515 @@ import org.dcm4chex.archive.codec.DecompressCmd;
  * @version $Revision: 12195 $
  * @since 18.09.2003
  */
-public class FileDataSource implements DataSource {
+public class FileDataSource implements DataSource
+{
 
-//!!    private static final Logger log = Logger.getLogger(FileDataSource.class);
-    private static Dataset defaultContributingEquipment;
+	// !! private static final Logger log =
+	// Logger.getLogger(FileDataSource.class);
+	private static Dataset defaultContributingEquipment;
 
-    static {
-        FileDataSource.defaultContributingEquipment =
-                DcmObjectFactory.getInstance().newDataset();
-        Dataset purpose = defaultContributingEquipment
-                .putSQ(Tags.PurposeOfReferenceCodeSeq).addNewItem();
-        purpose.putLO(Tags.CodeValue, "109105");
-        purpose.putSH(Tags.CodingSchemeDesignator, "DCM");
-        purpose.putLO(Tags.CodeMeaning, "Frame Extracting Equipment");
-        defaultContributingEquipment.putLO(Tags.Manufacturer, "dcm4che.org");
-    }
-    private final File file;
-    private final Dataset mergeAttrs;
-    private final byte[] buffer;
+	static
+	{
+		FileDataSource.defaultContributingEquipment = DcmObjectFactory
+				.getInstance().newDataset();
+		Dataset purpose = defaultContributingEquipment.putSQ(
+				Tags.PurposeOfReferenceCodeSeq).addNewItem();
+		purpose.putLO(Tags.CodeValue, "109105");
+		purpose.putSH(Tags.CodingSchemeDesignator, "DCM");
+		purpose.putLO(Tags.CodeMeaning, "Frame Extracting Equipment");
+		defaultContributingEquipment.putLO(Tags.Manufacturer, "dcm4che.org");
+	}
+	private final File file;
+	private final Dataset mergeAttrs;
+	private final byte[] buffer;
 
-    /** if true use Dataset.writeFile instead of writeDataset */
-    private boolean writeFile = false;
-    private boolean withoutPixeldata = false;
-    private boolean excludePrivate = false;
-    private int[] simpleFrameList;
-    private int[] calculatedFrameList;
-    private Dataset contributingEquipment =
-            FileDataSource.defaultContributingEquipment;
+	/** if true use Dataset.writeFile instead of writeDataset */
+	private boolean writeFile = false;
+	private boolean withoutPixeldata = false;
+	private boolean excludePrivate = false;
+	private int[] simpleFrameList;
+	private int[] calculatedFrameList;
+	private Dataset contributingEquipment = FileDataSource.defaultContributingEquipment;
 
-    public FileDataSource(File file, Dataset mergeAttrs, byte[] buffer) {
-        this.file = file;
-        this.mergeAttrs = mergeAttrs;
-        this.buffer = buffer;
-    }
+	public FileDataSource(File file, Dataset mergeAttrs, byte[] buffer)
+	{
+		this.file = file;
+		this.mergeAttrs = mergeAttrs;
+		this.buffer = buffer;
+	}
 
-    public static final Dataset getDefaultContributingEquipment() {
-        return defaultContributingEquipment;
-    }
+	public static final Dataset getDefaultContributingEquipment()
+	{
+		return defaultContributingEquipment;
+	}
 
-    public static final void setDefaultContributingEquipment(
-            Dataset contributingEquipment) {
-        FileDataSource.defaultContributingEquipment = contributingEquipment;
-    }
+	public static final void setDefaultContributingEquipment(
+			Dataset contributingEquipment)
+	{
+		FileDataSource.defaultContributingEquipment = contributingEquipment;
+	}
 
-    /**
-     * @return Returns the writeFile.
-     */
-    public final boolean isWriteFile() {
-        return writeFile;
-    }
+	/**
+	 * @return Returns the writeFile.
+	 */
+	public final boolean isWriteFile()
+	{
+		return writeFile;
+	}
 
-    /**
-     * Set the write method (file or net).
-     * <p>
-     * If true, this datasource use writeFile instead of writeDataset. Therefore
-     * the FileMetaInfo will be only written if writeFile is set to true
-     * explicitly!
-     * 
-     * @param writeFile
-     *                The writeFile to set.
-     */
-    public final void setWriteFile(boolean writeFile) {
-        this.writeFile = writeFile;
-    }
+	/**
+	 * Set the write method (file or net).
+	 * <p>
+	 * If true, this datasource use writeFile instead of writeDataset. Therefore
+	 * the FileMetaInfo will be only written if writeFile is set to true
+	 * explicitly!
+	 * 
+	 * @param writeFile
+	 *            The writeFile to set.
+	 */
+	public final void setWriteFile(boolean writeFile)
+	{
+		this.writeFile = writeFile;
+	}
 
-    public final boolean isWithoutPixeldata() {
-        return withoutPixeldata;
-    }
+	public final boolean isWithoutPixeldata()
+	{
+		return withoutPixeldata;
+	}
 
-    public final void setWithoutPixeldata(boolean withoutPixelData) {
-        this.withoutPixeldata = withoutPixelData;
-    }
+	public final void setWithoutPixeldata(boolean withoutPixelData)
+	{
+		this.withoutPixeldata = withoutPixelData;
+	}
 
-    public final boolean isExcludePrivate() {
-        return excludePrivate;
-    }
+	public final boolean isExcludePrivate()
+	{
+		return excludePrivate;
+	}
 
-    public final void setExcludePrivate(boolean excludePrivate) {
-        this.excludePrivate = excludePrivate;
-    }
+	public final void setExcludePrivate(boolean excludePrivate)
+	{
+		this.excludePrivate = excludePrivate;
+	}
 
-    public final void setSimpleFrameList(int[] simpleFrameList) {
-        if (simpleFrameList != null) {
-            if (calculatedFrameList != null) {
-                throw new IllegalStateException();
-            }
-            if (simpleFrameList.length == 0) {
-                throw new IllegalArgumentException();
-            }
-            for (int i = 0; i < simpleFrameList.length; i++) {
-                if (simpleFrameList[i] <= 0) {
-                    throw new IllegalArgumentException();
-                }
-                if (i != 0 && simpleFrameList[i]
-                           <= simpleFrameList[i-1]) {
-                    throw new IllegalArgumentException();
-                }
-            }
-        }
-        this.simpleFrameList = simpleFrameList;
-    }
+	public final void setSimpleFrameList(int[] simpleFrameList)
+	{
+		if (simpleFrameList != null)
+		{
+			if (calculatedFrameList != null)
+			{
+				throw new IllegalStateException();
+			}
+			if (simpleFrameList.length == 0)
+			{
+				throw new IllegalArgumentException();
+			}
+			for (int i = 0; i < simpleFrameList.length; i++)
+			{
+				if (simpleFrameList[i] <= 0)
+				{
+					throw new IllegalArgumentException();
+				}
+				if (i != 0 && simpleFrameList[i] <= simpleFrameList[i - 1])
+				{
+					throw new IllegalArgumentException();
+				}
+			}
+		}
+		this.simpleFrameList = simpleFrameList;
+	}
 
-    public final void setCalculatedFrameList(int[] calculatedFrameList) {
-        if (calculatedFrameList != null) {
-            if (simpleFrameList != null) {
-                throw new IllegalStateException();
-            }
-            if (calculatedFrameList.length == 0) {
-                throw new IllegalArgumentException();
-            }
-            if (calculatedFrameList.length % 3 != 0) {
-                throw new IllegalArgumentException();
-            }
-            for (int i = 0; i < calculatedFrameList.length; i++) {
-                if (calculatedFrameList[i] <= 0) {
-                    throw new IllegalArgumentException();
-                }
-                switch (i % 3) {
-                case 0:
-                    if (i != 0 && calculatedFrameList[i]
-                               <= calculatedFrameList[i-2]) {
-                        throw new IllegalArgumentException();
-                    }
-                    break;
-                case 1:
-                    if (i != 0 && calculatedFrameList[i]
-                               < calculatedFrameList[i-1]) {
-                        throw new IllegalArgumentException();
-                    }
-                    break;
-                }
-            }
-        }
-        this.calculatedFrameList = calculatedFrameList;
-    }
+	public final void setCalculatedFrameList(int[] calculatedFrameList)
+	{
+		if (calculatedFrameList != null)
+		{
+			if (simpleFrameList != null)
+			{
+				throw new IllegalStateException();
+			}
+			if (calculatedFrameList.length == 0)
+			{
+				throw new IllegalArgumentException();
+			}
+			if (calculatedFrameList.length % 3 != 0)
+			{
+				throw new IllegalArgumentException();
+			}
+			for (int i = 0; i < calculatedFrameList.length; i++)
+			{
+				if (calculatedFrameList[i] <= 0)
+				{
+					throw new IllegalArgumentException();
+				}
+				switch (i % 3)
+				{
+					case 0 :
+						if (i != 0
+								&& calculatedFrameList[i] <= calculatedFrameList[i - 2])
+						{
+							throw new IllegalArgumentException();
+						}
+						break;
+					case 1 :
+						if (i != 0
+								&& calculatedFrameList[i] < calculatedFrameList[i - 1])
+						{
+							throw new IllegalArgumentException();
+						}
+						break;
+				}
+			}
+		}
+		this.calculatedFrameList = calculatedFrameList;
+	}
 
-    public final void setContributingEquipment(Dataset contributingEquipment) {
-        this.contributingEquipment = contributingEquipment;
-    }
+	public final void setContributingEquipment(Dataset contributingEquipment)
+	{
+		this.contributingEquipment = contributingEquipment;
+	}
 
-    public final File getFile() {
-        return file;
-    }
+	public final File getFile()
+	{
+		return file;
+	}
 
-    public final Dataset getMergeAttrs() {
-        return mergeAttrs;
-    }
+	public final Dataset getMergeAttrs()
+	{
+		return mergeAttrs;
+	}
 
-    public void writeTo(OutputStream out, String tsUID) throws IOException {
-//!!        log.info("M-READ file:" + file);
-        boolean withoutPixeldata1 = withoutPixeldata 
-                || UIDs.NoPixelData.equals(tsUID)
-                || UIDs.NoPixelDataDeflate.equals(tsUID);
-        DataInputStream dis = new DataInputStream(
-                new BufferedInputStream(new FileInputStream(file)));
-        FileImageInputStream fiis = null;
-        try {
-            Dataset ds = DcmObjectFactory.getInstance().newDataset();
-            DcmParser parser = DcmParserFactory.getInstance().newDcmParser(dis);
-            parser.setDcmHandler(ds.getDcmHandler());
-            parser.parseDcmFile(null, Tags.PixelData);
-            boolean hasPixelData = parser.getReadTag() == Tags.PixelData;
-            DcmDecodeParam dcmDecodeParam = parser.getDcmDecodeParam();
-            if (!hasPixelData && !parser.hasSeenEOF()) {
-                parser.unreadHeader();
-                parser.parseDataset(dcmDecodeParam, -1);
-            }
-            ds.putAll(mergeAttrs);
-            String tsOrig = DecompressCmd.getTransferSyntax(ds);
-            if (writeFile) {
-                if (tsUID != null) {
-                    if (!tsUID.equals(tsOrig)) { // can only decompress here!
-                        if (!withoutPixeldata1 
-                                && !UIDs.ImplicitVRLittleEndian.equals(tsUID)) {
-                            tsUID = UIDs.ExplicitVRLittleEndian;
-                        }
-                        ds.setFileMetaInfo(DcmObjectFactory.getInstance()
-                                .newFileMetaInfo(ds, tsUID));
-                    }
-                } else {
-                    tsUID = tsOrig;
-                }
-            }
-            DcmEncodeParam enc = DcmEncodeParam.valueOf(tsUID);
-            if (!hasPixelData) {
-//!!                log.debug("Dataset:\n");
-//!!                log.debug(ds);
-                write(ds, out, enc);
-                return;
-            }
-            int pixelDataLen = parser.getReadLength();
-            boolean encapsulated = pixelDataLen == -1;
-            int framesInFile = ds.getInt(Tags.NumberOfFrames, 1);
-            if (simpleFrameList != null) {
-                if (simpleFrameList[simpleFrameList.length - 1] > framesInFile) {
-                    throw new RequestedFrameNumbersOutOfRangeException();
-                }
-            } else if (calculatedFrameList != null) {
-                if (calculatedFrameList[0] > framesInFile) {
-                    throw new RequestedFrameNumbersOutOfRangeException();
-                }
-                simpleFrameList = calculateFrameList(framesInFile);
-            }
-            if (framesInFile == 1) {
-                simpleFrameList = null;
-            }
-            if (simpleFrameList != null) {
-                addFrameExtractionSeq(ds);
-                addContributingEquipmentSeq(ds);
-                adjustNumberOfFrames(ds);
-                ds.putUI(Tags.SOPInstanceUID,
-                        UIDGenerator.getInstance().createUID());
-            }
-            if (withoutPixeldata1) {
-                // skip Pixel Data
-                if (!encapsulated) {
-                    dis.skipBytes(pixelDataLen);
-                } else {
-                    do {
-                        parser.parseHeader();
-                        dis.skipBytes(parser.getReadLength());
-                    } while (parser.getReadTag() == Tags.Item);
-                }
-                // parse attributes after Pixel Data
-                parser.parseDataset(dcmDecodeParam, -1);
-//!!                log.debug("Dataset:\n");
-//!!                log.debug(ds);
-                write(ds, out, enc);
-                return;
-            }
-            if (encapsulated && !enc.encapsulated) {
-                DecompressCmd.adjustPhotometricInterpretation(ds, tsOrig);
-            }
-//!!            log.debug("Dataset:\n");
-//!!            log.debug(ds);
-            write(ds, out, enc);
-            if (!encapsulated) {
-                // copy native Pixel Data
-                if (simpleFrameList == null) {
-                    ds.writeHeader(out, enc, Tags.PixelData, VRs.OW,
-                            pixelDataLen);
-                    copyBytes(dis, out, pixelDataLen, buffer);
-                } else {
-                    int frameLength = pixelDataLen / framesInFile;
-                    int newPixelDataLength =
-                        frameLength * simpleFrameList.length;
-                    ds.writeHeader(out, enc, Tags.PixelData, VRs.OW,
-                            (newPixelDataLength+1)&~1);
-                    int frameIndex = 0;
-                    for (int i = 0; i < simpleFrameList.length; i++) {
-                        while (++frameIndex < simpleFrameList[i]) {
-                            dis.skipBytes(frameLength);
-                        }
-                        copyBytes(dis, out, frameLength, buffer);
-                    }
-                    if ((newPixelDataLength & 1) != 0)
-                        out.write(0);
-                    // ignore attributes after Pixel Data
-                    return;
-                }
-            } else if (enc.encapsulated) {
-                // copy encapsulated Pixel Data
-                ds.writeHeader(out, enc, Tags.PixelData, VRs.OB, -1);
-                if (simpleFrameList == null) {
-                    do {
-                        parser.parseHeader();
-                        int itemlen = parser.getReadLength();
-                        ds.writeHeader(out, enc, parser.getReadTag(),
-                                VRs.NONE, itemlen);
-                        copyBytes(dis, out, itemlen, buffer);
-                    } while (parser.getReadTag() == Tags.Item);
-                } else {
-                    parser.parseHeader();
-                    int itemlen = parser.getReadLength();
-                    // write empty Basic Offset Table
-                    ds.writeHeader(out, enc, Tags.Item, VRs.NONE, 0);
-                    // skip Basic Offset Table
-                    dis.skipBytes(itemlen);
-                    // WARN frames spanning multiple data fragments not supported
-                    // assume one item per frame
-                    int frameIndex = 0;
-                    for (int i = 0; i < simpleFrameList.length; i++) {
-                        parser.parseHeader();
-                        itemlen = parser.getReadLength();
-                        while (++frameIndex < simpleFrameList[i]) {
-                            dis.skipBytes(itemlen);
-                            parser.parseHeader();
-                            itemlen = parser.getReadLength();
-                        }
-                        ds.writeHeader(out, enc, Tags.Item, VRs.NONE, itemlen);
-                        copyBytes(dis, out, itemlen, buffer);
-                    }
-                    ds.writeHeader(out, enc, Tags.SeqDelimitationItem,
-                            VRs.NONE, 0);
-                    // ignore attributes after Pixel Data
-                    return;
-                }
-            } else {
-                // decompress encapsulated Pixel Data
-                dis.close();
-                dis = null;
-                fiis = new FileImageInputStream(file);
-                fiis.seek(parser.getStreamPosition());
-                parser = DcmParserFactory.getInstance().newDcmParser(fiis);
-                parser.setDcmHandler(ds.getDcmHandler());
-                DecompressCmd cmd = new DecompressCmd(ds, tsOrig, parser);
-                cmd.setSimpleFrameList(simpleFrameList);
-                int newPixelDataLen = cmd.getPixelDataLength();
-                ds.writeHeader(out, enc, Tags.PixelData, VRs.OW,
-                        (newPixelDataLen+1)&~1);
-                try {
-                    cmd.decompress(enc.byteOrder, out);
-                } catch (IOException e) {
-                    throw e;
-                } catch (Throwable e) {
-                    throw new RuntimeException("Decompression failed:", e);
-                }
-                if ((newPixelDataLen&1) != 0)
-                    out.write(0);
-            }
-            // parse attributes after Pixel Data
-            parser.parseDataset(dcmDecodeParam, -1);
-            ds.subSet(Tags.PixelData, -1).writeDataset(out, enc);
-        } finally {
-            try {
-                if (dis != null)
-                    dis.close();
-            } catch (IOException ignore) {
-            }
-            try {
-                if (fiis != null) {
-                    fiis.close();
-                }
-            } catch (IOException ignore) {
-            }
-        }
-    }
-    
+	public void writeTo(OutputStream out, String tsUID) throws IOException
+	{
+		// !! log.info("M-READ file:" + file);
+		boolean withoutPixeldata1 = withoutPixeldata
+				|| UIDs.NoPixelData.equals(tsUID)
+				|| UIDs.NoPixelDataDeflate.equals(tsUID);
+		DataInputStream dis = new DataInputStream(new BufferedInputStream(
+				new FileInputStream(file)));
+		FileImageInputStream fiis = null;
+		try
+		{
+			Dataset ds = DcmObjectFactory.getInstance().newDataset();
+			DcmParser parser = DcmParserFactory.getInstance().newDcmParser(dis);
+			parser.setDcmHandler(ds.getDcmHandler());
+			parser.parseDcmFile(null, Tags.PixelData);
+			boolean hasPixelData = parser.getReadTag() == Tags.PixelData;
+			DcmDecodeParam dcmDecodeParam = parser.getDcmDecodeParam();
+			if (!hasPixelData && !parser.hasSeenEOF())
+			{
+				parser.unreadHeader();
+				parser.parseDataset(dcmDecodeParam, -1);
+			}
+			ds.putAll(mergeAttrs);
+			String tsOrig = DecompressCmd.getTransferSyntax(ds);
+			if (writeFile)
+			{
+				if (tsUID != null)
+				{
+					if (!tsUID.equals(tsOrig))
+					{ // can only decompress here!
+						if (!withoutPixeldata1
+								&& !UIDs.ImplicitVRLittleEndian.equals(tsUID))
+						{
+							tsUID = UIDs.ExplicitVRLittleEndian;
+						}
+						ds.setFileMetaInfo(DcmObjectFactory.getInstance()
+								.newFileMetaInfo(ds, tsUID));
+					}
+				} else
+				{
+					tsUID = tsOrig;
+				}
+			}
+			DcmEncodeParam enc = DcmEncodeParam.valueOf(tsUID);
+			if (!hasPixelData)
+			{
+				// !! log.debug("Dataset:\n");
+				// !! log.debug(ds);
+				write(ds, out, enc);
+				return;
+			}
+			int pixelDataLen = parser.getReadLength();
+			boolean encapsulated = pixelDataLen == -1;
+			int framesInFile = ds.getInt(Tags.NumberOfFrames, 1);
+			if (simpleFrameList != null)
+			{
+				if (simpleFrameList[simpleFrameList.length - 1] > framesInFile)
+				{
+					throw new RequestedFrameNumbersOutOfRangeException();
+				}
+			} else if (calculatedFrameList != null)
+			{
+				if (calculatedFrameList[0] > framesInFile)
+				{
+					throw new RequestedFrameNumbersOutOfRangeException();
+				}
+				simpleFrameList = calculateFrameList(framesInFile);
+			}
+			if (framesInFile == 1)
+			{
+				simpleFrameList = null;
+			}
+			if (simpleFrameList != null)
+			{
+				addFrameExtractionSeq(ds);
+				addContributingEquipmentSeq(ds);
+				adjustNumberOfFrames(ds);
+				ds.putUI(Tags.SOPInstanceUID, UIDGenerator.getInstance()
+						.createUID());
+			}
+			if (withoutPixeldata1)
+			{
+				// skip Pixel Data
+				if (!encapsulated)
+				{
+					dis.skipBytes(pixelDataLen);
+				} else
+				{
+					do
+					{
+						parser.parseHeader();
+						dis.skipBytes(parser.getReadLength());
+					} while (parser.getReadTag() == Tags.Item);
+				}
+				// parse attributes after Pixel Data
+				parser.parseDataset(dcmDecodeParam, -1);
+				// !! log.debug("Dataset:\n");
+				// !! log.debug(ds);
+				write(ds, out, enc);
+				return;
+			}
+			if (encapsulated && !enc.encapsulated)
+			{
+				DecompressCmd.adjustPhotometricInterpretation(ds, tsOrig);
+			}
+			// !! log.debug("Dataset:\n");
+			// !! log.debug(ds);
+			write(ds, out, enc);
+			if (!encapsulated)
+			{
+				// copy native Pixel Data
+				if (simpleFrameList == null)
+				{
+					ds.writeHeader(out, enc, Tags.PixelData, VRs.OW,
+							pixelDataLen);
+					copyBytes(dis, out, pixelDataLen, buffer);
+				} else
+				{
+					int frameLength = pixelDataLen / framesInFile;
+					int newPixelDataLength = frameLength
+							* simpleFrameList.length;
+					ds.writeHeader(out, enc, Tags.PixelData, VRs.OW,
+							(newPixelDataLength + 1) & ~1);
+					int frameIndex = 0;
+					for (int i = 0; i < simpleFrameList.length; i++)
+					{
+						while (++frameIndex < simpleFrameList[i])
+						{
+							dis.skipBytes(frameLength);
+						}
+						copyBytes(dis, out, frameLength, buffer);
+					}
+					if ((newPixelDataLength & 1) != 0)
+						out.write(0);
+					// ignore attributes after Pixel Data
+					return;
+				}
+			} else if (enc.encapsulated)
+			{
+				// copy encapsulated Pixel Data
+				ds.writeHeader(out, enc, Tags.PixelData, VRs.OB, -1);
+				if (simpleFrameList == null)
+				{
+					do
+					{
+						parser.parseHeader();
+						int itemlen = parser.getReadLength();
+						ds.writeHeader(out, enc, parser.getReadTag(), VRs.NONE,
+								itemlen);
+						copyBytes(dis, out, itemlen, buffer);
+					} while (parser.getReadTag() == Tags.Item);
+				} else
+				{
+					parser.parseHeader();
+					int itemlen = parser.getReadLength();
+					// write empty Basic Offset Table
+					ds.writeHeader(out, enc, Tags.Item, VRs.NONE, 0);
+					// skip Basic Offset Table
+					dis.skipBytes(itemlen);
+					// WARN frames spanning multiple data fragments not
+					// supported
+					// assume one item per frame
+					int frameIndex = 0;
+					for (int i = 0; i < simpleFrameList.length; i++)
+					{
+						parser.parseHeader();
+						itemlen = parser.getReadLength();
+						while (++frameIndex < simpleFrameList[i])
+						{
+							dis.skipBytes(itemlen);
+							parser.parseHeader();
+							itemlen = parser.getReadLength();
+						}
+						ds.writeHeader(out, enc, Tags.Item, VRs.NONE, itemlen);
+						copyBytes(dis, out, itemlen, buffer);
+					}
+					ds.writeHeader(out, enc, Tags.SeqDelimitationItem,
+							VRs.NONE, 0);
+					// ignore attributes after Pixel Data
+					return;
+				}
+			} else
+			{
+				// decompress encapsulated Pixel Data
+				dis.close();
+				dis = null;
+				fiis = new FileImageInputStream(file);
+				fiis.seek(parser.getStreamPosition());
+				parser = DcmParserFactory.getInstance().newDcmParser(fiis);
+				parser.setDcmHandler(ds.getDcmHandler());
+				DecompressCmd cmd = new DecompressCmd(ds, tsOrig, parser);
+				cmd.setSimpleFrameList(simpleFrameList);
+				int newPixelDataLen = cmd.getPixelDataLength();
+				ds.writeHeader(out, enc, Tags.PixelData, VRs.OW,
+						(newPixelDataLen + 1) & ~1);
+				try
+				{
+					cmd.decompress(enc.byteOrder, out);
+				} catch (IOException e)
+				{
+					throw e;
+				} catch (Throwable e)
+				{
+					throw new RuntimeException("Decompression failed:", e);
+				}
+				if ((newPixelDataLen & 1) != 0)
+					out.write(0);
+			}
+			// parse attributes after Pixel Data
+			parser.parseDataset(dcmDecodeParam, -1);
+			ds.subSet(Tags.PixelData, -1).writeDataset(out, enc);
+		} finally
+		{
+			try
+			{
+				if (dis != null)
+					dis.close();
+			} catch (IOException ignore)
+			{
+			}
+			try
+			{
+				if (fiis != null)
+				{
+					fiis.close();
+				}
+			} catch (IOException ignore)
+			{
+			}
+		}
+	}
 
-    private void adjustNumberOfFrames(Dataset ds) {
-        ds.putIS(Tags.NumberOfFrames, simpleFrameList.length);
-        DcmElement src = ds.remove(Tags.PerFrameFunctionalGroupsSeq);
-        if (src != null) {
-            DcmElement dest = ds.putSQ(Tags.PerFrameFunctionalGroupsSeq);
-            for (int i = 0; i < simpleFrameList.length; i++) {
-                dest.addItem(src.getItem(simpleFrameList[i]-1));
-            }
-        }
-    }
+	private void adjustNumberOfFrames(Dataset ds)
+	{
+		ds.putIS(Tags.NumberOfFrames, simpleFrameList.length);
+		DcmElement src = ds.remove(Tags.PerFrameFunctionalGroupsSeq);
+		if (src != null)
+		{
+			DcmElement dest = ds.putSQ(Tags.PerFrameFunctionalGroupsSeq);
+			for (int i = 0; i < simpleFrameList.length; i++)
+			{
+				dest.addItem(src.getItem(simpleFrameList[i] - 1));
+			}
+		}
+	}
 
-    private void addContributingEquipmentSeq(Dataset ds) {
-        if (contributingEquipment != null) {
-            getOrPutSQ(ds, Tags.ContributingEquipmentSeq)
-                    .addItem(contributingEquipment);
-        }
-    }
+	private void addContributingEquipmentSeq(Dataset ds)
+	{
+		if (contributingEquipment != null)
+		{
+			getOrPutSQ(ds, Tags.ContributingEquipmentSeq).addItem(
+					contributingEquipment);
+		}
+	}
 
-    private void addFrameExtractionSeq(Dataset ds) {
-        DcmElement seq = getOrPutSQ(ds, Tags.FrameExtractionSeq);
-        Dataset item = seq.addNewItem();
-        item.putUI(Tags.MultiFrameSourceSOPInstanceUID,
-                ds.getString(Tags.SOPInstanceUID));
-        if (calculatedFrameList != null) {
-            item.putUL(Tags.CalculatedFrameList, calculatedFrameList);
-        } else {
-            item.putUL(Tags.SimpleFrameList, simpleFrameList);
-        }
-     }
+	private void addFrameExtractionSeq(Dataset ds)
+	{
+		DcmElement seq = getOrPutSQ(ds, Tags.FrameExtractionSeq);
+		Dataset item = seq.addNewItem();
+		item.putUI(Tags.MultiFrameSourceSOPInstanceUID, ds
+				.getString(Tags.SOPInstanceUID));
+		if (calculatedFrameList != null)
+		{
+			item.putUL(Tags.CalculatedFrameList, calculatedFrameList);
+		} else
+		{
+			item.putUL(Tags.SimpleFrameList, simpleFrameList);
+		}
+	}
 
-    private DcmElement getOrPutSQ(Dataset ds, int tag) {
-        DcmElement seq = ds.putSQ(tag);
-        return seq != null ? seq : ds.putSQ(tag);
-    }
+	private DcmElement getOrPutSQ(Dataset ds, int tag)
+	{
+		DcmElement seq = ds.putSQ(tag);
+		return seq != null ? seq : ds.putSQ(tag);
+	}
 
-    private int[] calculateFrameList(int frames) {
-        int[] src = new int[frames];
-        int length = 0;
-        addFrame:
-        for (int i = 0; i < calculatedFrameList.length;) {
-            for (int f = calculatedFrameList[i++],
-                    last = calculatedFrameList[i++],
-                    step = calculatedFrameList[i++];
-                    f <= last; f += step) {
-                if (f > frames) {
-                    break addFrame;
-                }
-                src[length++] = f;
-            }
-        }
-        int[] dest = new int[length];
-        System.arraycopy(src, 0, dest, 0, length);
-        return dest;
-    }
+	private int[] calculateFrameList(int frames)
+	{
+		int[] src = new int[frames];
+		int length = 0;
+		addFrame : for (int i = 0; i < calculatedFrameList.length;)
+		{
+			for (int f = calculatedFrameList[i++], last = calculatedFrameList[i++], step = calculatedFrameList[i++]; f <= last; f += step)
+			{
+				if (f > frames)
+				{
+					break addFrame;
+				}
+				src[length++] = f;
+			}
+		}
+		int[] dest = new int[length];
+		System.arraycopy(src, 0, dest, 0, length);
+		return dest;
+	}
 
-    private void write(Dataset ds, OutputStream out, DcmEncodeParam enc)
-            throws IOException {
-        if (writeFile) {
-            if (excludePrivate) {
-                Dataset dsOut = ds.excludePrivate();
-                dsOut.setFileMetaInfo(ds.getFileMetaInfo());
-                dsOut.writeFile(out, enc);
-            } else {
-                ds.writeFile(out, enc);
-            }
-        } else {
-            if (excludePrivate)
-                ds.excludePrivate().writeDataset(out, enc);
-            else
-                ds.writeDataset(out, enc);
-        }
-        return;
+	private void write(Dataset ds, OutputStream out, DcmEncodeParam enc)
+			throws IOException
+	{
+		if (writeFile)
+		{
+			if (excludePrivate)
+			{
+				Dataset dsOut = ds.excludePrivate();
+				dsOut.setFileMetaInfo(ds.getFileMetaInfo());
+				dsOut.writeFile(out, enc);
+			} else
+			{
+				ds.writeFile(out, enc);
+			}
+		} else
+		{
+			if (excludePrivate)
+				ds.excludePrivate().writeDataset(out, enc);
+			else
+				ds.writeDataset(out, enc);
+		}
+		return;
 
-    }
+	}
 
-    private void copyBytes(InputStream is, OutputStream out, int totLen,
-            byte[] buffer) throws IOException {
-        for (int len, toRead = totLen; toRead > 0; toRead -= len) {
-            len = is.read(buffer, 0, Math.min(toRead, buffer.length));
-            if (len == -1) {
-                throw new EOFException();
-            }
-            out.write(buffer, 0, len);
-        }
-    }
+	private void copyBytes(InputStream is, OutputStream out, int totLen,
+			byte[] buffer) throws IOException
+	{
+		for (int len, toRead = totLen; toRead > 0; toRead -= len)
+		{
+			len = is.read(buffer, 0, Math.min(toRead, buffer.length));
+			if (len == -1)
+			{
+				throw new EOFException();
+			}
+			out.write(buffer, 0, len);
+		}
+	}
 }

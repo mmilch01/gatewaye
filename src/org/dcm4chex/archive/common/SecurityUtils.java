@@ -51,23 +51,28 @@ import javax.security.auth.Subject;
  * @author Gunter Zeilinger <gunterze@gmail.com>
  * @version $Revision$ $Date$
  * @since Oct 22, 2007
- *
+ * 
  */
-public class SecurityUtils {
-    
-    public static String[] rolesOf(Subject subject) {
-        Set groups = subject.getPrincipals(Group.class);
-        List result = new ArrayList();
-        for (Iterator iter = groups.iterator(); iter.hasNext();) {
-            Group group = (Group) iter.next();
-            if ("Roles".equals(group.getName())) {
-                for (Enumeration members = group.members();
-                        members.hasMoreElements();) {
-                    Principal member = (Principal) members.nextElement();
-                    result.add(member.getName());
-                }
-            }
-        }
-        return (String[]) result.toArray(new String[result.size()]);
-    }
+public class SecurityUtils
+{
+
+	public static String[] rolesOf(Subject subject)
+	{
+		Set groups = subject.getPrincipals(Group.class);
+		List result = new ArrayList();
+		for (Iterator iter = groups.iterator(); iter.hasNext();)
+		{
+			Group group = (Group) iter.next();
+			if ("Roles".equals(group.getName()))
+			{
+				for (Enumeration members = group.members(); members
+						.hasMoreElements();)
+				{
+					Principal member = (Principal) members.nextElement();
+					result.add(member.getName());
+				}
+			}
+		}
+		return (String[]) result.toArray(new String[result.size()]);
+	}
 }

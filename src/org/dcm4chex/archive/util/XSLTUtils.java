@@ -63,66 +63,79 @@ import org.dcm4che.util.TMFormat;
 
 /**
  * @author gunter.zeilinger@tiani.com
- * @version $Revision: 6803 $ $Date: 2008-08-18 12:47:27 +0200 (Mon, 18 Aug 2008) $
+ * @version $Revision: 6803 $ $Date: 2008-08-18 12:47:27 +0200 (Mon, 18 Aug
+ *          2008) $
  * @since Dec 5, 2005
  */
-public class XSLTUtils {
+public class XSLTUtils
+{
 
-    public static final SAXTransformerFactory transformerFactory =
-            (SAXTransformerFactory) TransformerFactory.newInstance();
+	public static final SAXTransformerFactory transformerFactory = (SAXTransformerFactory) TransformerFactory
+			.newInstance();
 
-    public static void xslt(Dataset ds, Templates tpl, Association a,
-            Dataset out) throws TransformerConfigurationException, IOException {
-        xslt(ds, getTransformerHandler(tpl, a), out);
-    }
+	public static void xslt(Dataset ds, Templates tpl, Association a,
+			Dataset out) throws TransformerConfigurationException, IOException
+	{
+		xslt(ds, getTransformerHandler(tpl, a), out);
+	}
 
-    public static TransformerHandler getTransformerHandler(Templates tpl,
-            Association a) throws TransformerConfigurationException {
-        TransformerHandler th = transformerFactory.newTransformerHandler(tpl);
-        setDateParameters(th);
-        if (a != null) {
-            setAETParameters(th, a);
-        }
-        return th;
-    }
+	public static TransformerHandler getTransformerHandler(Templates tpl,
+			Association a) throws TransformerConfigurationException
+	{
+		TransformerHandler th = transformerFactory.newTransformerHandler(tpl);
+		setDateParameters(th);
+		if (a != null)
+		{
+			setAETParameters(th, a);
+		}
+		return th;
+	}
 
-    public static void xslt(Dataset ds, TransformerHandler th, Dataset out)
-            throws IOException {
-        th.setResult(new SAXResult(out.getSAXHandler2(null)));
-        ds.writeDataset2(th, null, null, 64, null);
-    }
+	public static void xslt(Dataset ds, TransformerHandler th, Dataset out)
+			throws IOException
+	{
+		th.setResult(new SAXResult(out.getSAXHandler2(null)));
+		ds.writeDataset2(th, null, null, 64, null);
+	}
 
-    public static void xslt(Dataset ds, Templates tpl, Dataset out)
-            throws TransformerConfigurationException, IOException {
-        xslt(ds, tpl, null, out);        
-    }
-    
-    public static void setDateParameters(TransformerHandler th) {
-        Date now = new Date();
-        Transformer t = th.getTransformer();
-        t.setParameter("date", new DAFormat().format(now ));
-        t.setParameter("time", new TMFormat().format(now));
-    }
+	public static void xslt(Dataset ds, Templates tpl, Dataset out)
+			throws TransformerConfigurationException, IOException
+	{
+		xslt(ds, tpl, null, out);
+	}
 
-    public static void setAETParameters(TransformerHandler th, Association a) {
-        Date now = new Date();
-        Transformer t = th.getTransformer();
-        t.setParameter("calling", a.getCallingAET());
-        t.setParameter("called", a.getCalledAET());
-    }
+	public static void setDateParameters(TransformerHandler th)
+	{
+		Date now = new Date();
+		Transformer t = th.getTransformer();
+		t.setParameter("date", new DAFormat().format(now));
+		t.setParameter("time", new TMFormat().format(now));
+	}
 
-    public static void writeTo(Dataset ds, File f)
-            throws TransformerConfigurationException, IOException {
-        TransformerHandler th = transformerFactory.newTransformerHandler();
-        th.getTransformer().setOutputProperty(OutputKeys.INDENT, "yes");
-        FileOutputStream out = new FileOutputStream(f);
-        TagDictionary dict = DictionaryFactory.getInstance().getDefaultTagDictionary();
-        try {
-            th.setResult(new StreamResult(out));
-            ds.writeDataset2(th, dict, null, 64, null);		
-        } finally {
-            out.close();
-        }
-    }
+	public static void setAETParameters(TransformerHandler th, Association a)
+	{
+		Date now = new Date();
+		Transformer t = th.getTransformer();
+		t.setParameter("calling", a.getCallingAET());
+		t.setParameter("called", a.getCalledAET());
+	}
+
+	public static void writeTo(Dataset ds, File f)
+			throws TransformerConfigurationException, IOException
+	{
+		TransformerHandler th = transformerFactory.newTransformerHandler();
+		th.getTransformer().setOutputProperty(OutputKeys.INDENT, "yes");
+		FileOutputStream out = new FileOutputStream(f);
+		TagDictionary dict = DictionaryFactory.getInstance()
+				.getDefaultTagDictionary();
+		try
+		{
+			th.setResult(new StreamResult(out));
+			ds.writeDataset2(th, dict, null, 64, null);
+		} finally
+		{
+			out.close();
+		}
+	}
 
 }

@@ -50,195 +50,236 @@ import org.dcm4chex.archive.exceptions.ConfigurationException;
 /**
  * 
  * @author gunter.zeilinger@tiani.com
- * @version $Revision: 12863 $ $Date: 2010-03-03 14:30:19 +0100 (Wed, 03 Mar 2010) $
+ * @version $Revision: 12863 $ $Date: 2010-03-03 14:30:19 +0100 (Wed, 03 Mar
+ *          2010) $
  * @since 28.12.2003
  */
-public final class AttributeFilter {
-    private static final String CONFIG_URL = "resource:dcm4chee-attribute-filter.xml";
-    static AttributeFilter patientFilter;
-    static AttributeFilter studyFilter;
-    static AttributeFilter seriesFilter;
-    static HashMap<String, AttributeFilter> instanceFilters =
-            new HashMap<String, AttributeFilter>();
-    private int[] tags = {};
-    private int[] noCoercion = {};
-    private int[] iCase = {};
-    private int[] vrs = {};
-    private int[] fieldTags = {};
-    private String[] fields = {};
-    private final String tsuid;
-    private final boolean exclude;
-    private final boolean excludePrivate;
-    private final boolean overwrite;
-    private final boolean merge;
-    private boolean noFilter = false;
-    
-    static {
-        reload();
-    }
+public final class AttributeFilter
+{
+	private static final String CONFIG_URL = "resource:dcm4chee-attribute-filter.xml";
+	static AttributeFilter patientFilter;
+	static AttributeFilter studyFilter;
+	static AttributeFilter seriesFilter;
+	static HashMap<String, AttributeFilter> instanceFilters = new HashMap<String, AttributeFilter>();
+	private int[] tags = {};
+	private int[] noCoercion = {};
+	private int[] iCase = {};
+	private int[] vrs = {};
+	private int[] fieldTags = {};
+	private String[] fields = {};
+	private final String tsuid;
+	private final boolean exclude;
+	private final boolean excludePrivate;
+	private final boolean overwrite;
+	private final boolean merge;
+	private boolean noFilter = false;
 
-    // Test Driver
-    public static void main(String[] args) {
-        AttributeFilterLoader.loadFrom(args[0]);
-    }
+	static
+	{
+		reload();
+	}
 
-    public static void reload() {
-        AttributeFilter.patientFilter = null;
-        AttributeFilter.studyFilter = null;
-        AttributeFilter.seriesFilter = null;
-        AttributeFilter.instanceFilters.clear();
-        AttributeFilterLoader.loadFrom(CONFIG_URL);
-    }
+	// Test Driver
+	public static void main(String[] args)
+	{
+		AttributeFilterLoader.loadFrom(args[0]);
+	}
 
-    public static long lastModified() {
-        URLConnection conn;
-        try {
-            conn = new URL(CONFIG_URL).openConnection();
-        } catch (Exception e) {
-            throw new ConfigurationException(e);
-        }
-        return conn.getLastModified();
-    }
-    
-    public static AttributeFilter getPatientAttributeFilter()  {
-        return patientFilter;
-    }
+	public static void reload()
+	{
+		AttributeFilter.patientFilter = null;
+		AttributeFilter.studyFilter = null;
+		AttributeFilter.seriesFilter = null;
+		AttributeFilter.instanceFilters.clear();
+		AttributeFilterLoader.loadFrom(CONFIG_URL);
+	}
 
-    public static AttributeFilter getStudyAttributeFilter() {
-        return studyFilter;
-    }
+	public static long lastModified()
+	{
+		URLConnection conn;
+		try
+		{
+			conn = new URL(CONFIG_URL).openConnection();
+		} catch (Exception e)
+		{
+			throw new ConfigurationException(e);
+		}
+		return conn.getLastModified();
+	}
 
-    public static AttributeFilter getSeriesAttributeFilter() {
-        return seriesFilter;
-    }
-    
-    public static AttributeFilter getInstanceAttributeFilter(String cuid) {
-        AttributeFilter filter = instanceFilters.get(cuid);
-        return filter == null ? instanceFilters.get(null) : filter;
-    }
+	public static AttributeFilter getPatientAttributeFilter()
+	{
+		return patientFilter;
+	}
 
-    AttributeFilter(String tsuid, boolean exclude, boolean excludePrivate,
-            boolean overwrite, boolean merge) {
-        this.tsuid = tsuid;
-        this.exclude = exclude;
-        this.excludePrivate = excludePrivate;
-        this.overwrite = overwrite;
-        this.merge = merge;
-    }
-    
-    final void setNoCoercion(int[] noCoercion) {
-        this.noCoercion = noCoercion;
-    }
+	public static AttributeFilter getStudyAttributeFilter()
+	{
+		return studyFilter;
+	}
 
-    final void setICase(int[] iCase) {
-        this.iCase = iCase;
-    }
+	public static AttributeFilter getSeriesAttributeFilter()
+	{
+		return seriesFilter;
+	}
 
-    final void setTags(int[] tags) {
-        this.tags = tags;
-    }
+	public static AttributeFilter getInstanceAttributeFilter(String cuid)
+	{
+		AttributeFilter filter = instanceFilters.get(cuid);
+		return filter == null ? instanceFilters.get(null) : filter;
+	}
 
-    final int[] getTags() {
-        return this.tags;
-    }
-    
-    final void setFields(String[] fields) {
-        if (!exclude) {
-            this.fields = fields;
-        }
-    }
+	AttributeFilter(String tsuid, boolean exclude, boolean excludePrivate,
+			boolean overwrite, boolean merge)
+	{
+		this.tsuid = tsuid;
+		this.exclude = exclude;
+		this.excludePrivate = excludePrivate;
+		this.overwrite = overwrite;
+		this.merge = merge;
+	}
 
-    final String[] getFields() {
-        return this.fields;
-    }
-    
-    public boolean hasTag(int tag) {
-        int index = Arrays.binarySearch(tags,tag);
-        return index>=0;
-    }
+	final void setNoCoercion(int[] noCoercion)
+	{
+		this.noCoercion = noCoercion;
+	}
 
-    final void setFieldTags(int[] fieldTags) {
-        this.fieldTags = fieldTags;        
-    }
-    
-    public final int[] getFieldTags() {        
-        return this.fieldTags;
-    }
-    
-    public String getField(int tag) {
-        for (int i = 0; i < fieldTags.length; i++) {
-            if (fieldTags[i] == tag) {
-                return fields[i];
-            }
-        }
-        return null;
-    }
-    
-    final void setVRs(int[] vrs) {
-        this.vrs = vrs;
-    }
+	final void setICase(int[] iCase)
+	{
+		this.iCase = iCase;
+	}
 
-    final int[] getVRs() {
-        return this.vrs;
-    }
-    
-    public final boolean isNoFilter() {
-        return noFilter;
-    }
-         
-    final void setNoFilter(boolean noFilter) {
-        this.noFilter = noFilter;
-    }
-    
-    final boolean isExclude() {
-        return exclude;
-    }
-    
-    public boolean isCoercionForbidden(int tag) {
-    	return Arrays.binarySearch(noCoercion, tag) >= 0;
-    }
+	final void setTags(int[] tags)
+	{
+		this.tags = tags;
+	}
 
-    public boolean isICase(int tag) {
-        return Arrays.binarySearch(iCase, tag) >= 0;
-    }
+	final int[] getTags()
+	{
+		return this.tags;
+	}
 
-    public final String getTransferSyntaxUID() {
-        return tsuid;
-    }
+	final void setFields(String[] fields)
+	{
+		if (!exclude)
+		{
+			this.fields = fields;
+		}
+	}
 
-    public final boolean isOverwrite() {
-        return overwrite;
-    }
+	final String[] getFields()
+	{
+		return this.fields;
+	}
 
-    public final boolean isMerge() {
-        return merge;
-    }
+	public boolean hasTag(int tag)
+	{
+		int index = Arrays.binarySearch(tags, tag);
+		return index >= 0;
+	}
 
-    public Dataset filter(Dataset ds) {
-        return ds.subSet(tags, vrs, exclude, excludePrivate);
-    }
+	final void setFieldTags(int[] fieldTags)
+	{
+		this.fieldTags = fieldTags;
+	}
 
-    public String[] getStrings(Dataset ds, int tag) {
-        return getStrings(ds, tag, tag);
-    }
+	public final int[] getFieldTags()
+	{
+		return this.fieldTags;
+	}
 
-    public String[] getStrings(Dataset ds, int tag, int icasetag) {
-        String[] ss = ds.getStrings(tag);
-        if (ss != null && isICase(icasetag))
-            for (int i = 0; i < ss.length; i++)
-                ss[i] = toUpperCase(ss[i]);
-        return ss;
-    }
+	public String getField(int tag)
+	{
+		for (int i = 0; i < fieldTags.length; i++)
+		{
+			if (fieldTags[i] == tag)
+			{
+				return fields[i];
+			}
+		}
+		return null;
+	}
 
-    public String getString(Dataset ds, int tag) {
-        return toUpperCase(ds.getString(tag), tag);
-    }
+	final void setVRs(int[] vrs)
+	{
+		this.vrs = vrs;
+	}
 
-    public String toUpperCase(String s, int tag) {
-        return s != null && isICase(tag) ? s.toUpperCase() : s;
-    }
+	final int[] getVRs()
+	{
+		return this.vrs;
+	}
 
-    public static String toUpperCase(String s) {
-        return s != null ? s.toUpperCase() : s;
-    }
+	public final boolean isNoFilter()
+	{
+		return noFilter;
+	}
+
+	final void setNoFilter(boolean noFilter)
+	{
+		this.noFilter = noFilter;
+	}
+
+	final boolean isExclude()
+	{
+		return exclude;
+	}
+
+	public boolean isCoercionForbidden(int tag)
+	{
+		return Arrays.binarySearch(noCoercion, tag) >= 0;
+	}
+
+	public boolean isICase(int tag)
+	{
+		return Arrays.binarySearch(iCase, tag) >= 0;
+	}
+
+	public final String getTransferSyntaxUID()
+	{
+		return tsuid;
+	}
+
+	public final boolean isOverwrite()
+	{
+		return overwrite;
+	}
+
+	public final boolean isMerge()
+	{
+		return merge;
+	}
+
+	public Dataset filter(Dataset ds)
+	{
+		return ds.subSet(tags, vrs, exclude, excludePrivate);
+	}
+
+	public String[] getStrings(Dataset ds, int tag)
+	{
+		return getStrings(ds, tag, tag);
+	}
+
+	public String[] getStrings(Dataset ds, int tag, int icasetag)
+	{
+		String[] ss = ds.getStrings(tag);
+		if (ss != null && isICase(icasetag))
+			for (int i = 0; i < ss.length; i++)
+				ss[i] = toUpperCase(ss[i]);
+		return ss;
+	}
+
+	public String getString(Dataset ds, int tag)
+	{
+		return toUpperCase(ds.getString(tag), tag);
+	}
+
+	public String toUpperCase(String s, int tag)
+	{
+		return s != null && isICase(tag) ? s.toUpperCase() : s;
+	}
+
+	public static String toUpperCase(String s)
+	{
+		return s != null ? s.toUpperCase() : s;
+	}
 }

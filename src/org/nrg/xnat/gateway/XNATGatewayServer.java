@@ -1,21 +1,38 @@
 package org.nrg.xnat.gateway;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
+import java.net.InetAddress;
+import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 import java.util.TreeMap;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
+import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
 import org.apache.commons.httpclient.HttpMethodBase;
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.FileAppender;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.apache.log4j.Priority;
+import org.apache.log4j.SimpleLayout;
+import org.apache.log4j.varia.NullAppender;
 import org.dcm4che.data.Command;
 import org.dcm4che.data.Dataset;
 import org.dcm4che.data.DcmObjectFactory;
+import org.dcm4che.dict.Status;
 import org.dcm4che.dict.Tags;
 import org.dcm4che.net.ActiveAssociation;
 import org.dcm4che.net.DcmServiceException;
@@ -24,176 +41,299 @@ import org.dcm4che.net.DimseListener;
 import org.dcm4che.net.DcmServiceBase.MultiDimseRsp;
 import org.dcm4che.server.Server;
 import org.dcm4che.server.ServerFactory;
+import org.dcm4chex.archive.dcm.qrscp.AEManager;
 import org.dcm4chex.archive.dcm.qrscp.QueryRetrieveScpService;
+import org.dcm4chex.archive.ejb.interfaces.AEDTO;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.nrg.xnat.desktop.tools.XNATTableParser;
 import org.nrg.xnat.repository.XNATRestAdapter;
-
-
 import com.pixelmed.dicom.InformationEntity;
 
-public class XNATGatewayServer implements Runnable
+public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 {
-	private static String m_ver="April 26, 2010";
-//	private static QueryRetrieveScpService m_qrServ;
+	private static String m_ver = "May 6, 2010";
+	// private static QueryRetrieveScpService m_qrServ;
 	private Server m_dcmServer;
-	private static boolean m_srvShutdown=false;
+	private static boolean m_srvShutdown = false;
+
+	protected long m_RandSeed = 0;
+	protected String m_StoreFolder, m_XNATServer, m_XNATUser, m_XNATPass,
+			m_AETitle = null;
+	protected AEDTO m_localAE;
+	protected int m_maxCacheFiles = 50000;
+	protected static XNATGatewayServer m_this = null;
+	protected AEServer m_ael = new AEServer();
+
+	public void instancesSent(ArrayList fileInfos)
+	{
+		//delete files that were sent.
+		for(Object fi:fileInfos)
+		{
+			new File(((FileInfo)fi).fileID).delete();
+		}
+	}
 	
-	protected long m_RandSeed=0;
-	protected String m_StoreFolder, m_XNATServer, m_XNATUser, m_XNATPass, m_AETitle=null;
-	protected int m_maxCacheFiles=50000;
-	protected static XNATGatewayServer m_this=null;
+	public String getCalledAET(){return m_AETitle;}
 	public static XNATGatewayServer getInstance()
 	{
 		return m_this;
 	}
-	public XNATFindRsp getMultiCFindRsp(Dataset query)
+
+	public FileInfo[][] retrieveFiles(Dataset query)
 	{
-		return new XNATFindRsp(query,m_XNATServer,m_XNATUser,m_XNATPass);
+		return new XNATCMoveRsp(m_XNATServer, m_XNATUser, m_XNATPass,
+				m_StoreFolder).performRetrieve(query);
 	}
-	
-	public XNATGatewayServer(Properties props)
-	throws Exception
+	public XNATCFindRsp getMultiCFindRsp(Dataset query)
 	{
-		QueryRetrieveScpService srv=new QueryRetrieveScpService();
+		XNATCFindRsp rsp = new XNATCFindRsp(query, m_XNATServer, m_XNATUser,
+				m_XNATPass);
+		rsp.executeQuery();
+		return rsp;
+	}
+
+	public XNATGatewayServer(Properties props) throws Exception
+	{
+		Logger l=Logger.getRootLogger();
+		BasicConfigurator.configure(new NullAppender());
+		
+		FileAppender appender=null;
+		SimpleLayout layout=new SimpleLayout();
+		try
+		{
+			appender=new FileAppender(layout,"./gateway.log",false);
+			m_maxCacheFiles=Integer.parseInt(props.getProperty("Application.FilesInCache"));
+		}catch(Exception e){}
+
+		l.addAppender(appender);
+		l.setLevel(Level.toLevel(props.getProperty("Dicom.DebugLevel")));
+		l.info(DateFormat.getDateTimeInstance().format(new Date())+" Server started");
+				
+		QueryRetrieveScpService srv = new QueryRetrieveScpService();
 		initServerParams(srv);
-		
+
 		srv.setCalledAETs(props.getProperty("Dicom.CallingAETitle"));
-//		srv.setCallingAETs(props.getProperty("Dicom.CalledAETitile"));
+		// srv.setCallingAETs(props.getProperty("Dicom.CalledAETitile"));
 		srv.setCoerceRequestPatientIds(true);
-		String aets=props.getProperty("Dicom.RemoteAEs");
-		aets=aets.replace(' ', '\\');
-		srv.setCallingAETs(aets);
-//		srv.setAcceptedStandardSOPClasses(s)
-//		srv.setDcmServerName(new ObjectName("GatewayDcmQRSCP"));
+		String aets = props.getProperty("Dicom.RemoteAEs");
+		aets = aets.replace(' ', '\\');
+		srv.setCallingAETs(aets);		
+		// srv.setAcceptedStandardSOPClasses(s)
+		// srv.setDcmServerName(new ObjectName("GatewayDcmQRSCP"));
 		srv.startService();
-		m_dcmServer=ServerFactory.getInstance().newServer(srv.getDcmHandler());		
-		m_dcmServer.setPort(Integer.valueOf(props.getProperty("Dicom.ListeningPort")).intValue());
-		
-		m_StoreFolder=props.getProperty("Application.SavedImagesFolderName");
-		File sf=new File(m_StoreFolder);
-		if(!sf.exists()) sf.mkdir();
-		
-		m_XNATServer=props.getProperty(XnatServerProperties.XNATServerURL);
-		m_XNATUser=props.getProperty(XnatServerProperties.XNATUser);
-		m_XNATPass=props.getProperty(XnatServerProperties.XNATPass);
-		m_AETitle=props.getProperty(XnatServerProperties.AETitle);
+		m_dcmServer = ServerFactory.getInstance()
+				.newServer(srv.getDcmHandler());
+		m_dcmServer.setPort(Integer.valueOf(
+				props.getProperty("Dicom.ListeningPort")).intValue());
+
+		m_StoreFolder = props.getProperty("Application.SavedImagesFolderName");
+		File sf = new File(m_StoreFolder);
+		if (!sf.exists())
+			sf.mkdir();
 		//clean up from the previous run
 		try
 		{
 			for(File f:new File(m_StoreFolder).listFiles()) f.delete();
 		}
 		finally{}
-		m_this=this;
-//		m_dcmServer.start();
+		
+		m_XNATServer = props.getProperty(XnatServerProperties.XNATServerURL);
+		m_XNATUser = props.getProperty(XnatServerProperties.XNATUser);
+		m_XNATPass = props.getProperty(XnatServerProperties.XNATPass);
+		m_AETitle = props.getProperty(XnatServerProperties.AETitle);
+		initRemoteAEs(props);
+		// clean up from the previous run
+		try
+		{
+			for (File f : new File(m_StoreFolder).listFiles())
+				f.delete();
+		} finally
+		{
+		}
+		m_this = this;
+		// m_dcmServer.start();
+		
+		m_localAE=new AEDTO(0, 
+				m_AETitle,
+				"localhost",
+				Integer.parseInt(props.getProperty("Dicom.ListeningPort")),				
+				"", "", "", "", "","", "");
+		
+		srv.setAEManager(
+				new AEManager()
+				{
+					public AEDTO findByPrimaryKey(long l)
+					{
+						return null;
+					}
+					public AEDTO findByAET(String s)
+					{
+						if(s.compareTo(m_AETitle)!=0) return null;
+						return m_localAE;
+					}
+					public List<AEDTO> findAll()
+					{
+						LinkedList<AEDTO> llae=new LinkedList<AEDTO>();
+						llae.add(m_localAE);
+						return llae;
+					}
+				}
+		);
+
+		XNATQueryGenerator.LoadVocabulary("./config/vocabulary.xml");
+
 		new Thread(this).start();
-//??	srv.setPerfMonServiceName(perfMonServiceName)
-//		XNATQueryGenerator.LoadVocabulary("./config/vocabulary.xml");
-//		new Thread(new SCPServerRunnable(srv)).start();
+		// ?? srv.setPerfMonServiceName(perfMonServiceName)
+		// XNATQueryGenerator.LoadVocabulary("./config/vocabulary.xml");
+		// new Thread(new SCPServerRunnable(srv)).start();
+	}
+	private void initRemoteAEs(Properties p)
+	{
+		try
+		{
+			String[] aliases = p.getProperty("Dicom.RemoteAEs").split(" ");
+			String aet, host;
+			int port;
+			for (String alias : aliases)
+			{
+				try
+				{
+					aet = p.getProperty("Dicom.RemoteAEs." + alias
+							+ ".CalledAETitle");
+					host = p.getProperty("Dicom.RemoteAEs." + alias
+							+ ".HostNameOrIPAddress");
+					port = new Integer(p.getProperty("Dicom.RemoteAEs." + alias
+							+ ".Port")).intValue();
+				} catch (Exception e)
+				{
+					continue;
+				}
+				m_ael.addAE(new AEDTO(0, aet, host, port, "", "", "", "", "",
+						"", ""));
+			}
+		} catch (Exception e)
+		{
+		}
 	}
 	public void run()
 	{
 		try
 		{
 			m_dcmServer.start();
-			while(!m_srvShutdown)
+			while (!m_srvShutdown)
 			{
 				Thread.sleep(100);
 			}
-		}
-		catch(Exception e)
+		} catch (Exception e)
 		{
 			System.err.println(e);
-		}
-		finally
+		} finally
 		{
 			try
 			{
 				m_dcmServer.stop();
+			} catch (Exception e)
+			{
 			}
-			catch(Exception e){}
 		}
-	}	
+	}
 	private void initServerParams(QueryRetrieveScpService srv)
 	{
+		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
 		Document bD;
-		Document vD;		
+		Document vD;
 		try
 		{
-			bD=new SAXReader().read(new File("config/dcm4chee-qrscp-xmbean.xml"));
-			vD=new SAXReader().read(new File("config/qrscp-config.xml"));
-		}
-		catch(Exception e)
+			mbs.registerMBean(m_ael, new ObjectName(
+					"org.nrg.xnat.gateway:type=AEServer"));
+			srv.setAEServiceName(new ObjectName(
+					"org.nrg.xnat.gateway:type=AEServer"));
+			mbs.registerMBean(this, new ObjectName(
+					"org.nrg.xnag.gateway:type=GatewayServer"));
+			// srv.setDcmServerName(dcmServerName)
+			bD = new SAXReader().read(new File(
+					"config/dcm4chee-qrscp-xmbean.xml"));
+			vD = new SAXReader().read(new File("config/qrscp-config.xml"));
+		} catch (Exception e)
 		{
 			return;
 		}
-		final class MAttr{
-			String name,getMethod,setMethod,type;
+		final class MAttr
+		{
+			String name, getMethod, setMethod, type;
 			public MAttr(Element el)
 			{
-				name=el.element("name").getText();	type=el.element("type").getText();
-				getMethod=el.attributeValue("getMethod"); setMethod=el.attributeValue("setMethod");
+				name = el.element("name").getText();
+				type = el.element("type").getText();
+				getMethod = el.attributeValue("getMethod");
+				setMethod = el.attributeValue("setMethod");
 			}
 		};
-		TreeMap<String,MAttr> attMap=new TreeMap<String,MAttr>();
-		Element element=bD.getRootElement();
-		//elementByID("mbean");
-		for(Iterator<Element> it=element.elementIterator(); it.hasNext();)
+		TreeMap<String, MAttr> attMap = new TreeMap<String, MAttr>();
+		Element element = bD.getRootElement();
+		// elementByID("mbean");
+		for (Iterator<Element> it = element.elementIterator(); it.hasNext();)
 		{
-			Element eln=it.next();
-			if(eln.getName().compareTo("attribute")!=0) continue;
-			MAttr attr=new MAttr(eln);
+			Element eln = it.next();
+			if (eln.getName().compareTo("attribute") != 0)
+				continue;
+			MAttr attr = new MAttr(eln);
 			attMap.put(attr.name, attr);
 		}
-		for(Iterator<Element> it=vD.getRootElement().elementIterator(); it.hasNext();)
+		for (Iterator<Element> it = vD.getRootElement().elementIterator(); it
+				.hasNext();)
 		{
-			Element eln=it.next();
+			Element eln = it.next();
 			try
 			{
 
-				MAttr att=attMap.get(eln.attribute("name").getText());			
-				Class type=Class.forName(att.type);
-				Method method=srv.getClass().getMethod(att.setMethod, type);
-				String param=eln.getText();
-				if(att.type.compareTo("java.lang.String")!=0)
+				MAttr att = attMap.get(eln.attribute("name").getText());
+				Class type = Class.forName(att.type);
+				Method method = srv.getClass().getMethod(att.setMethod, type);
+				String param = eln.getText();
+				if (att.type.compareTo("java.lang.String") != 0)
 				{
-					method.invoke(srv, type.getMethod("valueOf", Class.forName("java.lang.String")).invoke(null, param));
-				}
-				else
+					method.invoke(srv, type.getMethod("valueOf",
+							Class.forName("java.lang.String")).invoke(null,
+							param));
+				} else
 				{
-					method.invoke(srv,param);
+					method.invoke(srv, param);
 				}
+			} catch (Exception e)
+			{
 			}
-			catch(Exception e){}
-			
+
 		}
-	}	
+	}
 	public static void main(String arg[])
 	{
-		String propertiesFileName = arg.length > 0 ? arg[0] : "./config/gateway.properties";
-//??	m_qrServ.setAcceptedStandardSOPClasses(s)
-//??	m_qrServ.setAcceptedTransferSyntax(s)
+		String propertiesFileName = arg.length > 0
+				? arg[0]
+				: "./config/gateway.properties";
+		// ?? m_qrServ.setAcceptedStandardSOPClasses(s)
+		// ?? m_qrServ.setAcceptedTransferSyntax(s)
 		try
 		{
-			Properties props=new Properties();
+			Properties props = new Properties();
 			try
 			{
 				FileInputStream in = new FileInputStream(propertiesFileName);
 				props.load(in);
 				in.close();
-			}
-			catch (IOException e)
+			} catch (IOException e)
 			{
-				Tools.LogException(Priority.ERROR, "Unable to read properties file", e);
+				Tools.LogException(Priority.ERROR,
+						"Unable to read properties file", e);
 			}
 			new XNATGatewayServer(props);
-			System.err.println("XNAT/DICOM gateway server v. 1.0, rev. "+m_ver);
+			System.err.println("XNAT/DICOM gateway server v. 1.0, rev. "
+					+ m_ver);
 			props.put(XnatServerProperties.XNATPass, "*****");
-			System.err.println("properties="+props);
-		}
-		catch (Exception e)
+			System.err.println("properties=" + props);
+		} catch (Exception e)
 		{
 			Tools.LogException(Priority.ERROR, "Initialization exception", e);
 		}
@@ -201,125 +341,14 @@ public class XNATGatewayServer implements Runnable
 	@Override
 	protected void finalize() throws Throwable
 	{
-//		if(m_dcmServer!=null)
-//			m_dcmServer.stop();
+		// if(m_dcmServer!=null)
+		// m_dcmServer.stop();
 		super.finalize();
 	}
-	public class XNATFindRsp implements MultiDimseRsp
-	{
-		private XNATRestAdapter m_xre;
-		private Dataset m_query;
-		private LinkedList<Dataset> m_curLst=new LinkedList<Dataset>();
-
-		public XNATFindRsp(Dataset query, String url, String usr, String pass)
-		{
-			m_xre=new XNATRestAdapter(url,usr,pass);
-			m_query=query;
-		}
-		protected InformationEntity getInformationEntityForQueryRetieveLevel(String queryRetrieveLevel) 
-		{
-			if (queryRetrieveLevel == null)					return null;
-			else if (queryRetrieveLevel.equals("PATIENT"))	return InformationEntity.PATIENT;
-			else if (queryRetrieveLevel.equals("STUDY"))	return InformationEntity.STUDY;
-			else if (queryRetrieveLevel.equals("SERIES"))	return InformationEntity.SERIES;
-			else if (queryRetrieveLevel.equals("IMAGE"))	return InformationEntity.INSTANCE;
-			else											return null;
-		}
-
-		public int executeQuery()
-		{
-			String qLevel=m_query.getString(Tags.QueryRetrieveLevel);
-			
-			//1. perform POST request via REST API - using XND's classes
-			
-			boolean bGenSearch=false;
-			HttpMethodBase method=null;
-			InformationEntity ieWanted=getInformationEntityForQueryRetieveLevel(qLevel);
-			if(qLevel.toLowerCase().compareTo("patient")==0)
-			if(ieWanted.compareTo(InformationEntity.STUDY)<=0)
-			{
-				//now, for Patient/Study level, use generic xml search.
-				String xml=XNATQueryGenerator.getQueryXML(ieWanted, m_query);
-				//verify the query xml
-				Tools.LogMessage(Priority.INFO, "XNAT Search engine query xml body:\n"+xml);
-				if(!m_xre.VerifyConnection()) return -1;
-				bGenSearch=true;
-				method=m_xre.PerformConnection(XNATRestAdapter.POST, "/search", xml);
-			}
-			else if(ieWanted.compareTo(InformationEntity.SERIES)<=0)
-//			else if(ieWanted.compareTo(InformationEntity.SERIES)==0)
-			{
-				String path=XNATQueryGenerator.getRESTQuery(ieWanted, m_query);
-				Tools.LogMessage(Priority.INFO, "REST query string:\n"+path);
-				if(path==null)
-				{
-					Tools.LogMessage(Priority.ERROR, "Error generating REST query");
-					return -1;
-				}
-				method=m_xre.PerformConnection(XNATRestAdapter.GET, path, "");					
-			}
-			else return 0;	
-			if(method==null) return 0;
-/*
-			try
-			{
-//				String resp=method.getResponseBodyAsString();
-//				System.err.println(resp);
-			}				
-			catch(Exception e){return;}
-			method.releaseConnection();
-*/				
-			try
-			{
-				//2. parse the response				    			- using XND's classes
-				LinkedList<TreeMap<String,String>> row_map=
-					XNATTableParser.GetRows(new SAXReader().read(method.getResponseBodyAsStream()),!bGenSearch,"header");//bGenSearch?"header":null);
-				for(TreeMap<String,String> row:row_map)
-				{
-					//3. translate the response to DICOM's AttributeList
-					Dataset resp=DcmObjectFactory.getInstance().newDataset();
-//					AttributeList al=new AttributeList();
-					resp.putAll(m_query);
-//					al.putAll(queryIdentifier);
-					Dataset received=XNATQueryGenerator.GetVocabulary().GetDicomEntry(row,ieWanted);
-					resp.putAll(received);
-//					al.putAll(received);
-					XNATQueryGenerator.GetVocabulary().modifySOPInstUID(resp, true);
-					if(resp.size()>0)
-						m_curLst.add(resp);
-				}
-			}
-			catch(Exception e)
-			{
-				Tools.LogException(Priority.ERROR, "Error parsing the response to REST query", e);
-			}
-			finally
-			{
-				method.releaseConnection();
-			}
-			return m_curLst.size();
-		}
-		
-		@Override
-		public DimseListener getCancelListener()
-		{
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		@Override
-		public Dataset next(ActiveAssociation assoc, Dimse rq, Command rspCmd)
-				throws DcmServiceException
-		{
-			if(m_curLst.size()<1) return null;
-			return m_curLst.remove();
-		}
-
-		@Override
-		public void release()
-		{
-			// TODO Auto-generated method stub			
-		}
-		
-	}
+	/*
+	 * public class AEServer implements AEServerMBean { private
+	 * TreeMap<String,AEDTO> m_AEs=new TreeMap<String,AEDTO>(); public AEDTO
+	 * findAE(String aet, InetAddress addr) { return m_AEs.get(aet); } public
+	 * void addAE(AEDTO ae) { m_AEs.put(ae.getTitle(), ae); } }
+	 */
 }

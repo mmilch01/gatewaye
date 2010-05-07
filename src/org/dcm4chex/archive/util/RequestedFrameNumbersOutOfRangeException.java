@@ -45,6 +45,7 @@ import java.io.IOException;
  * @version $Revision$ $Date$
  * @since Dec 18, 2007
  */
-public class RequestedFrameNumbersOutOfRangeException extends IOException {
+public class RequestedFrameNumbersOutOfRangeException extends IOException
+{
 
 }

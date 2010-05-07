@@ -56,141 +56,165 @@ import org.dcm4chex.archive.codec.CompressionFailedException;
 
 /**
  * @author Gunter Zeilinger <gunterze@gmail.com>
- * @version $Revision: 12904 $ $Date: 2010-03-11 16:04:45 +0100 (Thu, 11 Mar 2010) $
+ * @version $Revision: 12904 $ $Date: 2010-03-11 16:04:45 +0100 (Thu, 11 Mar
+ *          2010) $
  * @since 11.06.2004
  * 
  */
-public class CompressionRules {
+public class CompressionRules
+{
 
-    static final Logger LOG = Logger.getLogger(CompressionRules.class);
+	static final Logger LOG = Logger.getLogger(CompressionRules.class);
 
-    static final int NONE = 0;
+	static final int NONE = 0;
 
-    static final int J2LL = 1;
+	static final int J2LL = 1;
 
-    static final int JLSL = 2;
+	static final int JLSL = 2;
 
-    static final int J2KR = 3;
+	static final int J2KR = 3;
 
-    static final int JPLY = 4;
+	static final int JPLY = 4;
 
-    static final String[] CODES = { "NONE", "JPLL", "JLSL", "J2KR", "JPLY" };
+	static final String[] CODES = {"NONE", "JPLL", "JLSL", "J2KR", "JPLY"};
 
-    static final String[] TSUIDS = { null, UIDs.JPEGLossless,
-            UIDs.JPEGLSLossless, UIDs.JPEG2000Lossless, UIDs.JPEGBaseline};
+	static final String[] TSUIDS = {null, UIDs.JPEGLossless,
+			UIDs.JPEGLSLossless, UIDs.JPEG2000Lossless, UIDs.JPEGBaseline};
 
-    private final ArrayList list = new ArrayList();
+	private final ArrayList list = new ArrayList();
 
-    private static final class Entry {
+	private static final class Entry
+	{
 
-        final Condition condition;
-        final int compression;
-        final float quality;
-        final String derivationDescription;
-        final float ratio;
-        
-        Entry(Condition condition, int compression, float quality,
-                String derivationDescription, float ratio) {
-            this.condition = condition;
-            this.compression = compression;
-            this.quality = quality;
-            this.derivationDescription = derivationDescription;
-            this.ratio = ratio;
-       }
-    }
+		final Condition condition;
+		final int compression;
+		final float quality;
+		final String derivationDescription;
+		final float ratio;
 
-    public CompressionRules(String s) {
-        StringTokenizer stk = new StringTokenizer(s, "\r\n;");
-        while (stk.hasMoreTokens()) {
-            String tk = stk.nextToken().trim();
-            if (tk.length() == 0)
-                continue;
-            try {
-                int endCond = tk.indexOf(']') + 1;
-                Condition cond = new Condition(tk.substring(0, endCond));
-                String codec = tk.substring(endCond);
-                int compression;
-                float quality = 0.75f;
-                float ratio = 5.f;
-                String derivationDescription = "JPEG Lossy Compression with quality=0.75";
-                if (codec.startsWith("JPLY(")) {
-                    if (!codec.endsWith(")"))
-                        throw new IllegalArgumentException();
-                    int endQuality = codec.indexOf(':');
-                    if (endQuality == -1)
-                        throw new IllegalArgumentException();
-                    int endDesc = codec.indexOf(':',endQuality+1); 
-                    if (endDesc == -1)
-                        throw new IllegalArgumentException();
-                    compression = JPLY;
-                    quality = Float.parseFloat(codec.substring(5, endQuality));
-                    derivationDescription =
-                        codec.substring(endQuality + 1, endDesc);
-                    ratio =  Float.parseFloat(
-                            codec.substring(endDesc + 1, codec.length()-1));
-                } else {
-                    compression = Arrays.asList(CODES).indexOf(codec);
-                    if (compression == -1)
-                        throw new IllegalArgumentException();
-                }
-                list.add(new Entry(cond, compression, quality, derivationDescription,
-                        ratio));
-            } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException(tk);
-            }
-        }
-    }
+		Entry(Condition condition, int compression, float quality,
+				String derivationDescription, float ratio)
+		{
+			this.condition = condition;
+			this.compression = compression;
+			this.quality = quality;
+			this.derivationDescription = derivationDescription;
+			this.ratio = ratio;
+		}
+	}
 
-    public CompressCmd getCompressFor(Association assoc, Dataset ds) {
-        Map param = new HashMap();
-        param.put("calling", new String[] { assoc.getCallingAET() });
-        param.put("called", new String[] { assoc.getCalledAET() });
-        if (ds != null) {
-            putIntoIfNotNull(param, "cuid", ds, Tags.SOPClassUID);
-            putIntoIfNotNull(param, "pmi", ds, Tags.PhotometricInterpretation);
-            putIntoIfNotNull(param, "imgtype", ds, Tags.ImageType);
-            putIntoIfNotNull(param, "bodypart", ds, Tags.BodyPartExamined);
-        }
-        for (Iterator it = list.iterator(); it.hasNext();) {
-            Entry e = (Entry) it.next();
-            if (e.condition.isTrueFor(param)) {
-                try {
-                    return (e.compression == NONE)? null : (e.compression == JPLY) 
-                            ? CompressCmd.createJPEGLossyCompressCmd(
-                                    ds, e.quality, e.derivationDescription,
-                                    e.ratio, null, null)
-                            : CompressCmd.createCompressCmd(
-                                    ds, TSUIDS[e.compression]);
-                } catch (CompressionFailedException e1) {
-                    LOG.info(e1.getMessage());
-                    continue;
-                }
-            }
-        }
-        return null;
-    }
+	public CompressionRules(String s)
+	{
+		StringTokenizer stk = new StringTokenizer(s, "\r\n;");
+		while (stk.hasMoreTokens())
+		{
+			String tk = stk.nextToken().trim();
+			if (tk.length() == 0)
+				continue;
+			try
+			{
+				int endCond = tk.indexOf(']') + 1;
+				Condition cond = new Condition(tk.substring(0, endCond));
+				String codec = tk.substring(endCond);
+				int compression;
+				float quality = 0.75f;
+				float ratio = 5.f;
+				String derivationDescription = "JPEG Lossy Compression with quality=0.75";
+				if (codec.startsWith("JPLY("))
+				{
+					if (!codec.endsWith(")"))
+						throw new IllegalArgumentException();
+					int endQuality = codec.indexOf(':');
+					if (endQuality == -1)
+						throw new IllegalArgumentException();
+					int endDesc = codec.indexOf(':', endQuality + 1);
+					if (endDesc == -1)
+						throw new IllegalArgumentException();
+					compression = JPLY;
+					quality = Float.parseFloat(codec.substring(5, endQuality));
+					derivationDescription = codec.substring(endQuality + 1,
+							endDesc);
+					ratio = Float.parseFloat(codec.substring(endDesc + 1, codec
+							.length() - 1));
+				} else
+				{
+					compression = Arrays.asList(CODES).indexOf(codec);
+					if (compression == -1)
+						throw new IllegalArgumentException();
+				}
+				list.add(new Entry(cond, compression, quality,
+						derivationDescription, ratio));
+			} catch (IllegalArgumentException e)
+			{
+				throw new IllegalArgumentException(tk);
+			}
+		}
+	}
 
-    private void putIntoIfNotNull(Map param, String key, Dataset ds, int tag) {
-        String[] val = ds.getStrings(tag);
-        if (val != null && val.length != 0) {
-            param.put(key, val);
-        }
-    }
+	public CompressCmd getCompressFor(Association assoc, Dataset ds)
+	{
+		Map param = new HashMap();
+		param.put("calling", new String[]{assoc.getCallingAET()});
+		param.put("called", new String[]{assoc.getCalledAET()});
+		if (ds != null)
+		{
+			putIntoIfNotNull(param, "cuid", ds, Tags.SOPClassUID);
+			putIntoIfNotNull(param, "pmi", ds, Tags.PhotometricInterpretation);
+			putIntoIfNotNull(param, "imgtype", ds, Tags.ImageType);
+			putIntoIfNotNull(param, "bodypart", ds, Tags.BodyPartExamined);
+		}
+		for (Iterator it = list.iterator(); it.hasNext();)
+		{
+			Entry e = (Entry) it.next();
+			if (e.condition.isTrueFor(param))
+			{
+				try
+				{
+					return (e.compression == NONE)
+							? null
+							: (e.compression == JPLY) ? CompressCmd
+									.createJPEGLossyCompressCmd(ds, e.quality,
+											e.derivationDescription, e.ratio,
+											null, null) : CompressCmd
+									.createCompressCmd(ds,
+											TSUIDS[e.compression]);
+				} catch (CompressionFailedException e1)
+				{
+					LOG.info(e1.getMessage());
+					continue;
+				}
+			}
+		}
+		return null;
+	}
 
-    public String toString() {
-        final String newline = System.getProperty("line.separator", "\n");
-        if (list.isEmpty())
-            return newline;
-        StringBuffer sb = new StringBuffer();
-        for (Iterator it = list.iterator(); it.hasNext();) {
-            Entry e = (Entry) it.next();
-            e.condition.toStringBuffer(sb);
-            sb.append(CODES[e.compression]);
-            if (e.compression == JPLY) {
-                sb.append('(').append(e.quality).append(':').append(e.ratio).append(')');
-            }
-            sb.append(newline);
-        }
-        return sb.toString();
-    }
+	private void putIntoIfNotNull(Map param, String key, Dataset ds, int tag)
+	{
+		String[] val = ds.getStrings(tag);
+		if (val != null && val.length != 0)
+		{
+			param.put(key, val);
+		}
+	}
+
+	public String toString()
+	{
+		final String newline = System.getProperty("line.separator", "\n");
+		if (list.isEmpty())
+			return newline;
+		StringBuffer sb = new StringBuffer();
+		for (Iterator it = list.iterator(); it.hasNext();)
+		{
+			Entry e = (Entry) it.next();
+			e.condition.toStringBuffer(sb);
+			sb.append(CODES[e.compression]);
+			if (e.compression == JPLY)
+			{
+				sb.append('(').append(e.quality).append(':').append(e.ratio)
+						.append(')');
+			}
+			sb.append(newline);
+		}
+		return sb.toString();
+	}
 }

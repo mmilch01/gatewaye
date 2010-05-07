@@ -39,22 +39,23 @@
 
 package org.dcm4chex.archive.common;
 
-
 /**
  * @author gunter.zeilinger@tiani.com
- * @version $Revision: 12327 $ $Date: 2009-10-21 22:04:47 +0200 (Wed, 21 Oct 2009) $
+ * @version $Revision: 12327 $ $Date: 2009-10-21 22:04:47 +0200 (Wed, 21 Oct
+ *          2009) $
  * @since 06.10.2004
- *
+ * 
  */
-public class PrivateTags {
-    public static final String CreatorID = "dcm4che/archive";
-    public static final int PatientPk = 0x00430010;
-    public static final int StudyPk = 0x00430011;
-    public static final int SeriesPk = 0x00430012;
-    public static final int InstancePk = 0x00430013;
-    public static final int CallingAET = 0x00430014;
-    public static final int CalledAET = 0x00430015;
-    public static final int InstanceUpdated = 0x00430016;
-    public static final int WorkItemSeq = 0x00430020;
-    public static final int Dcm4cheURIReferencedTransferSyntaxUID = 0x00430030;
+public class PrivateTags
+{
+	public static final String CreatorID = "dcm4che/archive";
+	public static final int PatientPk = 0x00430010;
+	public static final int StudyPk = 0x00430011;
+	public static final int SeriesPk = 0x00430012;
+	public static final int InstancePk = 0x00430013;
+	public static final int CallingAET = 0x00430014;
+	public static final int CalledAET = 0x00430015;
+	public static final int InstanceUpdated = 0x00430016;
+	public static final int WorkItemSeq = 0x00430020;
+	public static final int Dcm4cheURIReferencedTransferSyntaxUID = 0x00430030;
 }

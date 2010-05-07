@@ -46,22 +46,27 @@ import java.io.Serializable;
  * @version $Revision: $ $Date: $
  * @since 27.09.2007
  */
-public class CallingAetChanged implements Serializable {
+public class CallingAetChanged implements Serializable
+{
 
-    private static final long serialVersionUID = 3256722883605704752L;
-	
-    private final String[] affectedCalledAETs;
-    private final String[] newCallingAETs;
+	private static final long serialVersionUID = 3256722883605704752L;
 
-    public CallingAetChanged(String[] affectedCalledAETs, String[] newCallingAETs) {
-        this.affectedCalledAETs = affectedCalledAETs;
-        this.newCallingAETs = newCallingAETs;
-    }
+	private final String[] affectedCalledAETs;
+	private final String[] newCallingAETs;
 
-    public final String[] getAffectedCalledAETs() {
-        return affectedCalledAETs;
-    }
-    public final String[] getNewCallingAETs() {
-        return newCallingAETs;
-    }
+	public CallingAetChanged(String[] affectedCalledAETs,
+			String[] newCallingAETs)
+	{
+		this.affectedCalledAETs = affectedCalledAETs;
+		this.newCallingAETs = newCallingAETs;
+	}
+
+	public final String[] getAffectedCalledAETs()
+	{
+		return affectedCalledAETs;
+	}
+	public final String[] getNewCallingAETs()
+	{
+		return newCallingAETs;
+	}
 }

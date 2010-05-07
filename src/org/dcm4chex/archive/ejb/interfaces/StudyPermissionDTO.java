@@ -45,86 +45,96 @@ import java.io.Serializable;
  * @since Oct 15, 2007
  * 
  */
-public class StudyPermissionDTO implements Serializable {
+public class StudyPermissionDTO implements Serializable
+{
 
-    private static final long serialVersionUID = 1042463933021834047L;
+	private static final long serialVersionUID = 1042463933021834047L;
 
-    /**
-     * Action value for permission to query attributes of the Study and
-     * included Series and Instance entities.
-     */
-    public static final String QUERY_ACTION = "Q";
-    
-    /**
-     * Action value for permission to active retrieve or passive receive
-     * Instances of the Study.
-     */
-    public static final String READ_ACTION = "R";
-    
-    /**
-     * Action value for permission to retrieve Instances of the Study to
-     * another application entity.
-     */
-    public static final String EXPORT_ACTION = "E";
-    
-    /**
-     * Action value for permission to store Instances to an already existing
-     * Study.
-     */
-    public static final String APPEND_ACTION = "A";
+	/**
+	 * Action value for permission to query attributes of the Study and included
+	 * Series and Instance entities.
+	 */
+	public static final String QUERY_ACTION = "Q";
 
-    /**
-     * Action value to modify attributes of the Study and included Series.
-     */
-    public static final String UPDATE_ACTION = "U";
+	/**
+	 * Action value for permission to active retrieve or passive receive
+	 * Instances of the Study.
+	 */
+	public static final String READ_ACTION = "R";
 
-    /**
-     * Action value to delete the whole Study or individual Series or Instances.
-     */
-    public static final String DELETE_ACTION = "D";
-    
-    private long pk = -1L;
+	/**
+	 * Action value for permission to retrieve Instances of the Study to another
+	 * application entity.
+	 */
+	public static final String EXPORT_ACTION = "E";
 
-    private String studyIuid;
+	/**
+	 * Action value for permission to store Instances to an already existing
+	 * Study.
+	 */
+	public static final String APPEND_ACTION = "A";
 
-    private String action;
+	/**
+	 * Action value to modify attributes of the Study and included Series.
+	 */
+	public static final String UPDATE_ACTION = "U";
 
-    private String role;
+	/**
+	 * Action value to delete the whole Study or individual Series or Instances.
+	 */
+	public static final String DELETE_ACTION = "D";
 
-    public final long getPk() {
-        return pk;
-    }
+	private long pk = -1L;
 
-    public final void setPk(long pk) {
-        this.pk = pk;
-    }
+	private String studyIuid;
 
-    public final String getStudyIuid() {
-        return studyIuid;
-    }
+	private String action;
 
-    public final void setStudyIuid(String studyIuid) {
-        this.studyIuid = studyIuid;
-    }
+	private String role;
 
-    public final String getAction() {
-        return action;
-    }
+	public final long getPk()
+	{
+		return pk;
+	}
 
-    public final void setAction(String action) {
-        this.action = action;
-    }
+	public final void setPk(long pk)
+	{
+		this.pk = pk;
+	}
 
-    public final String getRole() {
-        return role;
-    }
+	public final String getStudyIuid()
+	{
+		return studyIuid;
+	}
 
-    public final void setRole(String role) {
-        this.role = role;
-    }
+	public final void setStudyIuid(String studyIuid)
+	{
+		this.studyIuid = studyIuid;
+	}
 
-    public String toString() {
-        return "StudyPermission[pk=" + pk + ", suid=" + studyIuid + ", action="
-                + action + ", role=" + role + "]";
-    }
+	public final String getAction()
+	{
+		return action;
+	}
+
+	public final void setAction(String action)
+	{
+		this.action = action;
+	}
+
+	public final String getRole()
+	{
+		return role;
+	}
+
+	public final void setRole(String role)
+	{
+		this.role = role;
+	}
+
+	public String toString()
+	{
+		return "StudyPermission[pk=" + pk + ", suid=" + studyIuid + ", action="
+				+ action + ", role=" + role + "]";
+	}
 }

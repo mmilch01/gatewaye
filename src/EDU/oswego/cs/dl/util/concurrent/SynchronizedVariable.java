@@ -9,7 +9,7 @@
   History:
   Date       Who                What
   30Jun1998  dl               Create public version
-*/
+ */
 
 package EDU.oswego.cs.dl.util.concurrent;
 
@@ -176,30 +176,43 @@ package EDU.oswego.cs.dl.util.concurrent;
  * <p>[<a href="http://gee.cs.oswego.edu/dl/classes/EDU/oswego/cs/dl/util/concurrent/intro.html"> Introduction to this package. </a>]
  **/
 
-public class SynchronizedVariable implements Executor {
+public class SynchronizedVariable implements Executor
+{
 
-  protected final Object lock_;
+	protected final Object lock_;
 
-  /** Create a SynchronizedVariable using the supplied lock **/
-  public SynchronizedVariable(Object lock) { lock_ = lock; }
+	/** Create a SynchronizedVariable using the supplied lock **/
+	public SynchronizedVariable(Object lock)
+	{
+		lock_ = lock;
+	}
 
-  /** Create a SynchronizedVariable using itself as the lock **/
-  public SynchronizedVariable() { lock_ = this; }
+	/** Create a SynchronizedVariable using itself as the lock **/
+	public SynchronizedVariable()
+	{
+		lock_ = this;
+	}
 
-  /**
-   * Return the lock used for all synchronization for this object
-   **/
-  public Object getLock() { return lock_; }
+	/**
+	 * Return the lock used for all synchronization for this object
+	 **/
+	public Object getLock()
+	{
+		return lock_;
+	}
 
-  /**
-   * If current thread is not interrupted, execute the given command 
-   * within this object's lock
-   **/
+	/**
+	 * If current thread is not interrupted, execute the given command within
+	 * this object's lock
+	 **/
 
-  public void execute(Runnable command) throws InterruptedException {
-    if (Thread.interrupted()) throw new InterruptedException();
-    synchronized (lock_) { 
-      command.run();
-    }
-  }
+	public void execute(Runnable command) throws InterruptedException
+	{
+		if (Thread.interrupted())
+			throw new InterruptedException();
+		synchronized (lock_)
+		{
+			command.run();
+		}
+	}
 }

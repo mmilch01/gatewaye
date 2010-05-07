@@ -49,37 +49,41 @@ import org.dcm4chex.archive.ejb.interfaces.FileSystemDTO;
  * @version $Revision$ $Date$
  * @since Sep 1, 2008
  */
-public class StorageFileSystemSwitched implements Serializable {
+public class StorageFileSystemSwitched implements Serializable
+{
 
-    private static final long serialVersionUID = 6624397552425958868L;
+	private static final long serialVersionUID = 6624397552425958868L;
 
-    private final FileSystemDTO prevFS;
+	private final FileSystemDTO prevFS;
 
-    private final FileSystemDTO newFS;
+	private final FileSystemDTO newFS;
 
-    public static final NotificationFilter NOTIF_FILTER =
-        new NotificationFilter() {          
+	public static final NotificationFilter NOTIF_FILTER = new NotificationFilter()
+	{
 
-        private static final long serialVersionUID = -2027477213859843633L;
+		private static final long serialVersionUID = -2027477213859843633L;
 
-        public boolean isNotificationEnabled(Notification notif) {
-            return notif.getType().equals(
-                    StorageFileSystemSwitched.class.getName());
-        }
-    };
+		public boolean isNotificationEnabled(Notification notif)
+		{
+			return notif.getType().equals(
+					StorageFileSystemSwitched.class.getName());
+		}
+	};
 
-    public StorageFileSystemSwitched(FileSystemDTO oldFS, FileSystemDTO newFS) {
-        this.prevFS = oldFS;
-        this.newFS = newFS;
-    }
+	public StorageFileSystemSwitched(FileSystemDTO oldFS, FileSystemDTO newFS)
+	{
+		this.prevFS = oldFS;
+		this.newFS = newFS;
+	}
 
-    public FileSystemDTO getPreviousStorageFileSystem() {
-        return prevFS;
-    }
+	public FileSystemDTO getPreviousStorageFileSystem()
+	{
+		return prevFS;
+	}
 
-    public FileSystemDTO getNewStorageFileSystem() {
-        return newFS;
-    }
+	public FileSystemDTO getNewStorageFileSystem()
+	{
+		return newFS;
+	}
 
-    
 }

@@ -42,14 +42,17 @@ package org.dcm4chex.archive.exceptions;
  * @version $Revision$ $Date$
  * @since Oct 21, 2008
  */
-public class ConcurrentStudyStorageException extends Exception {
+public class ConcurrentStudyStorageException extends Exception
+{
 
-    private static final long serialVersionUID = 8162471799864810085L;
+	private static final long serialVersionUID = 8162471799864810085L;
 
-    public ConcurrentStudyStorageException() {
-    }
+	public ConcurrentStudyStorageException()
+	{
+	}
 
-    public ConcurrentStudyStorageException(String message) {
-        super(message);
-    }
+	public ConcurrentStudyStorageException(String message)
+	{
+		super(message);
+	}
 }

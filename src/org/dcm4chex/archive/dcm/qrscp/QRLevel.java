@@ -47,82 +47,96 @@ import org.dcm4che.net.DcmServiceException;
  * @version $Revision$ $Date$
  * @since May 6, 2008
  */
-enum QRLevel {
-    PATIENT, STUDY, SERIES, IMAGE;
+enum QRLevel
+{
+	PATIENT, STUDY, SERIES, IMAGE;
 
-    private static final int[] UID_TAGS = {
-        Tags.PatientID,
-        Tags.StudyInstanceUID,
-        Tags.SeriesInstanceUID,
-        Tags.SOPInstanceUID
-    };
+	private static final int[] UID_TAGS = {Tags.PatientID,
+			Tags.StudyInstanceUID, Tags.SeriesInstanceUID, Tags.SOPInstanceUID};
 
-    void checkSOPClass(String cuid, String studyRoot, String patientStudyOnly)
-            throws DcmServiceException {
-        if (this == PATIENT) {
-            if (cuid.equals(studyRoot)) {
-                throw new DcmServiceException(
-                        Status.IdentifierDoesNotMatchSOPClass,
-                        "Cannot use Query Retrieve Level PATIENT with Study Root IM");
-            }
-        } else if (this != STUDY) {
-            if (cuid.equals(patientStudyOnly)) {
-                throw new DcmServiceException(
-                        Status.IdentifierDoesNotMatchSOPClass,
-                        "Cannot use Query Retrieve Level " + this
-                                + " with Patient Study Only IM");
-            }
-        }
-    }
+	void checkSOPClass(String cuid, String studyRoot, String patientStudyOnly)
+			throws DcmServiceException
+	{
+		if (this == PATIENT)
+		{
+			if (cuid.equals(studyRoot))
+			{
+				throw new DcmServiceException(
+						Status.IdentifierDoesNotMatchSOPClass,
+						"Cannot use Query Retrieve Level PATIENT with Study Root IM");
+			}
+		} else if (this != STUDY)
+		{
+			if (cuid.equals(patientStudyOnly))
+			{
+				throw new DcmServiceException(
+						Status.IdentifierDoesNotMatchSOPClass,
+						"Cannot use Query Retrieve Level " + this
+								+ " with Patient Study Only IM");
+			}
+		}
+	}
 
-    void checkRetrieveRQ(Dataset rqData) throws DcmServiceException {
-        for (int level = 0, levelOffset = -ordinal(); level < UID_TAGS.length;
-                level++, levelOffset++) {
-            int uidTag = UID_TAGS[level];
-            String[] uids =  rqData.getStrings(uidTag);
-            if (levelOffset > 0) {
-                if (uids != null) {
-                    throw new DcmServiceException(
-                            Status.IdentifierDoesNotMatchSOPClass,
-                            "Illegal Unique Key Attribute "
-                            + Tags.toString(uidTag) + " in " + this
-                            + " Level Retrieve RQ");
-                }
-            } else {
-                if (levelOffset == 0) {
-                    if (uids == null || uids.length == 0) {
-                        throw new DcmServiceException(
-                                Status.IdentifierDoesNotMatchSOPClass,
-                                "Missing Unique Key Attribute "
-                                + Tags.toString(uidTag) + " in " + this
-                                + " Level Retrieve RQ");
-                    }
-                }
-                if (levelOffset < 0 || level == 0) {
-                    if (uids != null && uids.length > 1) {
-                        throw new DcmServiceException(
-                                Status.IdentifierDoesNotMatchSOPClass,
-                                "Illegal List of UIDs in Unique Key Attribute "
-                                + Tags.toString(uidTag) + " in " + this
-                                + " Level Retrieve RQ");
-                    }
-                }
-            }
-        }
-    }
+	void checkRetrieveRQ(Dataset rqData) throws DcmServiceException
+	{
+		for (int level = 0, levelOffset = -ordinal(); level < UID_TAGS.length; level++, levelOffset++)
+		{
+			int uidTag = UID_TAGS[level];
+			String[] uids = rqData.getStrings(uidTag);
+			if (levelOffset > 0)
+			{
+				if (uids != null)
+				{
+					throw new DcmServiceException(
+							Status.IdentifierDoesNotMatchSOPClass,
+							"Illegal Unique Key Attribute "
+									+ Tags.toString(uidTag) + " in " + this
+									+ " Level Retrieve RQ");
+				}
+			} else
+			{
+				if (levelOffset == 0)
+				{
+					if (uids == null || uids.length == 0)
+					{
+						throw new DcmServiceException(
+								Status.IdentifierDoesNotMatchSOPClass,
+								"Missing Unique Key Attribute "
+										+ Tags.toString(uidTag) + " in " + this
+										+ " Level Retrieve RQ");
+					}
+				}
+				if (levelOffset < 0 || level == 0)
+				{
+					if (uids != null && uids.length > 1)
+					{
+						throw new DcmServiceException(
+								Status.IdentifierDoesNotMatchSOPClass,
+								"Illegal List of UIDs in Unique Key Attribute "
+										+ Tags.toString(uidTag) + " in " + this
+										+ " Level Retrieve RQ");
+					}
+				}
+			}
+		}
+	}
 
-    static QRLevel toQRLevel(Dataset rqData) throws DcmServiceException {
-        String qrLevel = rqData.getString(Tags.QueryRetrieveLevel);
-        try {
-            return QRLevel.valueOf(qrLevel);
-        } catch (NullPointerException e) {
-            throw new DcmServiceException(
-                    Status.IdentifierDoesNotMatchSOPClass,
-                    "Missing Query Retrieve Level");
-        } catch (IllegalArgumentException e) {
-            throw new DcmServiceException(
-                    Status.IdentifierDoesNotMatchSOPClass,
-                    "Invalid Retrieve Level " + qrLevel);
-        }
-    }
+	static QRLevel toQRLevel(Dataset rqData) throws DcmServiceException
+	{
+		String qrLevel = rqData.getString(Tags.QueryRetrieveLevel);
+		try
+		{
+			return QRLevel.valueOf(qrLevel);
+		} catch (NullPointerException e)
+		{
+			throw new DcmServiceException(
+					Status.IdentifierDoesNotMatchSOPClass,
+					"Missing Query Retrieve Level");
+		} catch (IllegalArgumentException e)
+		{
+			throw new DcmServiceException(
+					Status.IdentifierDoesNotMatchSOPClass,
+					"Invalid Retrieve Level " + qrLevel);
+		}
+	}
 }

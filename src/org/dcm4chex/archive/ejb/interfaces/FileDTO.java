@@ -47,208 +47,240 @@ import java.io.Serializable;
  *          2006) $
  * @since 20.02.2004
  */
-public final class FileDTO implements Serializable, Comparable {
+public final class FileDTO implements Serializable, Comparable
+{
 
-    private static final long serialVersionUID = -3713363057919313663L;
+	private static final long serialVersionUID = -3713363057919313663L;
 
-    private long pk;
+	private long pk;
 
-    private long fspk;
+	private long fspk;
 
-    private String aet;
+	private String aet;
 
-    private String userInfo;
+	private String userInfo;
 
-    private String basedir;
+	private String basedir;
 
-    private String fsgrid;
+	private String fsgrid;
 
-    private String path;
+	private String path;
 
-    private String tsuid;
+	private String tsuid;
 
-    private String sopIuid;
+	private String sopIuid;
 
-    private String sopCuid;
+	private String sopCuid;
 
-    private long size;
+	private long size;
 
-    private byte[] md5;
+	private byte[] md5;
 
-    private int status;
+	private int status;
 
-    private int availability;
+	private int availability;
 
-    public String toString() {
-        return "FileDTO[pk=" + pk + ", basedir=" + basedir + ", fsgrid="
-                + fsgrid + ", path=" + path + ", status=" + status + "]";
-    }
+	public String toString()
+	{
+		return "FileDTO[pk=" + pk + ", basedir=" + basedir + ", fsgrid="
+				+ fsgrid + ", path=" + path + ", status=" + status + "]";
+	}
 
-    /**
-     * @return Returns the pk.
-     */
-    public final long getPk() {
-        return pk;
-    }
+	/**
+	 * @return Returns the pk.
+	 */
+	public final long getPk()
+	{
+		return pk;
+	}
 
-    /**
-     * @param pk
-     *            The pk to set.
-     */
-    public final void setPk(long pk) {
-        this.pk = pk;
-    }
+	/**
+	 * @param pk
+	 *            The pk to set.
+	 */
+	public final void setPk(long pk)
+	{
+		this.pk = pk;
+	}
 
-    /**
-     * @return Returns the aet.
-     */
-    public final String getRetrieveAET() {
-        return aet;
-    }
+	/**
+	 * @return Returns the aet.
+	 */
+	public final String getRetrieveAET()
+	{
+		return aet;
+	}
 
-    /**
-     * @param aets
-     *            The aets to set.
-     */
-    public final void setRetrieveAET(String aet) {
-        this.aet = aet;
-    }
+	/**
+	 * @param aets
+	 *            The aets to set.
+	 */
+	public final void setRetrieveAET(String aet)
+	{
+		this.aet = aet;
+	}
 
-    public final String getUserInfo() {
-        return userInfo;
-    }
+	public final String getUserInfo()
+	{
+		return userInfo;
+	}
 
-    public final void setUserInfo(String userInfo) {
-        this.userInfo = userInfo;
-    }
+	public final void setUserInfo(String userInfo)
+	{
+		this.userInfo = userInfo;
+	}
 
-    public final long getFileSystemPk() {
-        return fspk;
-    }
+	public final long getFileSystemPk()
+	{
+		return fspk;
+	}
 
-    public final void setFileSystemPk(long fspk) {
-        this.fspk = fspk;
-    }
+	public final void setFileSystemPk(long fspk)
+	{
+		this.fspk = fspk;
+	}
 
-    public final String getFileSystemGroupID() {
-        return fsgrid;
-    }
+	public final String getFileSystemGroupID()
+	{
+		return fsgrid;
+	}
 
-    public final void setFileSystemGroupID(String fsgrid) {
-        this.fsgrid = fsgrid;
-    }
+	public final void setFileSystemGroupID(String fsgrid)
+	{
+		this.fsgrid = fsgrid;
+	}
 
-    public final String getDirectoryPath() {
-        return basedir;
-    }
+	public final String getDirectoryPath()
+	{
+		return basedir;
+	}
 
-    public final void setDirectoryPath(String baseDir) {
-        this.basedir = baseDir;
-    }
+	public final void setDirectoryPath(String baseDir)
+	{
+		this.basedir = baseDir;
+	}
 
-    public final String getMd5String() {
-        return MD5.toString(md5);
-    }
+	public final String getMd5String()
+	{
+		return MD5.toString(md5);
+	}
 
-    /**
-     * @return Returns the md5.
-     */
-    public final byte[] getFileMd5() {
-        return md5;
-    }
+	/**
+	 * @return Returns the md5.
+	 */
+	public final byte[] getFileMd5()
+	{
+		return md5;
+	}
 
-    /**
-     * @param md5
-     *            The md5 to set.
-     */
-    public final void setFileMd5(byte[] md5) {
-        this.md5 = md5;
-    }
+	/**
+	 * @param md5
+	 *            The md5 to set.
+	 */
+	public final void setFileMd5(byte[] md5)
+	{
+		this.md5 = md5;
+	}
 
-    public final int getFileStatus() {
-        return status;
-    }
+	public final int getFileStatus()
+	{
+		return status;
+	}
 
-    public final void setFileStatus(int status) {
-        this.status = status;
-    }
+	public final void setFileStatus(int status)
+	{
+		this.status = status;
+	}
 
-    /**
-     * @return Returns the path.
-     */
-    public final String getFilePath() {
-        return path;
-    }
+	/**
+	 * @return Returns the path.
+	 */
+	public final String getFilePath()
+	{
+		return path;
+	}
 
-    /**
-     * @param path
-     *            The path to set.
-     */
-    public final void setFilePath(String path) {
-        this.path = path;
-    }
+	/**
+	 * @param path
+	 *            The path to set.
+	 */
+	public final void setFilePath(String path)
+	{
+		this.path = path;
+	}
 
-    /**
-     * @return Returns the size.
-     */
-    public final long getFileSize() {
-        return size;
-    }
+	/**
+	 * @return Returns the size.
+	 */
+	public final long getFileSize()
+	{
+		return size;
+	}
 
-    /**
-     * @param size
-     *            The size to set.
-     */
-    public final void setFileSize(long size) {
-        this.size = size;
-    }
+	/**
+	 * @param size
+	 *            The size to set.
+	 */
+	public final void setFileSize(long size)
+	{
+		this.size = size;
+	}
 
-    /**
-     * @return Returns the tsuid.
-     */
-    public final String getFileTsuid() {
-        return tsuid;
-    }
+	/**
+	 * @return Returns the tsuid.
+	 */
+	public final String getFileTsuid()
+	{
+		return tsuid;
+	}
 
-    /**
-     * @param tsuid
-     *            The tsuid to set.
-     */
-    public final void setFileTsuid(String tsuid) {
-        this.tsuid = tsuid;
-    }
+	/**
+	 * @param tsuid
+	 *            The tsuid to set.
+	 */
+	public final void setFileTsuid(String tsuid)
+	{
+		this.tsuid = tsuid;
+	}
 
-    public final int getAvailability() {
-        return availability;
-    }
+	public final int getAvailability()
+	{
+		return availability;
+	}
 
-    public final void setAvailability(int availability) {
-        this.availability = availability;
-    }
+	public final void setAvailability(int availability)
+	{
+		this.availability = availability;
+	}
 
-    public String getSopClassUID() {
-        return sopCuid;
-    }
+	public String getSopClassUID()
+	{
+		return sopCuid;
+	}
 
-    public void setSopClassUID(String sopClassUID) {
-        this.sopCuid = sopClassUID;
-    }
+	public void setSopClassUID(String sopClassUID)
+	{
+		this.sopCuid = sopClassUID;
+	}
 
-    public String getSopInstanceUID() {
-        return sopCuid;
-    }
+	public String getSopInstanceUID()
+	{
+		return sopCuid;
+	}
 
-    public void setSopInstanceUID(String sopClassUID) {
-        this.sopCuid = sopClassUID;
-    }
+	public void setSopInstanceUID(String sopClassUID)
+	{
+		this.sopCuid = sopClassUID;
+	}
 
-    /**
-     * This will make sure the most available - and for files with equal
-     * availability, the most recent - file will be listed first
-     */
-    public int compareTo(Object o) {
-        FileDTO fi2 = (FileDTO) o;
-        int diffAvail = getAvailability() - fi2.getAvailability();
-        return diffAvail != 0 ? diffAvail : fi2.getPk() < getPk() ? -1 : 1;
-    }
+	/**
+	 * This will make sure the most available - and for files with equal
+	 * availability, the most recent - file will be listed first
+	 */
+	public int compareTo(Object o)
+	{
+		FileDTO fi2 = (FileDTO) o;
+		int diffAvail = getAvailability() - fi2.getAvailability();
+		return diffAvail != 0 ? diffAvail : fi2.getPk() < getPk() ? -1 : 1;
+	}
 }

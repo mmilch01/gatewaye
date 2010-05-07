@@ -44,37 +44,42 @@ import org.dcm4cheri.util.StringUtils;
  * @version $Revision$ $Date$
  * @since Oct 15, 2008
  */
-public class AETs {
-    public static String update(String oldAETs, String oldAET,
-            String newAET) {
-        if (oldAETs != null) {
-            String[] aets = StringUtils.split(oldAETs, '\\');
-            for (int i = 0; i < aets.length; i++) {
-                if (aets[i].equals(oldAET)) {
-                    aets[i] = newAET;
-                    return StringUtils.toString(aets, '\\');
-                }
-            }
-        }
-        return oldAETs;
-    }
+public class AETs
+{
+	public static String update(String oldAETs, String oldAET, String newAET)
+	{
+		if (oldAETs != null)
+		{
+			String[] aets = StringUtils.split(oldAETs, '\\');
+			for (int i = 0; i < aets.length; i++)
+			{
+				if (aets[i].equals(oldAET))
+				{
+					aets[i] = newAET;
+					return StringUtils.toString(aets, '\\');
+				}
+			}
+		}
+		return oldAETs;
+	}
 
-    public static String common(String aets1, String aets2) {
-        if (aets1 == null || aets2 == null)
-            return null;
-        if (aets1.equals(aets2))
-            return aets1;
-        String[] a1 = StringUtils.split(aets1, '\\');
-        String[] a2 = StringUtils.split(aets2, '\\');
-        StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < a1.length; i++)
-            for (int j = 0; j < a2.length; j++)
-                if (a1[i].equals(a2[j]))
-                    sb.append(a1[i]).append('\\');
-        int l = sb.length();
-        if (l == 0)
-            return null;
-        sb.setLength(l-1);
-        return sb.toString();
-    }
+	public static String common(String aets1, String aets2)
+	{
+		if (aets1 == null || aets2 == null)
+			return null;
+		if (aets1.equals(aets2))
+			return aets1;
+		String[] a1 = StringUtils.split(aets1, '\\');
+		String[] a2 = StringUtils.split(aets2, '\\');
+		StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < a1.length; i++)
+			for (int j = 0; j < a2.length; j++)
+				if (a1[i].equals(a2[j]))
+					sb.append(a1[i]).append('\\');
+		int l = sb.length();
+		if (l == 0)
+			return null;
+		sb.setLength(l - 1);
+		return sb.toString();
+	}
 }

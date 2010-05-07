@@ -40,17 +40,21 @@ package org.dcm4chex.archive.exceptions;
 
 /**
  * @author Gunter Zeilinger <gunterze@gmail.com>
- * @version $Revision: 3392 $ $Date: 2007-06-19 16:18:50 +0200 (Tue, 19 Jun 2007) $
+ * @version $Revision: 3392 $ $Date: 2007-06-19 16:18:50 +0200 (Tue, 19 Jun
+ *          2007) $
  * @since Jun 18, 2007
  */
-public class PatientMismatchException extends Exception {
+public class PatientMismatchException extends Exception
+{
 
-    private static final long serialVersionUID = -5406026629396871512L;
+	private static final long serialVersionUID = -5406026629396871512L;
 
-    public PatientMismatchException() {
-    }
+	public PatientMismatchException()
+	{
+	}
 
-    public PatientMismatchException(String message) {
-        super(message);
-    }
+	public PatientMismatchException(String message)
+	{
+		super(message);
+	}
 }

@@ -43,14 +43,17 @@ package org.dcm4chex.archive.exceptions;
  * @version $Revision$ $Date$
  * @since Jan 23, 2008
  */
-public class PatientAlreadyExistsException extends Exception {
+public class PatientAlreadyExistsException extends Exception
+{
 
-    private static final long serialVersionUID = -8082877305408145624L;
+	private static final long serialVersionUID = -8082877305408145624L;
 
-    public PatientAlreadyExistsException() {
-    }
+	public PatientAlreadyExistsException()
+	{
+	}
 
-    public PatientAlreadyExistsException(String message) {
-        super(message);
-    }
+	public PatientAlreadyExistsException(String message)
+	{
+		super(message);
+	}
 }

@@ -45,17 +45,19 @@ import java.util.Collection;
  * @version $Revision$ $Date$
  * @since Sep 15, 2009
  */
-public class DeleteStudyOrdersAndMaxAccessTime implements Serializable {
+public class DeleteStudyOrdersAndMaxAccessTime implements Serializable
+{
 
-    private static final long serialVersionUID = 8798735468613522541L;
+	private static final long serialVersionUID = 8798735468613522541L;
 
-    public final Collection deleteStudyOrders;
-    public final long maxAccessTime;
+	public final Collection deleteStudyOrders;
+	public final long maxAccessTime;
 
-    public DeleteStudyOrdersAndMaxAccessTime(
-            Collection deleteStudyOrders, long maxAccessTime) {
-        this.deleteStudyOrders = deleteStudyOrders;
-        this.maxAccessTime = maxAccessTime;
-    }
+	public DeleteStudyOrdersAndMaxAccessTime(Collection deleteStudyOrders,
+			long maxAccessTime)
+	{
+		this.deleteStudyOrders = deleteStudyOrders;
+		this.maxAccessTime = maxAccessTime;
+	}
 
 }

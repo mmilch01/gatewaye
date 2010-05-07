@@ -35,79 +35,96 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-
 package org.dcm4chex.archive.config;
 
 import org.dcm4chex.archive.util.FileUtils;
 
 /**
  * @author gunter.zeilinger@tiani.com
- * @version $Revision: 3048 $ $Date: 2007-01-05 19:21:04 +0100 (Fri, 05 Jan 2007) $
+ * @version $Revision: 3048 $ $Date: 2007-01-05 19:21:04 +0100 (Fri, 05 Jan
+ *          2007) $
  * @since Jun 6, 2006
  */
-public abstract class DeleterThreshold implements Comparable {
+public abstract class DeleterThreshold implements Comparable
+{
 
-    protected int startHour;
-    private DeleterThreshold(int startHour) {
-        if (startHour < 0 || startHour > 23) {
-            throw new IllegalArgumentException();
-        }
-        this.startHour = startHour;
-    }
+	protected int startHour;
+	private DeleterThreshold(int startHour)
+	{
+		if (startHour < 0 || startHour > 23)
+		{
+			throw new IllegalArgumentException();
+		}
+		this.startHour = startHour;
+	}
 
-    public final int getStartHour() {
-        return startHour;
-    }
-    
-    public int compareTo(Object o) {
-        return startHour - ((DeleterThreshold) o).startHour;
-    }
-    
-    public abstract long getFreeSize(long expectedDataVolumePerDay);
-    
-    public static class SizeBased extends DeleterThreshold {
-        private long freeSize;
-        SizeBased(int startHour, long freeSize) {
-            super(startHour);
-            if (freeSize <= 0) {
-                throw new IllegalArgumentException();
-            }
-            this.freeSize = freeSize;
-        }
-        
-        public final long getFreeSize() {
-            return freeSize;
-        }
-        
-        public String toString() {
-            return "" + startHour + ":" +  FileUtils.formatSize(freeSize);
-        }
+	public final int getStartHour()
+	{
+		return startHour;
+	}
 
-        public long getFreeSize(long expectedDataVolumePerDay) {
-            return freeSize;
-        }
-    }
-    
-    public static class TimeBased extends DeleterThreshold {
-        private int freeHours;
-        TimeBased(int startHour, int freeHours) {
-            super(startHour);
-            if (freeHours <= 0) {
-                throw new IllegalArgumentException();
-            }
-            this.freeHours = freeHours;
-        }
-        
-        public final int getFreeHours() {
-            return freeHours;
-        }
+	public int compareTo(Object o)
+	{
+		return startHour - ((DeleterThreshold) o).startHour;
+	}
 
-        public String toString() {
-            return "" + startHour + ":" +  freeHours + "h";
-        }
+	public abstract long getFreeSize(long expectedDataVolumePerDay);
 
-        public long getFreeSize(long expectedDataVolumePerDay) {            
-            return expectedDataVolumePerDay * freeHours / 24;
-        }
-    }
+	public static class SizeBased extends DeleterThreshold
+	{
+		private long freeSize;
+		SizeBased(int startHour, long freeSize)
+		{
+			super(startHour);
+			if (freeSize <= 0)
+			{
+				throw new IllegalArgumentException();
+			}
+			this.freeSize = freeSize;
+		}
+
+		public final long getFreeSize()
+		{
+			return freeSize;
+		}
+
+		public String toString()
+		{
+			return "" + startHour + ":" + FileUtils.formatSize(freeSize);
+		}
+
+		public long getFreeSize(long expectedDataVolumePerDay)
+		{
+			return freeSize;
+		}
+	}
+
+	public static class TimeBased extends DeleterThreshold
+	{
+		private int freeHours;
+		TimeBased(int startHour, int freeHours)
+		{
+			super(startHour);
+			if (freeHours <= 0)
+			{
+				throw new IllegalArgumentException();
+			}
+			this.freeHours = freeHours;
+		}
+
+		public final int getFreeHours()
+		{
+			return freeHours;
+		}
+
+		public String toString()
+		{
+			return "" + startHour + ":" + freeHours + "h";
+		}
+
+		public long getFreeSize(long expectedDataVolumePerDay)
+		{
+			return expectedDataVolumePerDay * freeHours / 24;
+		}
+	}
 }

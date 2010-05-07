@@ -42,12 +42,14 @@ package org.dcm4chex.archive.exceptions;
  * @version $Revision$ $Date$
  * @since Sep 29, 2009
  */
-public class NoSuchSeriesException extends Exception {
+public class NoSuchSeriesException extends Exception
+{
 
-    private static final long serialVersionUID = -2762579096220015115L;
+	private static final long serialVersionUID = -2762579096220015115L;
 
-    public NoSuchSeriesException(Throwable cause) {
-        super(cause);
-    }
+	public NoSuchSeriesException(Throwable cause)
+	{
+		super(cause);
+	}
 
 }

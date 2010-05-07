@@ -48,24 +48,27 @@ import java.util.Arrays;
  * @since 06.10.2004
  * 
  */
-public class Availability {
+public class Availability
+{
 
-    public static final int ONLINE = 0;
-    public static final int NEARLINE = 1;
-    public static final int OFFLINE = 2;
-    public static final int UNAVAILABLE = 3;
+	public static final int ONLINE = 0;
+	public static final int NEARLINE = 1;
+	public static final int OFFLINE = 2;
+	public static final int UNAVAILABLE = 3;
 
-    private static final String[] AVAILABILITY = { "ONLINE", "NEARLINE",
-            "OFFLINE", "UNAVAILABLE" };
+	private static final String[] AVAILABILITY = {"ONLINE", "NEARLINE",
+			"OFFLINE", "UNAVAILABLE"};
 
-    public static final String toString(int value) {
-        return AVAILABILITY[value];
-    }
+	public static final String toString(int value)
+	{
+		return AVAILABILITY[value];
+	}
 
-    public static final int toInt(String s) {
-        final int index = Arrays.asList(AVAILABILITY).indexOf(s);
-        if (index == -1)
-            throw new IllegalArgumentException(s);
-        return index;
-    }
+	public static final int toInt(String s)
+	{
+		final int index = Arrays.asList(AVAILABILITY).indexOf(s);
+		if (index == -1)
+			throw new IllegalArgumentException(s);
+		return index;
+	}
 }

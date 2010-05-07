@@ -9,94 +9,121 @@
   History:
   Date       Who                What
   19Jun1998  dl               Create public version
-*/
+ */
 
 package EDU.oswego.cs.dl.util.concurrent;
 
 /**
  * A class useful for offloading synch for Object reference instance variables.
- *
- * <p>[<a href="http://gee.cs.oswego.edu/dl/classes/EDU/oswego/cs/dl/util/concurrent/intro.html"> Introduction to this package. </a>]
+ * 
+ * <p>
+ * [<a href="http://gee.cs.oswego.edu/dl/classes/EDU/oswego/cs/dl/util/concurrent/intro.html"
+ * > Introduction to this package. </a>]
  **/
 
-public class WaitableRef extends SynchronizedRef {
+public class WaitableRef extends SynchronizedRef
+{
 
-  /** 
-   * Create a WaitableRef initially holding the given reference 
-   * and using its own internal lock.
-   **/
-  public WaitableRef(Object initialValue) { 
-    super(initialValue);
-  }
+	/**
+	 * Create a WaitableRef initially holding the given reference and using its
+	 * own internal lock.
+	 **/
+	public WaitableRef(Object initialValue)
+	{
+		super(initialValue);
+	}
 
-  /** 
-   * Make a new WaitableRef with the given initial value,
-   * and using the supplied lock.
-   **/
-  public WaitableRef(Object initialValue, Object lock) { 
-    super(initialValue, lock); 
-  }
+	/**
+	 * Make a new WaitableRef with the given initial value, and using the
+	 * supplied lock.
+	 **/
+	public WaitableRef(Object initialValue, Object lock)
+	{
+		super(initialValue, lock);
+	}
 
-  public Object set(Object newValue) { 
-    synchronized (lock_) {
-      lock_.notifyAll();
-      return super.set(newValue);
-    }
-  }
+	public Object set(Object newValue)
+	{
+		synchronized (lock_)
+		{
+			lock_.notifyAll();
+			return super.set(newValue);
+		}
+	}
 
-  public boolean commit(Object assumedValue, Object newValue) {
-    synchronized (lock_) {
-      boolean success = super.commit(assumedValue, newValue);
-      if (success) lock_.notifyAll();
-      return success;
-    }
-  }
+	public boolean commit(Object assumedValue, Object newValue)
+	{
+		synchronized (lock_)
+		{
+			boolean success = super.commit(assumedValue, newValue);
+			if (success)
+				lock_.notifyAll();
+			return success;
+		}
+	}
 
-  /**
-   * Wait until value is null, then run action if nonnull.
-   * The action is run with the synchronization lock held.
-   **/
+	/**
+	 * Wait until value is null, then run action if nonnull. The action is run
+	 * with the synchronization lock held.
+	 **/
 
-  public void whenNull(Runnable action) throws InterruptedException {
-    synchronized (lock_) {
-      while (value_ != null) lock_.wait();
-      if (action != null) action.run();
-    }
-  }
+	public void whenNull(Runnable action) throws InterruptedException
+	{
+		synchronized (lock_)
+		{
+			while (value_ != null)
+				lock_.wait();
+			if (action != null)
+				action.run();
+		}
+	}
 
-  /**
-   * wait until value is nonnull, then run action if nonnull.
-   * The action is run with the synchronization lock held.
-   **/
-  public void whenNotNull(Runnable action) throws InterruptedException {
-    synchronized (lock_) {
-      while (value_ == null) lock_.wait();
-      if (action != null) action.run();
-    }
-  }
+	/**
+	 * wait until value is nonnull, then run action if nonnull. The action is
+	 * run with the synchronization lock held.
+	 **/
+	public void whenNotNull(Runnable action) throws InterruptedException
+	{
+		synchronized (lock_)
+		{
+			while (value_ == null)
+				lock_.wait();
+			if (action != null)
+				action.run();
+		}
+	}
 
-  /**
-   * Wait until value equals c, then run action if nonnull.
-   * The action is run with the synchronization lock held.
-   **/
+	/**
+	 * Wait until value equals c, then run action if nonnull. The action is run
+	 * with the synchronization lock held.
+	 **/
 
-  public void whenEqual(Object c, Runnable action) throws InterruptedException {
-    synchronized (lock_) {
-      while (!(value_ == c)) lock_.wait();
-      if (action != null) action.run();
-    }
-  }
+	public void whenEqual(Object c, Runnable action)
+			throws InterruptedException
+	{
+		synchronized (lock_)
+		{
+			while (!(value_ == c))
+				lock_.wait();
+			if (action != null)
+				action.run();
+		}
+	}
 
-  /**
-   * wait until value not equal to c, then run action if nonnull.
-   * The action is run with the synchronization lock held.
-   **/
-  public void whenNotEqual(Object c, Runnable action) throws InterruptedException {
-    synchronized (lock_) {
-      while (!(value_ != c)) lock_.wait();
-      if (action != null) action.run();
-    }
-  }
+	/**
+	 * wait until value not equal to c, then run action if nonnull. The action
+	 * is run with the synchronization lock held.
+	 **/
+	public void whenNotEqual(Object c, Runnable action)
+			throws InterruptedException
+	{
+		synchronized (lock_)
+		{
+			while (!(value_ != c))
+				lock_.wait();
+			if (action != null)
+				action.run();
+		}
+	}
 
 }
-

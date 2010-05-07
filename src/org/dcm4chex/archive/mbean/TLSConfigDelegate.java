@@ -62,190 +62,220 @@ import org.dcm4chex.archive.exceptions.ConfigurationException;
 
 /**
  * @author gunter.zeilinger@tiani.com
- * @version $Revision: 3284 $ $Date: 2007-04-16 11:41:45 +0200 (Mon, 16 Apr 2007) $
+ * @version $Revision: 3284 $ $Date: 2007-04-16 11:41:45 +0200 (Mon, 16 Apr
+ *          2007) $
  * @since 13.12.2004
  */
-public final class TLSConfigDelegate {
+public final class TLSConfigDelegate
+{
 
-//!!    private final ServiceMBeanSupport service;
+	// !! private final ServiceMBeanSupport service;
 	private final MBeanServer server;
-    
-    private int soSndBuf;
 
-    private int soRcvBuf;
+	private int soSndBuf;
 
-    private boolean tcpNoDelay = true;
+	private int soRcvBuf;
 
-    private ObjectName tlsConfigName;
+	private boolean tcpNoDelay = true;
 
-/*    public TLSConfigDelegate(final ServiceMBeanSupport service) {
-        this.service = service;
-    }
-*/
-    public TLSConfigDelegate(final MBeanServer server)
-    {
-    	this.server=server;
-    }
-    public final ObjectName getTLSConfigName() {
-        return tlsConfigName;
-    }
+	private ObjectName tlsConfigName;
 
-    public final void setTLSConfigName(ObjectName tlsConfigName) {
-        this.tlsConfigName = tlsConfigName;
-    }
+	/*
+	 * public TLSConfigDelegate(final ServiceMBeanSupport service) {
+	 * this.service = service; }
+	 */
+	public TLSConfigDelegate(final MBeanServer server)
+	{
+		this.server = server;
+	}
+	public final ObjectName getTLSConfigName()
+	{
+		return tlsConfigName;
+	}
 
-    public final int getReceiveBufferSize() {
-        return soRcvBuf;
-    }
-    
-    public final void setReceiveBufferSize(int size) {
-        if (size < 0) {
-            throw new IllegalArgumentException("size: " + size);
-        }
-        this.soRcvBuf = size;
-    }
+	public final void setTLSConfigName(ObjectName tlsConfigName)
+	{
+		this.tlsConfigName = tlsConfigName;
+	}
 
-    public final int getSendBufferSize() {
-        return soSndBuf;        
-    }
-    
-    public final void setSendBufferSize(int size) {
-        if (size < 0) {
-            throw new IllegalArgumentException("size: " + size);
-        }
-        this.soSndBuf = size;
-    }
-        
-    public final boolean isTcpNoDelay() {
-        return tcpNoDelay;
-    }
+	public final int getReceiveBufferSize()
+	{
+		return soRcvBuf;
+	}
 
-    public final void setTcpNoDelay(boolean on) {
-        this.tcpNoDelay = on;
-    }
-                
-    public HandshakeFailedListener handshakeFailedListener() {
-        try {
-            return (HandshakeFailedListener) server/*service.getServer()*/.invoke(
-                    tlsConfigName, "handshakeFailedListener", null, null);
-        } catch (Exception e) {
-            throw new ConfigurationException(e);
-        }
-    }
+	public final void setReceiveBufferSize(int size)
+	{
+		if (size < 0)
+		{
+			throw new IllegalArgumentException("size: " + size);
+		}
+		this.soRcvBuf = size;
+	}
 
-    public HandshakeCompletedListener handshakeCompletedListener() {
-        try {
-            return (HandshakeCompletedListener) server/*service.getServer()*/.invoke(
-                    tlsConfigName, "handshakeCompletedListener", null, null);
-        } catch (Exception e) {
-            throw new ConfigurationException(e);
-        }
-    }
+	public final int getSendBufferSize()
+	{
+		return soSndBuf;
+	}
 
-    public ServerSocketFactory serverSocketFactory(String[] cipherSuites) {
-//!!        try {
-            return ServerSocketFactory.getDefault();
-//!!            		server/*service.getServer()*/.invoke(
-//!!                    tlsConfigName, "serverSocketFactory",
-//!!                    new Object[] { cipherSuites},
-//!!                    new String[] { String[].class.getName(),});
-/*            
-        } catch (InstanceNotFoundException e) {
-            throw new ConfigurationException(e);
-        } catch (MBeanException e) {
-            throw new ConfigurationException(e);
-        } catch (ReflectionException e) {
-            throw new ConfigurationException(e);
-        }
-*/        
-    }
+	public final void setSendBufferSize(int size)
+	{
+		if (size < 0)
+		{
+			throw new IllegalArgumentException("size: " + size);
+		}
+		this.soSndBuf = size;
+	}
 
-/*
-    public SocketFactory socketFactory(String[] cipherSuites) {
-        try {
-//!!            return (SocketFactory) server service.getServer().invoke(tlsConfigName,
-                    "socketFactory", new Object[] { cipherSuites},
-                    new String[] { String[].class.getName(),});
-        } catch (InstanceNotFoundException e) {
-            throw new ConfigurationException(e);
-        } catch (MBeanException e) {
-            throw new ConfigurationException(e);
-        } catch (ReflectionException e) {
-            throw new ConfigurationException(e);
-        }
-    }
-*/
-    public void startHandshake(Socket s) throws IOException {
-        try {
-            server/*service.getServer()*/.invoke(tlsConfigName,
-                    "startHandshake", new Object[] { s },
-                    new String[] { Socket.class.getName(),});
-        } catch (Exception e) {
-            Throwable cause = e.getCause();
-            if (cause instanceof IOException) {
-                throw (IOException) cause;                
-            }
-            throw new ConfigurationException(e);
-        }
-    }
+	public final boolean isTcpNoDelay()
+	{
+		return tcpNoDelay;
+	}
 
-    public Socket createSocket(AEDTO localAE, AEDTO remoteAE)
-            throws IOException {
-        String[] cipherSuites = remoteAE.getCipherSuites();
-        Socket s = SocketFactory.getDefault().createSocket();
-//!!   	socketFactory(cipherSuites).createSocket();
-        s.bind(toBindPoint(localAE));
-        s.connect(toEndPoint(remoteAE));
-        startHandshake(s);
-        initSendBufferSize(s);
-        initReceiveBufferSize(s);
-        if (s.getTcpNoDelay() != tcpNoDelay) {
-            s.setTcpNoDelay(tcpNoDelay );
-        }
-        return s;
-    }
+	public final void setTcpNoDelay(boolean on)
+	{
+		this.tcpNoDelay = on;
+	}
 
-    private InetSocketAddress toEndPoint(AEDTO remoteAE)
-            throws UnknownHostException {
-        InetAddress addr = InetAddress.getByName(remoteAE.getHostName());
-        return new InetSocketAddress(addr, remoteAE.getPort());
-    }
+	public HandshakeFailedListener handshakeFailedListener()
+	{
+		try
+		{
+			return (HandshakeFailedListener) server
+					/* service.getServer() */.invoke(tlsConfigName,
+							"handshakeFailedListener", null, null);
+		} catch (Exception e)
+		{
+			throw new ConfigurationException(e);
+		}
+	}
 
-    private InetSocketAddress toBindPoint(AEDTO localAE) {
-        try {
-            InetAddress addr = InetAddress.getByName(localAE.getHostName());
-            if (!addr.isLoopbackAddress()) {
-                return new InetSocketAddress(addr, 0);
-            }
-        } catch (UnknownHostException e) {
-//!!        	
-//!!            server/*service*/.getLog().warn("Unkown Host " + localAE.getHostName()
-//!!                    + " - bind socket to a valid local address picked up by the OS");
-        }
-        return null;
-    }
+	public HandshakeCompletedListener handshakeCompletedListener()
+	{
+		try
+		{
+			return (HandshakeCompletedListener) server
+					/* service.getServer() */.invoke(tlsConfigName,
+							"handshakeCompletedListener", null, null);
+		} catch (Exception e)
+		{
+			throw new ConfigurationException(e);
+		}
+	}
 
-    private void initSendBufferSize(Socket s) throws SocketException {
-        int tmp = s.getSendBufferSize();
-        if (soSndBuf == 0) {
-            soSndBuf = tmp;
-        }
-        if (soSndBuf != tmp) {
-            s.setSendBufferSize(soSndBuf);
-            soSndBuf = s.getSendBufferSize();
-        }
-    }
-    
-    private void initReceiveBufferSize(Socket s) throws SocketException {
-        int tmp = s.getReceiveBufferSize();
-        if (soRcvBuf == 0) {
-            soRcvBuf = tmp;
-        }
-        if (soRcvBuf != tmp) {
-            s.setReceiveBufferSize(soRcvBuf);
-            soRcvBuf = s.getReceiveBufferSize();
-        }
-    }
-    
-    
+	public ServerSocketFactory serverSocketFactory(String[] cipherSuites)
+	{
+		// !! try {
+		return ServerSocketFactory.getDefault();
+		// !! server/*service.getServer()*/.invoke(
+		// !! tlsConfigName, "serverSocketFactory",
+		// !! new Object[] { cipherSuites},
+		// !! new String[] { String[].class.getName(),});
+		/*
+		 * } catch (InstanceNotFoundException e) { throw new
+		 * ConfigurationException(e); } catch (MBeanException e) { throw new
+		 * ConfigurationException(e); } catch (ReflectionException e) { throw
+		 * new ConfigurationException(e); }
+		 */
+	}
+
+	/*
+	 * public SocketFactory socketFactory(String[] cipherSuites) { try { //!!
+	 * return (SocketFactory) server service.getServer().invoke(tlsConfigName,
+	 * "socketFactory", new Object[] { cipherSuites}, new String[] {
+	 * String[].class.getName(),}); } catch (InstanceNotFoundException e) {
+	 * throw new ConfigurationException(e); } catch (MBeanException e) { throw
+	 * new ConfigurationException(e); } catch (ReflectionException e) { throw
+	 * new ConfigurationException(e); } }
+	 */
+	public void startHandshake(Socket s) throws IOException
+	{
+		try
+		{
+			server/* service.getServer() */.invoke(tlsConfigName,
+					"startHandshake", new Object[]{s},
+					new String[]{Socket.class.getName(),});
+		} catch (Exception e)
+		{
+			Throwable cause = e.getCause();
+			if (cause instanceof IOException)
+			{
+				throw (IOException) cause;
+			}
+			throw new ConfigurationException(e);
+		}
+	}
+
+	public Socket createSocket(AEDTO localAE, AEDTO remoteAE)
+			throws IOException
+	{
+		String[] cipherSuites = remoteAE.getCipherSuites();
+		Socket s = SocketFactory.getDefault().createSocket();
+		// !! socketFactory(cipherSuites).createSocket();
+		s.bind(toBindPoint(localAE));
+		s.connect(toEndPoint(remoteAE));
+//		startHandshake(s);
+		initSendBufferSize(s);
+		initReceiveBufferSize(s);
+		if (s.getTcpNoDelay() != tcpNoDelay)
+		{
+			s.setTcpNoDelay(tcpNoDelay);
+		}
+		return s;
+	}
+
+	private InetSocketAddress toEndPoint(AEDTO remoteAE)
+			throws UnknownHostException
+	{
+		InetAddress addr = InetAddress.getByName(remoteAE.getHostName());
+		return new InetSocketAddress(addr, remoteAE.getPort());
+	}
+
+	private InetSocketAddress toBindPoint(AEDTO localAE)
+	{
+		try
+		{
+			InetAddress addr = InetAddress.getByName(localAE.getHostName());
+			if (!addr.isLoopbackAddress())
+			{
+				return new InetSocketAddress(addr, 0);
+			}
+		} catch (UnknownHostException e)
+		{
+			// !!
+			// !! server/*service*/.getLog().warn("Unkown Host " +
+			// localAE.getHostName()
+			// !! +
+			// " - bind socket to a valid local address picked up by the OS");
+		}
+		return null;
+	}
+
+	private void initSendBufferSize(Socket s) throws SocketException
+	{
+		int tmp = s.getSendBufferSize();
+		if (soSndBuf == 0)
+		{
+			soSndBuf = tmp;
+		}
+		if (soSndBuf != tmp)
+		{
+			s.setSendBufferSize(soSndBuf);
+			soSndBuf = s.getSendBufferSize();
+		}
+	}
+
+	private void initReceiveBufferSize(Socket s) throws SocketException
+	{
+		int tmp = s.getReceiveBufferSize();
+		if (soRcvBuf == 0)
+		{
+			soRcvBuf = tmp;
+		}
+		if (soRcvBuf != tmp)
+		{
+			s.setReceiveBufferSize(soRcvBuf);
+			soRcvBuf = s.getReceiveBufferSize();
+		}
+	}
+
 }

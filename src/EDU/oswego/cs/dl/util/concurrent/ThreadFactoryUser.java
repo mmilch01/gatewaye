@@ -9,50 +9,57 @@
   History:
   Date       Who                What
   28aug1998  dl               refactored from Executor classes
-*/
+ */
 
 package EDU.oswego.cs.dl.util.concurrent;
 
 /**
  * 
  * Base class for Executors and related classes that rely on thread factories.
- * Generally intended to be used as a mixin-style abstract class, but
- * can also be used stand-alone.
- * <p>[<a href="http://gee.cs.oswego.edu/dl/classes/EDU/oswego/cs/dl/util/concurrent/intro.html"> Introduction to this package. </a>]
+ * Generally intended to be used as a mixin-style abstract class, but can also
+ * be used stand-alone.
+ * <p>
+ * [<a href="http://gee.cs.oswego.edu/dl/classes/EDU/oswego/cs/dl/util/concurrent/intro.html"
+ * > Introduction to this package. </a>]
  **/
 
-public class ThreadFactoryUser {
+public class ThreadFactoryUser
+{
 
-  protected ThreadFactory threadFactory_ = new DefaultThreadFactory();
+	protected ThreadFactory threadFactory_ = new DefaultThreadFactory();
 
-  protected static class DefaultThreadFactory implements ThreadFactory {
-    public Thread newThread(Runnable command) {
-      return new Thread(command);
-    }
-  }
+	protected static class DefaultThreadFactory implements ThreadFactory
+	{
+		public Thread newThread(Runnable command)
+		{
+			return new Thread(command);
+		}
+	}
 
-  /** 
-   * Set the factory for creating new threads.
-   * By default, new threads are created without any special priority,
-   * threadgroup, or status parameters.
-   * You can use a different factory
-   * to change the kind of Thread class used or its construction
-   * parameters.
-   * @param factory the factory to use
-   * @return the previous factory
-   **/
+	/**
+	 * Set the factory for creating new threads. By default, new threads are
+	 * created without any special priority, threadgroup, or status parameters.
+	 * You can use a different factory to change the kind of Thread class used
+	 * or its construction parameters.
+	 * 
+	 * @param factory
+	 *            the factory to use
+	 * @return the previous factory
+	 **/
 
-  public synchronized ThreadFactory setThreadFactory(ThreadFactory factory) {
-    ThreadFactory old = threadFactory_;
-    threadFactory_ = factory;
-    return old;
-  }
+	public synchronized ThreadFactory setThreadFactory(ThreadFactory factory)
+	{
+		ThreadFactory old = threadFactory_;
+		threadFactory_ = factory;
+		return old;
+	}
 
-  /** 
-   * Get the factory for creating new threads.
-   **/  
-  public synchronized ThreadFactory getThreadFactory() {
-    return threadFactory_;
-  }
+	/**
+	 * Get the factory for creating new threads.
+	 **/
+	public synchronized ThreadFactory getThreadFactory()
+	{
+		return threadFactory_;
+	}
 
 }

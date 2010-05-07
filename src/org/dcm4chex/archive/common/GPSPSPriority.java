@@ -43,26 +43,30 @@ import java.util.Arrays;
 
 /**
  * @author gunter.zeilinger@tiani.com
- * @version $Revision: 2010 $ $Date: 2005-10-06 21:55:27 +0200 (Thu, 06 Oct 2005) $
+ * @version $Revision: 2010 $ $Date: 2005-10-06 21:55:27 +0200 (Thu, 06 Oct
+ *          2005) $
  * @since 06.10.2004
- *
+ * 
  */
-public class GPSPSPriority {
+public class GPSPSPriority
+{
 
-    private static final String[] ENUM = { "HIGH", "MEDIUM", "LOW" };
+	private static final String[] ENUM = {"HIGH", "MEDIUM", "LOW"};
 
-    public static final int HIGH = 0;    
-    public static final int MEDIUM = 1;    
-    public static final int LOW = 2;    
+	public static final int HIGH = 0;
+	public static final int MEDIUM = 1;
+	public static final int LOW = 2;
 
-    public static final String toString(int value) {
-        return ENUM[value];
-    }
+	public static final String toString(int value)
+	{
+		return ENUM[value];
+	}
 
-    public static final int toInt(String s) {        
-        final int index = Arrays.asList(ENUM).indexOf(s);
-        if (index == -1)
-            throw new IllegalArgumentException(s);
-        return index;
-    }
+	public static final int toInt(String s)
+	{
+		final int index = Arrays.asList(ENUM).indexOf(s);
+		if (index == -1)
+			throw new IllegalArgumentException(s);
+		return index;
+	}
 }

@@ -41,19 +41,23 @@ package org.dcm4chex.archive.exceptions;
 
 /**
  * @author gunter.zeilinger@tiani.com
- * @version $Revision: 3324 $ $Date: 2007-05-08 18:10:10 +0200 (Tue, 08 May 2007) $
+ * @version $Revision: 3324 $ $Date: 2007-05-08 18:10:10 +0200 (Tue, 08 May
+ *          2007) $
  * @since 20.04.2004
  */
-public class UnknownAETException extends Exception {    
+public class UnknownAETException extends Exception
+{
 
 	private static final long serialVersionUID = 3257007665707431219L;
 
-	public UnknownAETException() {
-        super();
-    }
+	public UnknownAETException()
+	{
+		super();
+	}
 
-    public UnknownAETException(String message) {
-        super(message);
-    }
+	public UnknownAETException(String message)
+	{
+		super(message);
+	}
 
 }

@@ -13,34 +13,39 @@ import java.io.Serializable;
 
 /**
  * @author franz.willer@gwi-ag.com
- * @version $Revision: 7596 $ $Date: 2008-10-16 16:53:05 +0200 (Thu, 16 Oct 2008) $
+ * @version $Revision: 7596 $ $Date: 2008-10-16 16:53:05 +0200 (Thu, 16 Oct
+ *          2008) $
  * @since Nov 9, 2005
  */
-public class PatientUpdated implements Serializable {
+public class PatientUpdated implements Serializable
+{
 
-    private static final long serialVersionUID = -829912804804286932L;
+	private static final long serialVersionUID = -829912804804286932L;
 
-    private String patientID;
+	private String patientID;
 
-    private String description;
+	private String description;
 
-    public PatientUpdated(String patientID, String description) {
-        this.patientID = patientID;
-        this.description = description;
+	public PatientUpdated(String patientID, String description)
+	{
+		this.patientID = patientID;
+		this.description = description;
 
-    }
+	}
 
-    /**
-     * @return Returns the patientID.
-     */
-    public String getPatientID() {
-        return patientID;
-    }
+	/**
+	 * @return Returns the patientID.
+	 */
+	public String getPatientID()
+	{
+		return patientID;
+	}
 
-    /**
-     * @return Returns the description.
-     */
-    public String getDescription() {
-        return description;
-    }
+	/**
+	 * @return Returns the description.
+	 */
+	public String getDescription()
+	{
+		return description;
+	}
 }

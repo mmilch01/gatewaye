@@ -50,121 +50,145 @@ import org.dcm4cheri.util.StringUtils;
 
 /**
  * @author gunter.zeilinter@tiani.com
- * @version $Revision: 3300 $ $Date: 2007-04-30 14:37:00 +0200 (Mon, 30 Apr 2007) $
+ * @version $Revision: 3300 $ $Date: 2007-04-30 14:37:00 +0200 (Mon, 30 Apr
+ *          2007) $
  * @since 15.05.2004
- *
+ * 
  */
-public class ForwardingRules {
+public class ForwardingRules
+{
 
-    static final String NONE = "NONE";
+	static final String NONE = "NONE";
 
-    static final String[] EMPTY = {};
+	static final String[] EMPTY = {};
 
-    private final ArrayList list = new ArrayList();
+	private final ArrayList list = new ArrayList();
 
-    public static final class Entry {
+	public static final class Entry
+	{
 
-        final Condition condition;
+		final Condition condition;
 
-        final String[] forwardAETs;
+		final String[] forwardAETs;
 
-        Entry(Condition condition, String[] forwardAETs) {
-            this.condition = condition;
-            this.forwardAETs = forwardAETs;
-        }
-    }
+		Entry(Condition condition, String[] forwardAETs)
+		{
+			this.condition = condition;
+			this.forwardAETs = forwardAETs;
+		}
+	}
 
-    public ForwardingRules(String s) {
-        StringTokenizer stk = new StringTokenizer(s, "\r\n;");
-        while (stk.hasMoreTokens()) {
-            String tk = stk.nextToken().trim();
-            if (tk.length() == 0) continue;
-            try {
-                int endCond = tk.indexOf(']') + 1;
-                Condition cond = new Condition(tk.substring(0, endCond));
-                String second = tk.substring(endCond);
-                String[] aets = (second.length() == 0 || NONE
-                        .equalsIgnoreCase(second)) ? EMPTY : StringUtils.split(
-                        second, ',');
-                for (int i = 0; i < aets.length; i++) {
-                    checkAET(aets[i]);
-                }
-                list.add(new Entry(cond, aets));
-            } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException(tk);
-            }
-        }
-    }
+	public ForwardingRules(String s)
+	{
+		StringTokenizer stk = new StringTokenizer(s, "\r\n;");
+		while (stk.hasMoreTokens())
+		{
+			String tk = stk.nextToken().trim();
+			if (tk.length() == 0)
+				continue;
+			try
+			{
+				int endCond = tk.indexOf(']') + 1;
+				Condition cond = new Condition(tk.substring(0, endCond));
+				String second = tk.substring(endCond);
+				String[] aets = (second.length() == 0 || NONE
+						.equalsIgnoreCase(second)) ? EMPTY : StringUtils.split(
+						second, ',');
+				for (int i = 0; i < aets.length; i++)
+				{
+					checkAET(aets[i]);
+				}
+				list.add(new Entry(cond, aets));
+			} catch (IllegalArgumentException e)
+			{
+				throw new IllegalArgumentException(tk);
+			}
+		}
+	}
 
-    private static void checkAET(String s) {
-        int delim = s.lastIndexOf('!');
-        if (delim == -1) return;
-        int hypen = s.lastIndexOf('-');
-        int start = Integer.parseInt(s.substring(delim+1, hypen));
-        int end = Integer.parseInt(s.substring(hypen+1));
-        if (start < 0 || end > 24)
-            throw new IllegalArgumentException();
-    }
+	private static void checkAET(String s)
+	{
+		int delim = s.lastIndexOf('!');
+		if (delim == -1)
+			return;
+		int hypen = s.lastIndexOf('-');
+		int start = Integer.parseInt(s.substring(delim + 1, hypen));
+		int end = Integer.parseInt(s.substring(hypen + 1));
+		if (start < 0 || end > 24)
+			throw new IllegalArgumentException();
+	}
 
-    public static String toAET(String s) {
-        int delim = s.lastIndexOf('!');
-        return delim == -1 ? s : s.substring(0,delim);
-    }
+	public static String toAET(String s)
+	{
+		int delim = s.lastIndexOf('!');
+		return delim == -1 ? s : s.substring(0, delim);
+	}
 
-    public static long toScheduledTime(String s) {
-        int delim = s.lastIndexOf('!');
-        return (delim == -1) ? 0L : afterBusinessHours(
-                Calendar.getInstance(), s.substring(delim+1));
-    }
+	public static long toScheduledTime(String s)
+	{
+		int delim = s.lastIndexOf('!');
+		return (delim == -1) ? 0L : afterBusinessHours(Calendar.getInstance(),
+				s.substring(delim + 1));
+	}
 
-    public static long afterBusinessHours(Calendar cal, String businessHours) {
-        int hypen = businessHours.lastIndexOf('-');
-        int notAfterHour = Integer.parseInt(businessHours.substring(0, hypen));
-        int notBeforeHour = Integer.parseInt(businessHours.substring(hypen+1));
-        int hour = cal.get(Calendar.HOUR_OF_DAY);
-        boolean sameDay = notAfterHour <= notBeforeHour;
-        boolean delay = sameDay 
-            ? hour >= notAfterHour && hour < notBeforeHour
-            : hour >= notAfterHour || hour < notBeforeHour;
-        if (!delay)
-            return 0L;
-        cal.set(Calendar.MILLISECOND, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.HOUR_OF_DAY, notBeforeHour);
-        if (!sameDay && hour >= notAfterHour)
-            cal.add(Calendar.DAY_OF_MONTH, 1);
-        return cal.getTimeInMillis();        
-    }
-    
-    public String[] getForwardDestinationsFor(Map param) {
-    	ArrayList l = new ArrayList(); 
-        for (Iterator it = list.iterator(); it.hasNext();) {
-            Entry e = (Entry) it.next();
-            if (e.condition.isTrueFor(param) && e.forwardAETs.length > 0 ) l.addAll( Arrays.asList( e.forwardAETs ) );
-        }
-        if ( l.isEmpty() )
-        	return EMPTY;
-        else
-        	return (String[]) l.toArray( new String[l.size()]);
-    }
-    
-    public String toString() {
-        final String newline = System.getProperty("line.separator", "\n");
-        if (list.isEmpty()) return newline;
-        StringBuffer sb = new StringBuffer();
-        for (Iterator it = list.iterator(); it.hasNext();) {
-            Entry e = (Entry) it.next();
-            e.condition.toStringBuffer(sb);
-            if (e.forwardAETs.length == 0) {
-                sb.append(NONE);
-            } else {
-                for (int i = 0; i < e.forwardAETs.length; ++i)
-                    sb.append(e.forwardAETs[i]).append(',');
-                sb.setLength(sb.length() - 1);
-            }
-            sb.append(newline);
-        }
-        return sb.toString();
-    }
+	public static long afterBusinessHours(Calendar cal, String businessHours)
+	{
+		int hypen = businessHours.lastIndexOf('-');
+		int notAfterHour = Integer.parseInt(businessHours.substring(0, hypen));
+		int notBeforeHour = Integer
+				.parseInt(businessHours.substring(hypen + 1));
+		int hour = cal.get(Calendar.HOUR_OF_DAY);
+		boolean sameDay = notAfterHour <= notBeforeHour;
+		boolean delay = sameDay
+				? hour >= notAfterHour && hour < notBeforeHour
+				: hour >= notAfterHour || hour < notBeforeHour;
+		if (!delay)
+			return 0L;
+		cal.set(Calendar.MILLISECOND, 0);
+		cal.set(Calendar.SECOND, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.HOUR_OF_DAY, notBeforeHour);
+		if (!sameDay && hour >= notAfterHour)
+			cal.add(Calendar.DAY_OF_MONTH, 1);
+		return cal.getTimeInMillis();
+	}
+
+	public String[] getForwardDestinationsFor(Map param)
+	{
+		ArrayList l = new ArrayList();
+		for (Iterator it = list.iterator(); it.hasNext();)
+		{
+			Entry e = (Entry) it.next();
+			if (e.condition.isTrueFor(param) && e.forwardAETs.length > 0)
+				l.addAll(Arrays.asList(e.forwardAETs));
+		}
+		if (l.isEmpty())
+			return EMPTY;
+		else
+			return (String[]) l.toArray(new String[l.size()]);
+	}
+
+	public String toString()
+	{
+		final String newline = System.getProperty("line.separator", "\n");
+		if (list.isEmpty())
+			return newline;
+		StringBuffer sb = new StringBuffer();
+		for (Iterator it = list.iterator(); it.hasNext();)
+		{
+			Entry e = (Entry) it.next();
+			e.condition.toStringBuffer(sb);
+			if (e.forwardAETs.length == 0)
+			{
+				sb.append(NONE);
+			} else
+			{
+				for (int i = 0; i < e.forwardAETs.length; ++i)
+					sb.append(e.forwardAETs[i]).append(',');
+				sb.setLength(sb.length() - 1);
+			}
+			sb.append(newline);
+		}
+		return sb.toString();
+	}
 }

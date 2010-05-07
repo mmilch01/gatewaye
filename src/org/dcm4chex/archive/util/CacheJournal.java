@@ -54,187 +54,234 @@ import java.util.Date;
  * @version $Revision$ $Date$
  * @since Mar 4, 2009
  */
-public class CacheJournal {
+public class CacheJournal
+{
 
-    private static final String DEFAULT_FILE_PATH_PATTERN = "yyyy/MM/dd/HH";
-  //!!    private static final Logger log = 
-  //!!            LoggerFactory.getLogger(CacheJournal.class);
+	private static final String DEFAULT_FILE_PATH_PATTERN = "yyyy/MM/dd/HH";
+	// !! private static final Logger log =
+	// !! LoggerFactory.getLogger(CacheJournal.class);
 
-    private File journalRootDir;
-    private File dataRootDir;
-    private SimpleDateFormat journalFilePathFormat =
-            new SimpleDateFormat(DEFAULT_FILE_PATH_PATTERN);
-    private boolean freeIsRunning = false;
+	private File journalRootDir;
+	private File dataRootDir;
+	private SimpleDateFormat journalFilePathFormat = new SimpleDateFormat(
+			DEFAULT_FILE_PATH_PATTERN);
+	private boolean freeIsRunning = false;
 
-    public File getJournalRootDir() {
-        return journalRootDir;
-    }
+	public File getJournalRootDir()
+	{
+		return journalRootDir;
+	}
 
-    public void setJournalRootDir(File journalRootDir) {
-        assertWritableDiretory(journalRootDir);
-        this.journalRootDir = journalRootDir;
-    }
+	public void setJournalRootDir(File journalRootDir)
+	{
+		assertWritableDiretory(journalRootDir);
+		this.journalRootDir = journalRootDir;
+	}
 
-    public File getDataRootDir() {
-        return dataRootDir;
-    }
+	public File getDataRootDir()
+	{
+		return dataRootDir;
+	}
 
-    public void setDataRootDir(File dataRootDir) {
-        assertWritableDiretory(dataRootDir);
-        this.dataRootDir = dataRootDir;
-    }
+	public void setDataRootDir(File dataRootDir)
+	{
+		assertWritableDiretory(dataRootDir);
+		this.dataRootDir = dataRootDir;
+	}
 
-    private static void assertWritableDiretory(File dir) {
-        mkdirs(dir);
-        if (!dir.isDirectory() || !dir.canWrite()) {
-            throw new IllegalArgumentException(
-                    "Not a writable directory:" + dir);
-        }
-    }
+	private static void assertWritableDiretory(File dir)
+	{
+		mkdirs(dir);
+		if (!dir.isDirectory() || !dir.canWrite())
+		{
+			throw new IllegalArgumentException("Not a writable directory:"
+					+ dir);
+		}
+	}
 
-    public String getJournalFilePathFormat() {
-        return journalFilePathFormat.toPattern();
-    }
+	public String getJournalFilePathFormat()
+	{
+		return journalFilePathFormat.toPattern();
+	}
 
-    public void setJournalFilePathFormat(String format) {
-        this.journalFilePathFormat = new SimpleDateFormat(format);
-    }
+	public void setJournalFilePathFormat(String format)
+	{
+		this.journalFilePathFormat = new SimpleDateFormat(format);
+	}
 
-    public synchronized void record(File f) throws IOException {
-        record(f, false);
-    }
+	public synchronized void record(File f) throws IOException
+	{
+		record(f, false);
+	}
 
-    public synchronized void record(File f, boolean update)
-            throws IOException {
-        String path = f.getPath().substring(
-                    dataRootDir.getPath().length() + 1);
-        long time = System.currentTimeMillis();
-        File journalFile = getJournalFile(time);
-        if (journalFile.exists()) {
-            if (update && journalFile.equals(getJournalFile(f.lastModified()))) {
-            	//!!                log.debug("{} already contains entry for {}", journalFile, f);
-                return;
-            }
-          //!!            log.debug("M-UPDATE {}", journalFile);
-        } else {
-            mkdirs(journalFile.getParentFile());
-          //!!            log.debug("M-WRITE {}", journalFile);
-        }
-        FileWriter journal = new FileWriter(journalFile, true);
-        try {
-            journal.write(path + '\n');
-        } finally {
-            journal.close();
-        }
-        f.setLastModified(time);
-    }
+	public synchronized void record(File f, boolean update) throws IOException
+	{
+		String path = f.getPath().substring(dataRootDir.getPath().length() + 1);
+		long time = System.currentTimeMillis();
+		File journalFile = getJournalFile(time);
+		if (journalFile.exists())
+		{
+			if (update && journalFile.equals(getJournalFile(f.lastModified())))
+			{
+				// !! log.debug("{} already contains entry for {}", journalFile,
+				// f);
+				return;
+			}
+			// !! log.debug("M-UPDATE {}", journalFile);
+		} else
+		{
+			mkdirs(journalFile.getParentFile());
+			// !! log.debug("M-WRITE {}", journalFile);
+		}
+		FileWriter journal = new FileWriter(journalFile, true);
+		try
+		{
+			journal.write(path + '\n');
+		} finally
+		{
+			journal.close();
+		}
+		f.setLastModified(time);
+	}
 
-    private static void mkdirs(File dir) {
-        if (dir.exists()) {
-            return;
-        }
-        mkdirs(dir.getParentFile());
-        if (dir.mkdir()) {
-        	//!!            log.info("M-WRITE {}", dir);
-        }
-    }
+	private static void mkdirs(File dir)
+	{
+		if (dir.exists())
+		{
+			return;
+		}
+		mkdirs(dir.getParentFile());
+		if (dir.mkdir())
+		{
+			// !! log.info("M-WRITE {}", dir);
+		}
+	}
 
-    private synchronized File getJournalFile(long time) {
-        return new File(journalRootDir,
-                journalFilePathFormat.format(new Date(time)));
-    }
+	private synchronized File getJournalFile(long time)
+	{
+		return new File(journalRootDir, journalFilePathFormat.format(new Date(
+				time)));
+	}
 
-    public long free(long size) throws IOException {
-        synchronized (this) {
-            if (freeIsRunning) {
-                return 0L;
-            }
-            freeIsRunning = true;
-        }
-        try {
-            return free(size, journalRootDir);
-        } finally {
-            freeIsRunning = false;
-        }
-    }
+	public long free(long size) throws IOException
+	{
+		synchronized (this)
+		{
+			if (freeIsRunning)
+			{
+				return 0L;
+			}
+			freeIsRunning = true;
+		}
+		try
+		{
+			return free(size, journalRootDir);
+		} finally
+		{
+			freeIsRunning = false;
+		}
+	}
 
-    public void clearCache() {
-        deleteFilesOrDirectories(journalRootDir.listFiles());
-        deleteFilesOrDirectories(dataRootDir.listFiles());
-    }
+	public void clearCache()
+	{
+		deleteFilesOrDirectories(journalRootDir.listFiles());
+		deleteFilesOrDirectories(dataRootDir.listFiles());
+	}
 
-    public boolean isEmpty() {
-        return dataRootDir.list().length == 0;
-    }
+	public boolean isEmpty()
+	{
+		return dataRootDir.list().length == 0;
+	}
 
-    public static void deleteFilesOrDirectories(File[] files) {
-        for (File f : files) {
-            deleteFileOrDirectory(f);
-        }
-    }
+	public static void deleteFilesOrDirectories(File[] files)
+	{
+		for (File f : files)
+		{
+			deleteFileOrDirectory(f);
+		}
+	}
 
-    public static boolean deleteFileOrDirectory(File f) {
-        if (f.isDirectory()) {
-            deleteFilesOrDirectories(f.listFiles());
-        }
-        if (!f.delete()) {
-        	//!!            log.warn("Failed to delete {}", f);
-            return false;
-        }
-      //!!        log.info("M-DELETE {}", f);
-        return true;
-    }
+	public static boolean deleteFileOrDirectory(File f)
+	{
+		if (f.isDirectory())
+		{
+			deleteFilesOrDirectories(f.listFiles());
+		}
+		if (!f.delete())
+		{
+			// !! log.warn("Failed to delete {}", f);
+			return false;
+		}
+		// !! log.info("M-DELETE {}", f);
+		return true;
+	}
 
-    private long free(long size, File dir) throws IOException {
-        long free = 0L;
-        if (dir.isDirectory()) {
-            String[] fnames = dir.list();
-            Arrays.sort(fnames);
-            for (String fname : fnames) {
-                free += free(size - free, new File(dir, fname));
-                if (free >= size) {
-                    break;
-                }
-            }
-        } else {
-            BufferedReader journal = new BufferedReader(new FileReader(dir));
-            try {
-                String path;
-                while ((path = journal.readLine()) != null) {
-                    File f = new File(dataRootDir, path);
-                    if (!f.exists()) {
-                    	//!!                        log.debug("{} already deleted", f);
-                        continue;
-                    }
-                    if (!getJournalFile(f.lastModified()).equals(dir)) {
-                    	//!!                        log.debug("{} was accessed after record in {}", f, dir);
-                        continue;
-                    }
-                    long flen = f.length();
-                    if (deleteFileAndParents(f, dataRootDir)) {
-                        free += flen;
-                    }
-                }
-            } finally {
-                journal.close();
-            }
-            deleteFileAndParents(dir, journalRootDir);
-        }
-        return free;
-    }
+	private long free(long size, File dir) throws IOException
+	{
+		long free = 0L;
+		if (dir.isDirectory())
+		{
+			String[] fnames = dir.list();
+			Arrays.sort(fnames);
+			for (String fname : fnames)
+			{
+				free += free(size - free, new File(dir, fname));
+				if (free >= size)
+				{
+					break;
+				}
+			}
+		} else
+		{
+			BufferedReader journal = new BufferedReader(new FileReader(dir));
+			try
+			{
+				String path;
+				while ((path = journal.readLine()) != null)
+				{
+					File f = new File(dataRootDir, path);
+					if (!f.exists())
+					{
+						// !! log.debug("{} already deleted", f);
+						continue;
+					}
+					if (!getJournalFile(f.lastModified()).equals(dir))
+					{
+						// !! log.debug("{} was accessed after record in {}", f,
+						// dir);
+						continue;
+					}
+					long flen = f.length();
+					if (deleteFileAndParents(f, dataRootDir))
+					{
+						free += flen;
+					}
+				}
+			} finally
+			{
+				journal.close();
+			}
+			deleteFileAndParents(dir, journalRootDir);
+		}
+		return free;
+	}
 
-    public static boolean deleteFileAndParents(File f, File baseDir) {
-        if (!deleteFileOrDirectory(f)) {
-            return false;
-        }
-        File dir = f.getParentFile();
-        while (!dir.equals(baseDir)) {
-            if (!dir.delete()) {
-               break;
-            }
-          //!!            log.info("M-DELETE {}", dir);
-            dir = dir.getParentFile();
-        }
-        return true;
-    }
+	public static boolean deleteFileAndParents(File f, File baseDir)
+	{
+		if (!deleteFileOrDirectory(f))
+		{
+			return false;
+		}
+		File dir = f.getParentFile();
+		while (!dir.equals(baseDir))
+		{
+			if (!dir.delete())
+			{
+				break;
+			}
+			// !! log.info("M-DELETE {}", dir);
+			dir = dir.getParentFile();
+		}
+		return true;
+	}
 }

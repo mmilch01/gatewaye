@@ -46,23 +46,27 @@ import java.io.Serializable;
  * @version $Revision: $ $Date: $
  * @since 27.09.2007
  */
-public class AetChanged implements Serializable {
+public class AetChanged implements Serializable
+{
 
-    private static final long serialVersionUID = 3256722883605704752L;
+	private static final long serialVersionUID = 3256722883605704752L;
 
-    private final String oldAET;
-    private final String newAET;
+	private final String oldAET;
+	private final String newAET;
 
-    public AetChanged(String oldAET, String newAET) {
-        this.oldAET = oldAET;
-        this.newAET = newAET;
-    }
+	public AetChanged(String oldAET, String newAET)
+	{
+		this.oldAET = oldAET;
+		this.newAET = newAET;
+	}
 
-    public final String getOldAET() {
-        return oldAET;
-    }
+	public final String getOldAET()
+	{
+		return oldAET;
+	}
 
-    public final String getNewAET() {
-        return newAET;
-    }
+	public final String getNewAET()
+	{
+		return newAET;
+	}
 }

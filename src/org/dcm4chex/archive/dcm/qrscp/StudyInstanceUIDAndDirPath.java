@@ -37,40 +37,47 @@
  * ***** END LICENSE BLOCK ***** */
 package org.dcm4chex.archive.dcm.qrscp;
 
-import org.dcm4chex.archive.ejb.jdbc.FileInfo;
+import org.nrg.xnat.gateway.FileInfo;
 
 /**
  * @author Gunter Zeilinger <gunterze@gmail.com>
  * @version $Revision$ $Date$
  * @since May 13, 2008
  */
-class StudyInstanceUIDAndDirPath {
-    final String studyIUID;
-    final String dirpath;
-    StudyInstanceUIDAndDirPath(String suid, String dirpath) {
-        this.studyIUID = suid;
-        this.dirpath = dirpath;
-    }
+class StudyInstanceUIDAndDirPath
+{
+	final String studyIUID;
+//	final String dirpath=null;
+	StudyInstanceUIDAndDirPath(String suid, String dirpath)
+	{
+		this.studyIUID = suid;
+//		this.dirpath = dirpath;
+	}
 
-    StudyInstanceUIDAndDirPath(FileInfo fileInfo) {
-        this.studyIUID = fileInfo.studyIUID;
-        this.dirpath = fileInfo.basedir;
-    }
+	StudyInstanceUIDAndDirPath(FileInfo fileInfo)
+	{
+		this.studyIUID = fileInfo.studyIUID;
+//		this.dirpath = fileInfo.basedir;
+	}
 
-    public boolean equals(Object o) {
-        if (!(o instanceof StudyInstanceUIDAndDirPath)) {
-            return false;
-        }
-        StudyInstanceUIDAndDirPath other = (StudyInstanceUIDAndDirPath) o;
-        return studyIUID.equals(other.studyIUID)
-                && dirpath.equals(other.dirpath);
-    }
+	public boolean equals(Object o)
+	{
+		if (!(o instanceof StudyInstanceUIDAndDirPath))
+		{
+			return false;
+		}
+		StudyInstanceUIDAndDirPath other = (StudyInstanceUIDAndDirPath) o;
+		return studyIUID.equals(other.studyIUID);
+//				&& dirpath.equals(other.dirpath);
+	}
 
-    public int hashCode() {
-        return studyIUID.hashCode() + dirpath.hashCode();
-    }
+	public int hashCode()
+	{
+		return studyIUID.hashCode();// + dirpath.hashCode();
+	}
 
-    public String toString() {
-        return studyIUID + '@' + dirpath;
-    }
+	public String toString()
+	{
+		return studyIUID;// + '@' + dirpath;
+	}
 }

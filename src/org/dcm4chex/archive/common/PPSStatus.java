@@ -42,27 +42,31 @@ import java.util.Arrays;
 
 /**
  * @author gunter zeilinger(gunterze@gmail.com)
- * @version $Revision: 2415 $ $Date: 2006-04-10 01:42:00 +0200 (Mon, 10 Apr 2006) $
+ * @version $Revision: 2415 $ $Date: 2006-04-10 01:42:00 +0200 (Mon, 10 Apr
+ *          2006) $
  * @since Apr 9, 2006
- *
+ * 
  */
-public class PPSStatus {
+public class PPSStatus
+{
 
-    private static final String[] ENUM = { "IN PROGRESS", "COMPLETED",
-        "DISCONTINUED" };
+	private static final String[] ENUM = {"IN PROGRESS", "COMPLETED",
+			"DISCONTINUED"};
 
-    public static final int IN_PROGRESS = 0;    
-    public static final int COMPLETED = 1;    
-    public static final int DISCONTINUED = 2;
+	public static final int IN_PROGRESS = 0;
+	public static final int COMPLETED = 1;
+	public static final int DISCONTINUED = 2;
 
-    public static final String toString(int value) {
-        return ENUM[value];
-    }
+	public static final String toString(int value)
+	{
+		return ENUM[value];
+	}
 
-    public static final int toInt(String s) {        
-        final int index = Arrays.asList(ENUM).indexOf(s);
-        if (index == -1)
-            throw new IllegalArgumentException(s);
-        return index;
-    }
+	public static final int toInt(String s)
+	{
+		final int index = Arrays.asList(ENUM).indexOf(s);
+		if (index == -1)
+			throw new IllegalArgumentException(s);
+		return index;
+	}
 }

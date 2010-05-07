@@ -42,6 +42,7 @@ import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.management.ObjectName;
 import javax.security.auth.Subject;
 
 import org.apache.log4j.Logger;
@@ -54,113 +55,111 @@ import org.dcm4che.net.Association;
 import org.dcm4che.net.DcmServiceBase;
 import org.dcm4che.net.DcmServiceException;
 import org.dcm4che.net.Dimse;
-import org.dcm4chex.archive.ejb.interfaces.StudyPermissionDTO;
+import org.dcm4chex.archive.ejb.interfaces.StudyPermissionDTO; //import org.dcm4chex.archive.ejb.jdbc.RetrieveCmd;
 //import org.dcm4chex.archive.ejb.interfaces.StudyPermissionManager;
-import org.dcm4chex.archive.ejb.jdbc.FileInfo;
-import org.dcm4chex.archive.ejb.jdbc.RetrieveCmd;
 //import org.jboss.logging.Logger;
+import org.nrg.xnat.gateway.FileInfo;
 
 /**
  * @author Gunter Zeilinger <gunterze@gmail.com>
  * @version $Revision$ $Date$
  * @since May 6, 2008
  */
-public class GetScp extends DcmServiceBase {
+public class GetScp extends DcmServiceBase
+{
 
-    private static final int MISSING_USER_ID_OF_STORE_SCP_ERR_STATUS = 0xCE12;
-    
-    private static final int NO_READ_PERMISSION_ERR_STATUS = 0xCE20;
-    
-    private static final String MISSING_USER_ID_OF_STORE_SCP_ERR_MSG =
-            "Missing or invalid user identification of retrieve destination";
-    
-    private static final String NO_READ_PERMISSION_ERR_MSG =
-            "Retrieve destination has no permission to read Study";
+	private static final int MISSING_USER_ID_OF_STORE_SCP_ERR_STATUS = 0xCE12;
 
-    protected final QueryRetrieveScpService service;
+	private static final int NO_READ_PERMISSION_ERR_STATUS = 0xCE20;
 
-    private final Logger log;
+	private static final String MISSING_USER_ID_OF_STORE_SCP_ERR_MSG = "Missing or invalid user identification of retrieve destination";
 
-    public GetScp(QueryRetrieveScpService service) {
-        this.service = service;
-        this.log = service.getLog();
-    }
+	private static final String NO_READ_PERMISSION_ERR_MSG = "Retrieve destination has no permission to read Study";
 
-    @Override
-    public void c_get(ActiveAssociation assoc, Dimse rq) throws IOException {
-        int pcid = rq.pcid();
-        Command rqCmd = rq.getCommand();
-        Association a = assoc.getAssociation();
-        try {            
-            Dataset rqData = rq.getDataset();
-            if(log.isDebugEnabled()) {
-                log.debug("Identifier:\n");
-                log.debug(rqData);
-            }
-            QRLevel qrLevel = QRLevel.toQRLevel(rqData);
-            qrLevel.checkSOPClass(rqCmd.getAffectedSOPClassUID(), 
-                    UIDs.StudyRootQueryRetrieveInformationModelGET,
-                    UIDs.PatientStudyOnlyQueryRetrieveInformationModelGET);
-            qrLevel.checkRetrieveRQ(rqData);
-            FileInfo[][] fileInfos = null;
-            try {
-                fileInfos = RetrieveCmd.create(rqData).getFileInfos();
-                checkPermission(a, fileInfos);
-                    new Thread(new GetTask(
-                            service, assoc, pcid, rqCmd, rqData, fileInfos))
-                        .start();
-            } catch (DcmServiceException e) {
-                throw e;
-            } catch (SQLException e) {
-                log.error("Query DB failed:", e);
-                throw new DcmServiceException(Status.UnableToCalculateNumberOfMatches, e);
-            } catch (Throwable e) {
-                log.error("Unexpected exception:", e);
-                throw new DcmServiceException(Status.UnableToProcess, e);
-            }
-        } catch (DcmServiceException e) {
-            Command rspCmd = objFact.newCommand();
-            rspCmd.initCGetRSP(
-                rqCmd.getMessageID(),
-                rqCmd.getAffectedSOPClassUID(),
-                e.getStatus());
-            e.writeTo(rspCmd);
-            Dimse rsp = fact.newDimse(pcid, rspCmd);
-            a.write(rsp);
-        }
-    }
+	protected final QueryRetrieveScpService service;
 
-    private void checkPermission(Association a, FileInfo[][] fileInfos)
-            throws Exception {
-/*    	
-        if (fileInfos.length == 0) {
-            return;
-        }
-        String callingAET = a.getCallingAET();
-        if (service.hasUnrestrictedReadPermissions(callingAET)) {
-            return;
-        }
-        Subject subject = (Subject) a.getProperty("user");
-        if (subject == null) {
-            throw new DcmServiceException(
-                    MISSING_USER_ID_OF_STORE_SCP_ERR_STATUS,
-                    MISSING_USER_ID_OF_STORE_SCP_ERR_MSG);
-        }
-        StudyPermissionManager studyPermissionManager =
-            service.getStudyPermissionManager(a);
-        Set<String> suids = new HashSet<String>();
-        for (int i = 0; i < fileInfos.length; i++) {
-            if (suids.add(fileInfos[i][0].studyIUID)) {
-                if (!studyPermissionManager.hasPermission(
-                        fileInfos[i][0].studyIUID,
-                        StudyPermissionDTO.READ_ACTION, subject)) {
-                   throw new DcmServiceException(
-                           NO_READ_PERMISSION_ERR_STATUS,
-                           NO_READ_PERMISSION_ERR_MSG);
-                }
-            }
-        }
-*/        
-    }
+	private final Logger log;
+
+	public GetScp(QueryRetrieveScpService service)
+	{
+		this.service = service;
+		this.log = service.getLog();
+	}
+
+	@Override
+	public void c_get(ActiveAssociation assoc, Dimse rq) throws IOException
+	{
+		int pcid = rq.pcid();
+		Command rqCmd = rq.getCommand();
+		Association a = assoc.getAssociation();
+		try
+		{
+			Dataset rqData = rq.getDataset();
+			if (log.isDebugEnabled())
+			{
+				log.debug("Identifier:\n");
+				log.debug(rqData);
+			}
+			QRLevel qrLevel = QRLevel.toQRLevel(rqData);
+			qrLevel.checkSOPClass(rqCmd.getAffectedSOPClassUID(),
+					UIDs.StudyRootQueryRetrieveInformationModelGET,
+					UIDs.PatientStudyOnlyQueryRetrieveInformationModelGET);
+			qrLevel.checkRetrieveRQ(rqData);
+			FileInfo[][] fileInfos = null;
+			try
+			{
+				fileInfos = 
+					(FileInfo[][]) service.server.invoke(
+							new ObjectName(
+									"org.nrg.xnag.gateway:type=GatewayServer"),
+							"retrieveFiles", new Object[]{rqData},
+							new String[]{Dataset.class.getName()});												
+//					RetrieveCmd.create(rqData).getFileInfos();
+				checkPermission(a, fileInfos);
+				new Thread(new GetTask(service, assoc, pcid, rqCmd, rqData,
+						fileInfos)).start();
+			} catch (DcmServiceException e)
+			{
+				throw e;
+			} catch (SQLException e)
+			{
+				log.error("Query DB failed:", e);
+				throw new DcmServiceException(
+						Status.UnableToCalculateNumberOfMatches, e);
+			} catch (Throwable e)
+			{
+				log.error("Unexpected exception:", e);
+				throw new DcmServiceException(Status.UnableToProcess, e);
+			}
+		} catch (DcmServiceException e)
+		{
+			Command rspCmd = objFact.newCommand();
+			rspCmd.initCGetRSP(rqCmd.getMessageID(), rqCmd
+					.getAffectedSOPClassUID(), e.getStatus());
+			e.writeTo(rspCmd);
+			Dimse rsp = fact.newDimse(pcid, rspCmd);
+			a.write(rsp);
+		}
+	}
+
+	private void checkPermission(Association a, FileInfo[][] fileInfos)
+			throws Exception
+	{
+		/*
+		 * if (fileInfos.length == 0) { return; } String callingAET =
+		 * a.getCallingAET(); if
+		 * (service.hasUnrestrictedReadPermissions(callingAET)) { return; }
+		 * Subject subject = (Subject) a.getProperty("user"); if (subject ==
+		 * null) { throw new DcmServiceException(
+		 * MISSING_USER_ID_OF_STORE_SCP_ERR_STATUS,
+		 * MISSING_USER_ID_OF_STORE_SCP_ERR_MSG); } StudyPermissionManager
+		 * studyPermissionManager = service.getStudyPermissionManager(a);
+		 * Set<String> suids = new HashSet<String>(); for (int i = 0; i <
+		 * fileInfos.length; i++) { if (suids.add(fileInfos[i][0].studyIUID)) {
+		 * if (!studyPermissionManager.hasPermission( fileInfos[i][0].studyIUID,
+		 * StudyPermissionDTO.READ_ACTION, subject)) { throw new
+		 * DcmServiceException( NO_READ_PERMISSION_ERR_STATUS,
+		 * NO_READ_PERMISSION_ERR_MSG); } } }
+		 */
+	}
 }
-

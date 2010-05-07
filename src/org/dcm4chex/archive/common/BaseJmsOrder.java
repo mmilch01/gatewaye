@@ -49,89 +49,105 @@ import java.util.Date;
  * This is abstract JMS order message that provides failure counting feature
  * 
  * @author fang.yang@agfa.com
- * @version $Revision: 9943 $ $Date: 2009-02-23 16:59:02 +0100 (Mon, 23 Feb 2009) $
+ * @version $Revision: 9943 $ $Date: 2009-02-23 16:59:02 +0100 (Mon, 23 Feb
+ *          2009) $
  * @since April 4, 2006
  */
-public abstract class BaseJmsOrder implements Serializable {
+public abstract class BaseJmsOrder implements Serializable
+{
 
-    protected static long counter = 0;
-    private String id;
-    private int failureCount = 0;
-    private Throwable throwable = null;  // Remember last exception happened
-    private String origQueueName = null; // The original queue
-    
-    public BaseJmsOrder()
-    {
-        id = new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()) + counter++;
-    }
-    
-    public final int getFailureCount() {
-        return failureCount;
-    }
+	protected static long counter = 0;
+	private String id;
+	private int failureCount = 0;
+	private Throwable throwable = null; // Remember last exception happened
+	private String origQueueName = null; // The original queue
 
-    public final void setFailureCount(int failureCount) {
-        this.failureCount = failureCount;
-    }
+	public BaseJmsOrder()
+	{
+		id = new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date())
+				+ counter++;
+	}
 
-    public Throwable getThrowable() {
-        return throwable;
-    }
+	public final int getFailureCount()
+	{
+		return failureCount;
+	}
 
-    public void setThrowable(Throwable throwable) {
-    	this.throwable = throwable;
-    }
-    
-    public String toIdString()
-    {
-        return getClass().getName() + "@" + id + "@" + Integer.toHexString(hashCode());
-    }
+	public final void setFailureCount(int failureCount)
+	{
+		this.failureCount = failureCount;
+	}
 
-    protected String getOrderDetails() { return ""; };
+	public Throwable getThrowable()
+	{
+		return throwable;
+	}
 
-    /**
-     * Set the original queue name, only the first time
-     * 
-     * @param queueName
-     */
-    public void setQueueName(String queueName) {		
-        if(origQueueName == null)
-            origQueueName = queueName;
-    }
+	public void setThrowable(Throwable throwable)
+	{
+		this.throwable = throwable;
+	}
 
-    public String getQueueName()
-    {
-        return origQueueName;
-    }
+	public String toIdString()
+	{
+		return getClass().getName() + "@" + id + "@"
+				+ Integer.toHexString(hashCode());
+	}
 
-    public String toString() {
-        StringBuffer sb = new StringBuffer(toIdString() + "[");
+	protected String getOrderDetails()
+	{
+		return "";
+	};
 
-        String orderDetails = getOrderDetails();
-        if ( orderDetails.length() > 0) {
-           sb.append(orderDetails);
-        }
-        sb.append(", failures=").append(failureCount);
-        sb.append("]");
+	/**
+	 * Set the original queue name, only the first time
+	 * 
+	 * @param queueName
+	 */
+	public void setQueueName(String queueName)
+	{
+		if (origQueueName == null)
+			origQueueName = queueName;
+	}
 
-        return sb.toString();
-    }
+	public String getQueueName()
+	{
+		return origQueueName;
+	}
 
-    public String toLongString()
-    {
-        StringBuffer sb = new StringBuffer();
-        sb.append("\tInternal ID: ").append(toIdString()).append("\n");
-        String orderDetails = getOrderDetails();
-        if ( orderDetails.length() > 0) {
-           sb.append("\tDetails: ").append(orderDetails).append("\n");
-        }
-        sb.append("\tOriginal queue name: ").append(origQueueName).append("\n");
-        sb.append("\tFailure count: ").append(failureCount).append("\n");
-        if(throwable != null)
-        {
-            StringWriter sw = new StringWriter(); 
-            throwable.printStackTrace( new PrintWriter( sw ) ); 
-            sb.append("\tException caught: ").append(sw.toString()).append("\n");
-        }
-        return sb.toString();
-    }
+	public String toString()
+	{
+		StringBuffer sb = new StringBuffer(toIdString() + "[");
+
+		String orderDetails = getOrderDetails();
+		if (orderDetails.length() > 0)
+		{
+			sb.append(orderDetails);
+		}
+		sb.append(", failures=").append(failureCount);
+		sb.append("]");
+
+		return sb.toString();
+	}
+
+	public String toLongString()
+	{
+		StringBuffer sb = new StringBuffer();
+		sb.append("\tInternal ID: ").append(toIdString()).append("\n");
+		String orderDetails = getOrderDetails();
+		if (orderDetails.length() > 0)
+		{
+			sb.append("\tDetails: ").append(orderDetails).append("\n");
+		}
+		sb.append("\tOriginal queue name: ").append(origQueueName).append("\n");
+		sb.append("\tFailure count: ").append(failureCount).append("\n");
+		if (throwable != null)
+		{
+			StringWriter sw = new StringWriter();
+			throwable.printStackTrace(new PrintWriter(sw));
+			sb.append("\tException caught: ").append(sw.toString())
+					.append("\n");
+		}
+		return sb.toString();
+	}
 }

@@ -46,110 +46,130 @@ import org.dcm4chex.archive.common.FileSystemStatus;
 
 /**
  * @author gunter.zeilinger@tiani.com
- * @version $Revision: 6814 $ $Date: 2008-08-20 12:13:04 +0200 (Wed, 20 Aug 2008) $
+ * @version $Revision: 6814 $ $Date: 2008-08-20 12:13:04 +0200 (Wed, 20 Aug
+ *          2008) $
  * @since 13.09.2004
  * 
  */
-public class FileSystemDTO implements Serializable {
+public class FileSystemDTO implements Serializable
+{
 
-    private static final long serialVersionUID = -1301228596642462447L;
+	private static final long serialVersionUID = -1301228596642462447L;
 
-    private long pk = -1; // unknown mark
+	private long pk = -1; // unknown mark
 
-    private String directoryPath;
+	private String directoryPath;
 
-    private String groupID;
+	private String groupID;
 
-    private String retrieveAET;
+	private String retrieveAET;
 
-    private int availability;
+	private int availability;
 
-    private int status;
+	private int status;
 
-    private String userInfo;
+	private String userInfo;
 
-    private String next;
+	private String next;
 
-    public StringBuffer toString(StringBuffer sb) {
-        sb.append("FileSystem[pk=").append(pk);
-        sb.append(", ").append(directoryPath);
-        sb.append(", groupID=").append(groupID);
-        sb.append(", aet=").append(retrieveAET);
-        sb.append(", ").append(Availability.toString(availability));
-        sb.append(", ").append(FileSystemStatus.toString(status));
-        sb.append(", userinfo=").append(userInfo);
-        if (next != null)
-            sb.append(", next=").append(next);
-        sb.append("]");
-        return sb;
-    }
+	public StringBuffer toString(StringBuffer sb)
+	{
+		sb.append("FileSystem[pk=").append(pk);
+		sb.append(", ").append(directoryPath);
+		sb.append(", groupID=").append(groupID);
+		sb.append(", aet=").append(retrieveAET);
+		sb.append(", ").append(Availability.toString(availability));
+		sb.append(", ").append(FileSystemStatus.toString(status));
+		sb.append(", userinfo=").append(userInfo);
+		if (next != null)
+			sb.append(", next=").append(next);
+		sb.append("]");
+		return sb;
+	}
 
-    public String toString() {
-        return toString(new StringBuffer()).toString();
-    }
+	public String toString()
+	{
+		return toString(new StringBuffer()).toString();
+	}
 
-    public final long getPk() {
-        return pk;
-    }
+	public final long getPk()
+	{
+		return pk;
+	}
 
-    public final void setPk(long pk) {
-        this.pk = pk;
-    }
+	public final void setPk(long pk)
+	{
+		this.pk = pk;
+	}
 
-    public final String getDirectoryPath() {
-        return directoryPath;
-    }
+	public final String getDirectoryPath()
+	{
+		return directoryPath;
+	}
 
-    public final void setDirectoryPath(String directoryPath) {
-        this.directoryPath = directoryPath;
-    }
+	public final void setDirectoryPath(String directoryPath)
+	{
+		this.directoryPath = directoryPath;
+	}
 
-    public final String getGroupID() {
-        return groupID;
-    }
+	public final String getGroupID()
+	{
+		return groupID;
+	}
 
-    public final void setGroupID(String groupID) {
-        this.groupID = groupID;
-    }
+	public final void setGroupID(String groupID)
+	{
+		this.groupID = groupID;
+	}
 
-    public final String getRetrieveAET() {
-        return retrieveAET;
-    }
+	public final String getRetrieveAET()
+	{
+		return retrieveAET;
+	}
 
-    public final void setRetrieveAET(String retrieveAET) {
-        this.retrieveAET = retrieveAET;
-    }
+	public final void setRetrieveAET(String retrieveAET)
+	{
+		this.retrieveAET = retrieveAET;
+	}
 
-    public final int getAvailability() {
-        return availability;
-    }
+	public final int getAvailability()
+	{
+		return availability;
+	}
 
-    public final void setAvailability(int availability) {
-        this.availability = availability;
-    }
+	public final void setAvailability(int availability)
+	{
+		this.availability = availability;
+	}
 
-    public final int getStatus() {
-        return status;
-    }
+	public final int getStatus()
+	{
+		return status;
+	}
 
-    public final void setStatus(int status) {
-        this.status = status;
-    }
+	public final void setStatus(int status)
+	{
+		this.status = status;
+	}
 
-    public final String getUserInfo() {
-        return userInfo;
-    }
+	public final String getUserInfo()
+	{
+		return userInfo;
+	}
 
-    public final void setUserInfo(String userInfo) {
-        this.userInfo = userInfo;
-    }
+	public final void setUserInfo(String userInfo)
+	{
+		this.userInfo = userInfo;
+	}
 
-    public final String getNext() {
-        return next;
-    }
+	public final String getNext()
+	{
+		return next;
+	}
 
-    public final void setNext(String next) {
-        this.next = next;
-    }
+	public final void setNext(String next)
+	{
+		this.next = next;
+	}
 
 }

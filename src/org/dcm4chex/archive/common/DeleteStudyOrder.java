@@ -51,66 +51,77 @@ import org.dcm4chex.archive.common.BaseJmsOrder;
  * @since Jun 1, 2006
  * 
  */
-public class DeleteStudyOrder extends BaseJmsOrder implements Serializable {
+public class DeleteStudyOrder extends BaseJmsOrder implements Serializable
+{
 
-    private static final long serialVersionUID = 2395940827585137279L;
+	private static final long serialVersionUID = 2395940827585137279L;
 
-    private final long sofPk;
-    private final long studyPk;
-    private final long fsPk;
-    private final long accessTime;
-    private final String studyIUID;
-    private final String externalRetrieveAET;
-    private int externalRetrieveAvailability = Availability.UNAVAILABLE;
+	private final long sofPk;
+	private final long studyPk;
+	private final long fsPk;
+	private final long accessTime;
+	private final String studyIUID;
+	private final String externalRetrieveAET;
+	private int externalRetrieveAvailability = Availability.UNAVAILABLE;
 
-    public DeleteStudyOrder(long sofPk, long studyPk, long fsPk,
-            long accessTime, String externalRetrieveAET, String studyIUID) {
-        this.sofPk = sofPk;
-        this.studyPk = studyPk;
-        this.fsPk = fsPk;
-        this.accessTime = accessTime;
-        this.studyIUID = studyIUID;
-        this.externalRetrieveAET = externalRetrieveAET;
-    }
+	public DeleteStudyOrder(long sofPk, long studyPk, long fsPk,
+			long accessTime, String externalRetrieveAET, String studyIUID)
+	{
+		this.sofPk = sofPk;
+		this.studyPk = studyPk;
+		this.fsPk = fsPk;
+		this.accessTime = accessTime;
+		this.studyIUID = studyIUID;
+		this.externalRetrieveAET = externalRetrieveAET;
+	}
 
-    public String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append(super.toString());
-        sb.append("\tStudyOnFS PK: ").append(sofPk).append("\n");
-        sb.append("\tStudy PK: ").append(studyPk).append("\n");
-        sb.append("\tFileSystem PK: ").append(fsPk).append("\n");
-        return sb.toString();
-    }
+	public String toString()
+	{
+		StringBuffer sb = new StringBuffer();
+		sb.append(super.toString());
+		sb.append("\tStudyOnFS PK: ").append(sofPk).append("\n");
+		sb.append("\tStudy PK: ").append(studyPk).append("\n");
+		sb.append("\tFileSystem PK: ").append(fsPk).append("\n");
+		return sb.toString();
+	}
 
-    public long getSoFsPk() {
-        return sofPk;
-    }
+	public long getSoFsPk()
+	{
+		return sofPk;
+	}
 
-    public long getFsPk() {
-        return fsPk;
-    }
+	public long getFsPk()
+	{
+		return fsPk;
+	}
 
-    public long getStudyPk() {
-        return studyPk;
-    }
+	public long getStudyPk()
+	{
+		return studyPk;
+	}
 
-    public long getAccessTime() {
-        return accessTime;
-    }
-    
-    public String getStudyIUID() {
-        return studyIUID;
-    }
+	public long getAccessTime()
+	{
+		return accessTime;
+	}
 
-    public String getExternalRetrieveAET() {
-        return externalRetrieveAET;
-    }
+	public String getStudyIUID()
+	{
+		return studyIUID;
+	}
 
-    public int getExternalRetrieveAvailability() {
-        return externalRetrieveAvailability;
-    }
+	public String getExternalRetrieveAET()
+	{
+		return externalRetrieveAET;
+	}
 
-    public void setExternalRetrieveAvailability(int availability) {
-        this.externalRetrieveAvailability = availability;
-    }
+	public int getExternalRetrieveAvailability()
+	{
+		return externalRetrieveAvailability;
+	}
+
+	public void setExternalRetrieveAvailability(int availability)
+	{
+		this.externalRetrieveAvailability = availability;
+	}
 }

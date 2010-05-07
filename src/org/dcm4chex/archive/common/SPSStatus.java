@@ -43,41 +43,48 @@ import java.util.Arrays;
 
 /**
  * @author gunter.zeilinger@tiani.com
- * @version $Revision: 2772 $ $Date: 2006-09-20 10:58:51 +0200 (Wed, 20 Sep 2006) $
+ * @version $Revision: 2772 $ $Date: 2006-09-20 10:58:51 +0200 (Wed, 20 Sep
+ *          2006) $
  * @since 06.10.2004
- *
+ * 
  */
-public class SPSStatus {
+public class SPSStatus
+{
 
-    private static final String[] ENUM = { "SCHEDULED", "ARRIVED", "READY",
-    	"STARTED", "COMPLETED", "DISCONTINUED" };
+	private static final String[] ENUM = {"SCHEDULED", "ARRIVED", "READY",
+			"STARTED", "COMPLETED", "DISCONTINUED"};
 
-    public static final int SCHEDULED = 0;    
-    public static final int ARRIVED = 1;
-    public static final int READY = 2;
-    public static final int STARTED = 3;    
-    public static final int COMPLETED = 4;    
-    public static final int DISCONTINUED = 5;
+	public static final int SCHEDULED = 0;
+	public static final int ARRIVED = 1;
+	public static final int READY = 2;
+	public static final int STARTED = 3;
+	public static final int COMPLETED = 4;
+	public static final int DISCONTINUED = 5;
 
-    public static final String toString(int value) {
-        return ENUM[value];
-    }
+	public static final String toString(int value)
+	{
+		return ENUM[value];
+	}
 
-    public static final int toInt(String s) {        
-        final int index = Arrays.asList(ENUM).indexOf(s);
-        if (index == -1)
-            throw new IllegalArgumentException(s);
-        return index;
-    }
+	public static final int toInt(String s)
+	{
+		final int index = Arrays.asList(ENUM).indexOf(s);
+		if (index == -1)
+			throw new IllegalArgumentException(s);
+		return index;
+	}
 
-    public static int[] toInts(String[] ss) {
-        if (ss == null) {
-            return null;
-        }
-        int[] ret = new int[ss.length];
-        for (int i = 0; i < ret.length; i++) {
-            ret[i] = toInt(ss[i]);
-        }
-        return ret;
-    }
+	public static int[] toInts(String[] ss)
+	{
+		if (ss == null)
+		{
+			return null;
+		}
+		int[] ret = new int[ss.length];
+		for (int i = 0; i < ret.length; i++)
+		{
+			ret[i] = toInt(ss[i]);
+		}
+		return ret;
+	}
 }

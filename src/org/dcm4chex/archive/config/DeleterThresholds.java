@@ -35,7 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-
 package org.dcm4chex.archive.config;
 
 import java.util.Calendar;
@@ -45,62 +44,80 @@ import org.dcm4chex.archive.util.FileUtils;
 
 /**
  * @author gunter.zeilinger@tiani.com
- * @version $Revision: 2518 $ $Date: 2006-06-07 18:29:43 +0200 (Wed, 07 Jun 2006) $
+ * @version $Revision: 2518 $ $Date: 2006-06-07 18:29:43 +0200 (Wed, 07 Jun
+ *          2006) $
  * @since Jun 6, 2006
  */
-public class DeleterThresholds {
-    private final DeleterThreshold[] thresholds;
-    public DeleterThresholds(String spec, boolean timeBased) {
-        StringTokenizer stk = new StringTokenizer(spec, ":;, \t\r\n");
-        int n = stk.countTokens();
-        if (n == 0 || (n & 1) != 0) {
-            throw new IllegalArgumentException(spec);
-        }
-        thresholds = new DeleterThreshold[n/2];
-        int hour;
-        String sizeOrHours;
-        int last;
-        try {
-            for (int i = 0; i < thresholds.length; i++) {
-                hour = Integer.parseInt(stk.nextToken());
-                sizeOrHours = stk.nextToken();
-                last = sizeOrHours.length() - 1;
-                if (sizeOrHours.charAt(last) == 'h' ) {
-                    if (!timeBased) {
-                        throw new IllegalArgumentException();
-                    }
-                    thresholds[i] = (DeleterThreshold) new DeleterThreshold.TimeBased(
-                                hour, Integer.parseInt(sizeOrHours.substring(0, last)));
-                } else {
-                    thresholds[i] = (DeleterThreshold) new DeleterThreshold.SizeBased(
-                                hour, FileUtils.parseSize(sizeOrHours, 0));
-                }
-            }
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException(spec);
-        }
-    }
-    
-    public String toString() {
-        StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < thresholds.length; i++) {
-            sb.append(thresholds[i]).append(';');
-        }
-        return sb.substring(0, sb.length()-1);
-    }
-    
-    public DeleterThreshold getDeleterThreshold(Calendar now) {
-        if (thresholds.length == 1) {
-            return thresholds[0];
-        }
-        int hourOfDay = now.get(Calendar.HOUR_OF_DAY);
-        if (hourOfDay  > thresholds[0].getStartHour()) {            
-            for (int i = 1; i < thresholds.length; i++) {
-                if (hourOfDay < thresholds[i].getStartHour()) {
-                    return thresholds[i-1];
-                }
-            }
-        }
-        return thresholds[thresholds.length-1];
-    }
+public class DeleterThresholds
+{
+	private final DeleterThreshold[] thresholds;
+	public DeleterThresholds(String spec, boolean timeBased)
+	{
+		StringTokenizer stk = new StringTokenizer(spec, ":;, \t\r\n");
+		int n = stk.countTokens();
+		if (n == 0 || (n & 1) != 0)
+		{
+			throw new IllegalArgumentException(spec);
+		}
+		thresholds = new DeleterThreshold[n / 2];
+		int hour;
+		String sizeOrHours;
+		int last;
+		try
+		{
+			for (int i = 0; i < thresholds.length; i++)
+			{
+				hour = Integer.parseInt(stk.nextToken());
+				sizeOrHours = stk.nextToken();
+				last = sizeOrHours.length() - 1;
+				if (sizeOrHours.charAt(last) == 'h')
+				{
+					if (!timeBased)
+					{
+						throw new IllegalArgumentException();
+					}
+					thresholds[i] = (DeleterThreshold) new DeleterThreshold.TimeBased(
+							hour, Integer.parseInt(sizeOrHours.substring(0,
+									last)));
+				} else
+				{
+					thresholds[i] = (DeleterThreshold) new DeleterThreshold.SizeBased(
+							hour, FileUtils.parseSize(sizeOrHours, 0));
+				}
+			}
+		} catch (IllegalArgumentException e)
+		{
+			throw new IllegalArgumentException(spec);
+		}
+	}
+
+	public String toString()
+	{
+		StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < thresholds.length; i++)
+		{
+			sb.append(thresholds[i]).append(';');
+		}
+		return sb.substring(0, sb.length() - 1);
+	}
+
+	public DeleterThreshold getDeleterThreshold(Calendar now)
+	{
+		if (thresholds.length == 1)
+		{
+			return thresholds[0];
+		}
+		int hourOfDay = now.get(Calendar.HOUR_OF_DAY);
+		if (hourOfDay > thresholds[0].getStartHour())
+		{
+			for (int i = 1; i < thresholds.length; i++)
+			{
+				if (hourOfDay < thresholds[i].getStartHour())
+				{
+					return thresholds[i - 1];
+				}
+			}
+		}
+		return thresholds[thresholds.length - 1];
+	}
 }
