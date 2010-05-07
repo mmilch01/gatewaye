@@ -1,14 +1,15 @@
 #
-# XNAT server address, prefixed by http:// or https://
+# XNAT server URL, prefixed by http:// or https://
 #
 
-XNAT.ServerURL=http://central.xnat.org
+#XNAT.ServerURL=http://central.xnat.org
+XNAT.ServerURL=https://cnda.wustl.edu
 
 #
-# XNAT user ID & pass
+# XNAT server user ID & pass
 #
-XNAT.User=guest
-XNAT.Pass=guest
+XNAT.User=mmilch
+XNAT.Pass=abc123
 
 #
 # Location of cache for images downladed from XNAT server
@@ -25,22 +26,11 @@ Application.SavedImagesFolderName=./config/cache
 Dicom.StorageSCUCompressionLevel=0
 
 #
-# Dicom.StorageSCUDebugLevel should be 0 for no debugging (silent), > 0 for more
-# verbose levels of debugging
+# Dicom.DebugLevel 
+# possible values:
+# ALL,DEBUG,INFO,WARN,ERROR,FATAL,OFF
 #
-Dicom.StorageSCUDebugLevel=1
-
-#
-# Dicom.StorageSCPDebugLevel should be 0 for no debugging (silent), > 0 for more
-# verbose levels of debugging
-#
-Dicom.StorageSCPDebugLevel=1
-
-#
-# Dicom.QueryDebugLevel should be 0 for no debugging (silent), > 0 for more
-# verbose levels of debugging
-#
-Dicom.QueryDebugLevel=1
+Dicom.DebugLevel=WARN
 
 #
 # Dicom.ListeningPort should be set to whatever port this DicomImageViewer application is to
@@ -52,18 +42,13 @@ Dicom.ListeningPort=4008
 # Dicom.CalledAETitle should be set to whatever this DicomImageViewer application is to
 # call itself when accepting an association.
 #
-Dicom.CalledAETitle=SERVERTEST
+Dicom.CalledAETitle=GATEWAY2
 
 #
 # Dicom.CallingAETitle should be set to whatever this DicomImageViewer application is to
 # call itself when initiating an association.
 #
-Dicom.CallingAETitle=SERVERTEST
-
-#
-# Dicom.PrimaryDeviceType should be set to the type of device, e.g., WSD, ARCHIVE.
-#
-Dicom.PrimaryDeviceType=ARCHIVE
+Dicom.CallingAETitle=GATEWAY2
 
 #
 # Dicom.RemoteAEs is a space or comma separated list of all the available remote AEs;
@@ -71,7 +56,7 @@ Dicom.PrimaryDeviceType=ARCHIVE
 # does not need to be the same as the actual AE title.
 #
 #Dicom.RemoteAEs=osirix helgray
-Dicom.RemoteAEs=osirix algom workstation1
+Dicom.RemoteAEs=NILPC154 PMVIEWER OSIRIX KPACS
 
 #
 # Each remote AE (listed in Dicom.RemoteAEs) needs to be described by three
@@ -82,14 +67,18 @@ Dicom.RemoteAEs=osirix algom workstation1
 #
 # where XXXXX is the name of the AE displayed to the user and used in this file
 #
-Dicom.RemoteAEs.osirix.CalledAETitle=osirix
-Dicom.RemoteAEs.osirix.HostNameOrIPAddress=localhost
-Dicom.RemoteAEs.osirix.Port=4006
+Dicom.RemoteAEs.KPACS.CalledAETitle=KPACS
+Dicom.RemoteAEs.KPACS.HostNameOrIPAddress=nilpc154.neuroimage.wustl.edu
+Dicom.RemoteAEs.KPACS.Port=104
 
-Dicom.RemoteAEs.algom.CalledAETitle=AlgoM
-Dicom.RemoteAEs.algom.HostNameOrIPAddress=nilpc154.neuroimage.wustl.edu
-Dicom.RemoteAEs.algom.Port=104
+Dicom.RemoteAEs.NILPC154.CalledAETitle=NILPC154
+Dicom.RemoteAEs.NILPC154.HostNameOrIPAddress=nilpc154.neuroimage.wustl.edu
+Dicom.RemoteAEs.NILPC154.Port=104
 
-Dicom.RemoteAEs.workstation1.CalledAETitle=test1
-Dicom.RemoteAEs.algom.HostNameOrIPAddress=wsname.yourdicomsubnetwork.wustl.edu
-Dicom.RemoteAEs.algom.Port=4002
+Dicom.RemoteAEs.PMVIEWER.CalledAETitle=PMVIEWER
+Dicom.RemoteAEs.PMVIEWER.HostNameOrIPAddress=nilpc154.neuroimage.wustl.edu
+Dicom.RemoteAEs.PMVIEWER.Port=4002
+
+Dicom.RemoteAEs.OSIRIX.CalledAETitle=OSIRIX_MACI_BUCK
+Dicom.RemoteAEs.OSIRIX.HostNameOrIPAddress=10.28.112.128
+Dicom.RemoteAEs.OSIRIX.Port=4444
