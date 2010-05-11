@@ -1226,7 +1226,10 @@ public class QueryRetrieveScpService extends AbstractScpService
 					new String[]{String.class.getName(),
 							InetAddress.class.getName()});
 			if (o == null)
+			{
+//				o = new AEDTO(0, aet, address.getHostAddress(), 4008, "", "","","","","","");
 				throw new UnknownAETException("Unkown AET: " + aet);
+			}
 			return (AEDTO) o;
 		} catch (JMException e)
 		{

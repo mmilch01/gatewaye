@@ -22,7 +22,9 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
 import org.apache.commons.httpclient.HttpMethodBase;
+import org.apache.log4j.Appender;
 import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.FileAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -64,7 +66,7 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 	protected AEDTO m_localAE;
 	protected int m_maxCacheFiles = 50000;
 	protected static XNATGatewayServer m_this = null;
-	protected AEServer m_ael = new AEServer();
+	protected AEServer m_ael=new AEServer();
 
 	public void instancesSent(ArrayList fileInfos)
 	{
@@ -97,14 +99,18 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 	public XNATGatewayServer(Properties props) throws Exception
 	{
 		Logger l=Logger.getRootLogger();
-		BasicConfigurator.configure(new NullAppender());
+		BasicConfigurator.configure(
+				new NullAppender());
 		
-		FileAppender appender=null;
+		Appender appender=null;
 		SimpleLayout layout=new SimpleLayout();
 		try
 		{
-			appender=new FileAppender(layout,"./gateway.log",false);
-			m_maxCacheFiles=Integer.parseInt(props.getProperty("Application.FilesInCache"));
+			if(props.getProperty("Logger.Output").toLowerCase().compareTo("file")==0)
+				appender=new FileAppender(layout,"./gateway.log",false);
+			else 
+				appender=new ConsoleAppender(layout);
+//			m_maxCacheFiles=Integer.parseInt(props.getProperty("Application.FilesInCache"));
 		}catch(Exception e){}
 
 		l.addAppender(appender);
@@ -117,10 +123,15 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 		srv.setCalledAETs(props.getProperty("Dicom.CallingAETitle"));
 		// srv.setCallingAETs(props.getProperty("Dicom.CalledAETitile"));
 		srv.setCoerceRequestPatientIds(true);
-		String aets = props.getProperty("Dicom.RemoteAEs");
-		aets = aets.replace(' ', '\\');
-		srv.setCallingAETs(aets);		
-		// srv.setAcceptedStandardSOPClasses(s)
+		initRemoteAEs(props);
+		
+		String aets = m_ael.getAETList();
+		if(aets!=null)
+		{
+			aets = aets.replace(' ', '\\');
+			srv.setCallingAETs(aets);		
+		}
+		// srv.setAcceptedStandardSOPClasses(s)			
 		// srv.setDcmServerName(new ObjectName("GatewayDcmQRSCP"));
 		srv.startService();
 		m_dcmServer = ServerFactory.getInstance()
@@ -143,7 +154,7 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 		m_XNATUser = props.getProperty(XnatServerProperties.XNATUser);
 		m_XNATPass = props.getProperty(XnatServerProperties.XNATPass);
 		m_AETitle = props.getProperty(XnatServerProperties.AETitle);
-		initRemoteAEs(props);
+
 		// clean up from the previous run
 		try
 		{
@@ -155,12 +166,13 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 		m_this = this;
 		// m_dcmServer.start();
 		
-		m_localAE=new AEDTO(0, 
+		m_localAE=new AEDTO(0,
 				m_AETitle,
 				"localhost",
 				Integer.parseInt(props.getProperty("Dicom.ListeningPort")),				
 				"", "", "", "", "","", "");
-		
+		m_ael.setLocalAE(m_localAE);
+//		m_ael=new AEServer(m_localAE);
 		srv.setAEManager(
 				new AEManager()
 				{

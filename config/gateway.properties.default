@@ -8,8 +8,8 @@ XNAT.ServerURL=https://cnda.wustl.edu
 #
 # XNAT server user ID & pass
 #
-XNAT.User=mmilch
-XNAT.Pass=abc123
+XNAT.User=guest
+XNAT.Pass=guest
 
 #
 # Location of cache for images downladed from XNAT server
@@ -17,20 +17,16 @@ XNAT.Pass=abc123
 Application.SavedImagesFolderName=./config/cache
 
 #
-# Dicom.StorageSCUCompressionLevel determines what types of compressed Transfer Syntaxes are
-# proposed:
-#	0 = none
-#	1 = propose deflate
-#	2 = propose deflate and bzip2 (if bzip2 codec is available)
-#
-Dicom.StorageSCUCompressionLevel=0
-
-#
 # Dicom.DebugLevel 
 # possible values:
 # ALL,DEBUG,INFO,WARN,ERROR,FATAL,OFF
 #
 Dicom.DebugLevel=WARN
+
+#
+# Logger.Output: redirection of logger output (default: console (System.err). Possible values: FILE, CONSOLE.
+# 
+Logger.Output=CONSOLE
 
 #
 # Dicom.ListeningPort should be set to whatever port this DicomImageViewer application is to
@@ -55,7 +51,6 @@ Dicom.CallingAETitle=GATEWAY2
 # each AE may be named anything unique (in this file) without a space or comma; the name
 # does not need to be the same as the actual AE title.
 #
-#Dicom.RemoteAEs=osirix helgray
 Dicom.RemoteAEs=NILPC154 PMVIEWER OSIRIX KPACS
 
 #
