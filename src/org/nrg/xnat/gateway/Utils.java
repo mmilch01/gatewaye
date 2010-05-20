@@ -23,6 +23,26 @@ public final class Utils
 		else
 			return null;
 	}
+	public static String String2UID(String str)
+	{
+		String res="";
+		for(int i=0; i<str.length(); i++)
+		{
+			res+=Short.toString((short)str.charAt(i));
+			if(i<str.length()-1) res+=".";
+		}
+		return res;
+	}
+	public static String UID2String(String str)
+	{
+		String res="";
+		String[] chars=str.split("\\.");
+		for(int i=0; i<chars.length;i++)
+		{
+			res+= Character.toString((char)Short.valueOf(chars[i]).shortValue());
+		}
+		return res;
+	}
 	public static String PseudoUID()
 	{
 		return new Long(Calendar.getInstance().getTimeInMillis()).toString()

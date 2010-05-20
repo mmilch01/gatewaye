@@ -1,5 +1,4 @@
 package org.nrg.xnat.gateway;
-
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -55,7 +54,7 @@ import com.pixelmed.dicom.InformationEntity;
 
 public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 {
-	private static String m_ver = "May 6, 2010";
+	private static String m_ver = "May 20, 2010";
 	// private static QueryRetrieveScpService m_qrServ;
 	private Server m_dcmServer;
 	private static boolean m_srvShutdown = false;
@@ -68,6 +67,22 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 	protected static XNATGatewayServer m_this = null;
 	protected AEServer m_ael=new AEServer();
 
+	public boolean test()
+	{
+		return true;
+/*		
+		String s0="CNDA_E01841",s1="CNDA_E01841_1";
+		String s01=Utils.String2UID(s0), s11=Utils.String2UID(s1);
+		System.out.println(s0);
+		System.out.println(s01);
+		System.out.println(s1);
+		System.out.println(s11);
+		
+		System.out.println(Utils.UID2String(s01));
+		System.out.println(Utils.UID2String(s11));
+		return false;
+*/
+	}
 	public void instancesSent(ArrayList fileInfos)
 	{
 		//delete files that were sent.
@@ -98,6 +113,7 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 
 	public XNATGatewayServer(Properties props) throws Exception
 	{
+		if(!test()) return;
 		Logger l=Logger.getRootLogger();
 		BasicConfigurator.configure(
 				new NullAppender());
@@ -111,16 +127,29 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 			else 
 				appender=new ConsoleAppender(layout);
 //			m_maxCacheFiles=Integer.parseInt(props.getProperty("Application.FilesInCache"));
-		}catch(Exception e){}
+		}
+		catch(Exception e)
+		{
+			if(appender==null)
+				appender=new ConsoleAppender(layout);
+		}
 
 		l.addAppender(appender);
-		l.setLevel(Level.toLevel(props.getProperty("Dicom.DebugLevel")));
+		String str;
+		if((str=props.getProperty("Dicom.DebugLevel"))!=null)
+		{
+			l.setLevel(Level.toLevel(str));			
+		}
+		else l.setLevel(Level.WARN);
+		
 		l.info(DateFormat.getDateTimeInstance().format(new Date())+" Server started");
 				
 		QueryRetrieveScpService srv = new QueryRetrieveScpService();
 		initServerParams(srv);
 
-		srv.setCalledAETs(props.getProperty("Dicom.CallingAETitle"));
+		str=props.getProperty("Dicom.CallingAETitle");
+		if(str==null)	throw new IOException();
+		srv.setCalledAETs(str);
 		// srv.setCallingAETs(props.getProperty("Dicom.CalledAETitile"));
 		srv.setCoerceRequestPatientIds(true);
 		initRemoteAEs(props);
@@ -138,8 +167,8 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 				.newServer(srv.getDcmHandler());
 		m_dcmServer.setPort(Integer.valueOf(
 				props.getProperty("Dicom.ListeningPort")).intValue());
-
 		m_StoreFolder = props.getProperty("Application.SavedImagesFolderName");
+		
 		File sf = new File(m_StoreFolder);
 		if (!sf.exists())
 			sf.mkdir();
@@ -154,7 +183,9 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 		m_XNATUser = props.getProperty(XnatServerProperties.XNATUser);
 		m_XNATPass = props.getProperty(XnatServerProperties.XNATPass);
 		m_AETitle = props.getProperty(XnatServerProperties.AETitle);
-
+		if(m_XNATServer==null || m_XNATUser==null || m_XNATPass==null || m_AETitle==null) 
+			throw new IOException();
+		
 		// clean up from the previous run
 		try
 		{
@@ -341,8 +372,7 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 						"Unable to read properties file", e);
 			}
 			new XNATGatewayServer(props);
-			System.err.println("XNAT/DICOM gateway server v. 1.0, rev. "
-					+ m_ver);
+			System.err.println("XNAT/DICOM gateway, "+ m_ver);
 			props.put(XnatServerProperties.XNATPass, "*****");
 			System.err.println("properties=" + props);
 		} catch (Exception e)

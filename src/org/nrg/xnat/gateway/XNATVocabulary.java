@@ -124,6 +124,11 @@ public class XNATVocabulary
 	}
 	public static String xnatTodcm(String val, String alias)
 	{
+		if(alias.compareTo("stinstuid")==0 || alias.compareTo("id")==0)
+		{
+			if(val==null) return val;
+			return Utils.String2UID(val);
+		}
 		if (alias.compareTo("stmodality") == 0)
 		{
 			if (val == null || val.length() < 1)
@@ -153,6 +158,11 @@ public class XNATVocabulary
 	}
 	public static String dcmToXNATField(String field, String dcmAlias)
 	{
+		if (dcmAlias.compareTo("stinstuid")==0 || dcmAlias.compareTo("id")==0)
+		{
+			if(field==null) return null;
+			return Utils.UID2String(field);
+		}
 		if (dcmAlias.compareTo("stmodality") == 0)
 		{
 			String allModalities = "xnat:imageSessionData";
@@ -184,15 +194,17 @@ public class XNATVocabulary
 			return;
 		try
 		{
-			al.putXX(Tags.SeriesInstanceUID, toDicom ? (s1 + "_" + s2) : (s2
-					.substring(s1.length() + 1)));
+			s1=Utils.UID2String(s1);
+			s2=Utils.UID2String(s2);
+			String res=toDicom ? (s1 + "_" + s2) : (s2
+					.substring(s1.length() + 1));
+			al.putXX(Tags.SeriesInstanceUID, Utils.String2UID(res));
 			// serInstUID.setValue(toDicom?(s1+"_"+s2):(s2.substring(s1.length()+1)));
 			// al.put(serInstUID);
 		} catch (Exception de)
 		{
 		}
 	}
-
 	public XNATVocabularyEntry GetDcmEntry(int tag)
 	{
 		return m_dcm_entries.get(new Integer(tag));

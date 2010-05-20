@@ -72,8 +72,11 @@ public class XNATCMoveRsp
 //		ds.readDataset(in, param, stopTag)		
 		ds.readFile(is, null, 0xffffffff);
 		ds.putAll(xnatTags);
-/*			
- * 
+		
+		//remove query-specific tags
+		ds.remove(Tags.QueryRetrieveLevel);
+/*
+
 		FileMetaInfo fmi = DcmObjectFactory.getInstance().newFileMetaInfo();
 		fmi.read(is);
 		fmi.putAll(request);
@@ -111,8 +114,7 @@ public class XNATCMoveRsp
 		 * FileMetaInformation.addFileMetaInformation(fal,sts,m_AETitle);
 		 * fal.write(fname,sts,true,true); new File(fname).deleteOnExit();
 		 */
-		FileInfo fi = new FileInfo(ds, fname);
-		return fi;
+		return new FileInfo(ds, fname);
 	}
 
 	private FileInfo DownloadAndSaveDicomFile(XNATRestAdapter xre, String URI,
