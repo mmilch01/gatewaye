@@ -297,8 +297,8 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 					"org.nrg.xnag.gateway:type=GatewayServer"));
 			// srv.setDcmServerName(dcmServerName)
 			bD = new SAXReader().read(new File(
-					"config/dcm4chee-qrscp-xmbean.xml"));
-			vD = new SAXReader().read(new File("config/qrscp-config.xml"));
+					"./config/dcm4chee-qrscp-xmbean.xml"));
+			vD = new SAXReader().read(new File("./config/qrscp-config.xml"));
 		} catch (Exception e)
 		{
 			return;
@@ -353,6 +353,12 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 	}
 	public static void main(String arg[])
 	{
+		try
+		{
+			Thread.sleep(30000);
+		}
+		catch(Exception e){}
+		
 		String propertiesFileName = arg.length > 0
 				? arg[0]
 				: "./config/gateway.properties";
