@@ -110,6 +110,14 @@ public class XNATQueryGenerator
 				path += (bFirst ? "?" : "&") + "subject_ID=" + patid;
 				bFirst = false;
 			}
+/*
+			if(!bFirst)
+			{
+				path+="&";
+				bFirst=false;
+			}
+			path+="columns=studyInstanceUID";
+*/			
 			return path;
 		}
 		return null;

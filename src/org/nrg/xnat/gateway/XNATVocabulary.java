@@ -64,18 +64,35 @@ public class XNATVocabulary
 		// (05/19/2009)
 		if (ie.compareTo(InformationEntity.STUDY) == 0)
 		{
+
+			//synonyms for study instance uid.
+//			stMap.put("UID", "stinstuid");
 			stMap.put("ID", "stinstuid");
+//			stMap.put("session_ID","stinstuid");
+			
 			stMap.put("date", "stdate");
 			stMap.put("xsiType", "stmodality");
 			stMap.put("subject_ID", "patid");
 			stMap.put("label", "staccessionnum");
 			stMap.put("subject_label", "patname");
+			
+			//check if Study Instance UID is contained in response and if yes populate the resulting dataset.
+//			boolean bStInstUIDDefined=false;
+//			String temp=row.get("UID");
+//			if(temp!=null && temp.length()>0)
+//			{
+//				bStInstUIDDefined=true;
+//			}
+			
 			for (String s : row.keySet())
 			{
 				XNATVocabularyEntry xve;
 				nm = stMap.get(s);
 				if (nm == null)
 					continue;
+				//if Study instance UID was defined, skip its replacements.
+//				if((s.compareTo("ID")==0 || s.compareTo("session_ID")==0) && bStInstUIDDefined) continue;
+					
 				xve = m_xnat_entries.get(nm);
 				if (xve != null)
 				{

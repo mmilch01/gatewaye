@@ -31,8 +31,8 @@ entry indexing. It should be unique throughout the vocabulary.
 </entry>
 
 <!-- Study instance UID  -->
-<entry dicom_group="0020" dicom_element="000D" xnat_element_name="xnat:mrSessionData" 
-		 xnat_field_id="xnat:mrSessionData/ID" xnat_header="ID" search_column_alias="stinstuid">
+<entry dicom_group="0020" dicom_element="000D" xnat_element_name="xnat:imageSessionData" 
+		 xnat_field_id="xnat:imageSessionData/ID" xnat_header="ID" search_column_alias="stinstuid">
 </entry>
 
 <!-- Study accession number  -->

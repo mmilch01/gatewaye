@@ -57,7 +57,7 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 	private static String m_ver = "May 20, 2010";
 	// private static QueryRetrieveScpService m_qrServ;
 	private Server m_dcmServer;
-	private static boolean m_srvShutdown = false;
+	private boolean m_srvShutdown = false;
 
 	protected long m_RandSeed = 0;
 	protected String m_StoreFolder, m_XNATServer, m_XNATUser, m_XNATPass,
@@ -66,6 +66,9 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 	protected int m_maxCacheFiles = 50000;
 	protected static XNATGatewayServer m_this = null;
 	protected AEServer m_ael=new AEServer();
+	
+	public static final boolean bUseDICOMUIDs=true;
+	private boolean m_bStartFlag=false;
 
 	public boolean test()
 	{
@@ -145,7 +148,7 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 		l.info(DateFormat.getDateTimeInstance().format(new Date())+" Server started");
 				
 		QueryRetrieveScpService srv = new QueryRetrieveScpService();
-		initServerParams(srv);
+		if(!initServerParams(srv)) throw new IOException();
 
 		str=props.getProperty("Dicom.CallingAETitle");
 		if(str==null)	throw new IOException();
@@ -272,25 +275,39 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 		} catch (Exception e)
 		{
 			System.err.println(e);
-		} finally
+		}
+		finally
 		{
-			try
-			{
-				m_dcmServer.stop();
-			} catch (Exception e)
-			{
-			}
+			m_dcmServer.stop();
+			m_bStartFlag=false;
+			m_srvShutdown=false;
 		}
 	}
-	private void initServerParams(QueryRetrieveScpService srv)
+	private void unregisterMBean(String s)
+	{
+		try
+		{
+			ManagementFactory.getPlatformMBeanServer().unregisterMBean(new ObjectName(s));
+		}
+		catch(Exception e){}
+	}
+	
+	private boolean initServerParams(QueryRetrieveScpService srv)
 	{
 		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
 		Document bD;
 		Document vD;
+		
+		//unregister previously registered MBean's
+		unregisterMBean("org.nrg.xnat.gateway:type=AEServer");
+		unregisterMBean("org.nrg.xnat.gateway:type=AEServer");
+		unregisterMBean("org.nrg.xnag.gateway:type=GatewayServer");
+		
 		try
 		{
 			mbs.registerMBean(m_ael, new ObjectName(
 					"org.nrg.xnat.gateway:type=AEServer"));
+			
 			srv.setAEServiceName(new ObjectName(
 					"org.nrg.xnat.gateway:type=AEServer"));
 			mbs.registerMBean(this, new ObjectName(
@@ -301,7 +318,7 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 			vD = new SAXReader().read(new File("./config/qrscp-config.xml"));
 		} catch (Exception e)
 		{
-			return;
+			return false;
 		}
 		final class MAttr
 		{
@@ -348,20 +365,20 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 			} catch (Exception e)
 			{
 			}
-
 		}
+		return true;
 	}
-	public static void main(String arg[])
+	public static Result start()
 	{
-		try
+/*		try
 		{
 			Thread.sleep(30000);
 		}
 		catch(Exception e){}
-		
-		String propertiesFileName = arg.length > 0
-				? arg[0]
-				: "./config/gateway.properties";
+*/		
+		String propertiesFileName = 
+//			arg.length > 0 ? arg[0] :
+				"./config/gateway.properties";
 		// ?? m_qrServ.setAcceptedStandardSOPClasses(s)
 		// ?? m_qrServ.setAcceptedTransferSyntax(s)
 		try
@@ -374,8 +391,10 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 				in.close();
 			} catch (IOException e)
 			{
+				Result r=Result.PROPERTIES_FILE_ERROR;
 				Tools.LogException(Priority.ERROR,
-						"Unable to read properties file", e);
+						r.getMessage(), e);
+				return r;
 			}
 			new XNATGatewayServer(props);
 			System.err.println("XNAT/DICOM gateway, "+ m_ver);
@@ -383,8 +402,51 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 			System.err.println("properties=" + props);
 		} catch (Exception e)
 		{
-			Tools.LogException(Priority.ERROR, "Initialization exception", e);
+			Result r = Result.INITIALIZATION_EXCEPTION;
+			Tools.LogException(Priority.ERROR, 
+					r.getMessage(), e);
+			return r;
 		}
+		getInstance().m_bStartFlag=true;
+		return Result.SERVER_STARTED;
+	}
+	public static Result stop()
+	{
+		getInstance().m_srvShutdown=true;
+		try
+		{
+			Thread.sleep(1000);
+		}
+		catch(Exception e){}
+		
+		m_this=null;
+		return Result.SERVER_STOPPED;
+	}
+	
+	public static void main(String arg[])
+	{
+//		start();
+		
+		System.err.println("Server startup/shutdown test");
+		for(int i=0; i<3; i++)
+		{
+			Result r=start();
+			System.err.println(r.getMessage());
+			try
+			{
+				Thread.sleep(10000);
+			}
+			catch(Exception e){}
+			
+			r=stop();
+			System.err.println(r.getMessage());
+			try
+			{
+				Thread.sleep(10000);
+			}
+			catch(Exception e){}
+		}
+		System.err.println("End of test");
 	}
 	@Override
 	protected void finalize() throws Throwable
