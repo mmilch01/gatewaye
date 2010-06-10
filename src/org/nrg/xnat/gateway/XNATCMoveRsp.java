@@ -176,38 +176,52 @@ public class XNATCMoveRsp
 	}
 
 	private Collection<FileInfo> retrieveSeries(Dataset al,
-			boolean bUseCompression)
+			boolean bUseCompression,TreeMap<String,String[]> scanMap)
 	{
 		// bUseCompression=false;//??
-		System.gc();
 		// XNATRestAdapter xre = new
-		// XNATRestAdapter(m_XNATServer,m_XNATUser,m_XNATPass);
+		// XNATRestAdapter(m_XNATServer,m_XNATUser,m_XNATPass);			
+
 		HttpMethodBase get;
-
-		// AttributeList mod_request=new AttributeList();
-		// mod_request.putAll(request);
-		XNATQueryGenerator.GetVocabulary().modifySOPInstUID(al, false);
 		LinkedList<FileInfo> files = new LinkedList<FileInfo>();
-
-		String path = XNATQueryGenerator.getRetrieveRESTQuery(
-				InformationEntity.SERIES, al);
-		Tools.LogMessage(Priority.INFO_INT, "Rest query path: " + path);
-		if (path == null)
+		String path="";
+		
+		//construct the path to request scan files
+		if(!XNATGatewayServer.isDICOMUID())
 		{
-			Tools.LogMessage(Priority.ERROR_INT,
-					"Error generating REST retrieve query");
-			return files;
+			// AttributeList mod_request=new AttributeList();
+			// mod_request.putAll(request);
+			XNATQueryGenerator.GetVocabulary().modifySOPInstUID(al, false);
+	
+			path = XNATQueryGenerator.getRetrieveRESTQuery(
+					InformationEntity.SERIES, al);
+			Tools.LogMessage(Priority.INFO_INT, "Rest query path: " + path);
+			if (path == null)
+			{
+				Tools.LogMessage(Priority.ERROR_INT,
+						"Error generating REST retrieve query");
+				return files;
+			}
 		}
+		else
+		{
+			String[] ids=scanMap.get(al.getString(Tags.SeriesInstanceUID));
+			if(ids==null) return files;
+			path="/experiments/"+ids[0]+"/scans/"+ids[1]+"/files";
+		}
+		
 		if (bUseCompression)
 			path += (path.contains("?") ? "&" : "?") + "format=zip";
 		if (null == (get = m_xre.PerformConnection(XNATRestAdapter.GET, path,
 				"")))
 			return files;
+		
 		/*
 		 * try { // String resp=get.getResponseBodyAsString(); //
 		 * System.err.println(resp); } catch(Exception e){return;}
 		 */
-		XNATQueryGenerator.GetVocabulary().modifySOPInstUID(al, true);
+		if(!XNATGatewayServer.isDICOMUID())
+			XNATQueryGenerator.GetVocabulary().modifySOPInstUID(al, true);
 		FileInfo fi;
 
 		try
@@ -305,11 +319,19 @@ public class XNATCMoveRsp
 		// XNATRestAdapter xra = new
 		// XNATRestAdapter(m_XNATServer,m_XNATUser,m_XNATPass);
 		HttpMethodBase get;
-		String p = "experiments?ID="
-				+ XNATQueryGenerator.GetValueFromAttributeList("stinstuid",
-						query)
-				+ "&columns=ID,project,label,subject_ID,subject_label&format=xml";
+		String p="experiments?"+(XNATGatewayServer.isDICOMUID()?
+				"xnat:imageSessionData/UID=":"ID=");
+		p+= XNATQueryGenerator.GetValueFromAttributeList("stinstuid", query)
+					+ "&columns=ID,project,label,subject_ID,subject_label";
+		if(XNATGatewayServer.isDICOMUID())
+		{
+			p+=",xnat:imageSessionData/Scans/Scan/ID,xnat:imageSessionData/Scans/Scan/UID";
+		}
+		
+		p+="&format=xml";
+		
 		get = m_xre.PerformConnection(XNATRestAdapter.GET, p, "");
+		TreeMap<String,String[]> scanMap=new TreeMap<String,String[]>();
 		try
 		{
 			String rsp = get.getResponseBodyAsString();
@@ -317,16 +339,25 @@ public class XNATCMoveRsp
 					new SAXReader().read(get.getResponseBodyAsStream()), true,
 					"header");// bGenSearch?"header":null);
 			int i = 0;
+			
 			for (TreeMap<String, String> row : rm)
 			{
-				if (i > 0)
-					break;
-				Dataset received = XNATQueryGenerator.GetVocabulary()
-						.GetDicomEntry(row, ieWanted);
-				// patient name, id and staccessionnum
-				query.putXX(0x00100010, received.getString(0x00100010));
-				query.putXX(0x00100020, received.getString(0x00100020));
-				query.putXX(0x00080050, received.getString(0x00080050));
+				if(XNATGatewayServer.isDICOMUID())
+				{					
+					String scanUID=row.get("xnat:imagesessiondata/scans/scan/uid");
+					String[] ids={row.get("ID"),row.get("xnat:imagesessiondata/scans/scan/id")};
+					scanMap.put(scanUID,ids);
+				}
+				if (i == 0)
+				{
+					
+					Dataset received = XNATQueryGenerator.GetVocabulary()
+							.GetDicomEntry(row, ieWanted);
+					// patient name, id and staccessionnum
+					query.putXX(0x00100010, received.getString(0x00100010));
+					query.putXX(0x00100020, received.getString(0x00100020));
+					query.putXX(0x00080050, received.getString(0x00080050));
+				}
 				i++;
 			}
 			get.releaseConnection();
@@ -337,13 +368,13 @@ public class XNATCMoveRsp
 		// then, proceed with series retrieve.
 		if (ieWanted.compareTo(InformationEntity.SERIES) == 0 && bSeriesDefined)
 		{
-			files = retrieveSeries(query, true); // ??
+			files = retrieveSeries(query, true,scanMap); // ??
 		} else if ((ieWanted.compareTo(InformationEntity.STUDY) == 0 && bStudyDefined)
 				|| (ieWanted.compareTo(InformationEntity.SERIES) == 0 && !bSeriesDefined))
 		{
 			// m_sdf=null;
 			String path = XNATQueryGenerator.getRESTQuery(
-					InformationEntity.SERIES, query);
+					InformationEntity.SERIES, query,true);
 			Tools.LogMessage(Priority.INFO_INT, "REST query: " + path);
 
 			if (path == null)
@@ -390,7 +421,7 @@ public class XNATCMoveRsp
 							true);
 					if (ds.size() > 0)
 					{
-						files.addAll(retrieveSeries(ds, true));
+						files.addAll(retrieveSeries(ds, true,scanMap));
 					}
 				}
 			} catch (Exception e)

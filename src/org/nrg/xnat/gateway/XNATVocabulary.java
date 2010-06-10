@@ -67,7 +67,12 @@ public class XNATVocabulary
 
 			//synonyms for study instance uid.
 //			stMap.put("UID", "stinstuid");
-			stMap.put("ID", "stinstuid");
+			if(XNATGatewayServer.isDICOMUID())
+			{
+				stMap.put("UID","stinstuid");
+			}
+			else
+				stMap.put("ID", "stinstuid");
 //			stMap.put("session_ID","stinstuid");
 			
 			stMap.put("date", "stdate");
@@ -105,7 +110,14 @@ public class XNATVocabulary
 			}
 		} else if (ie.compareTo(InformationEntity.SERIES) == 0)
 		{
-			stMap.put("ID", "id");
+			if(!XNATGatewayServer.isDICOMUID())				
+				stMap.put("ID", "id");
+			else
+			{
+				stMap.put("xnat:imagesessiondata/scans/scan/uid","id");
+				stMap.put("xnat:imagesessiondata/scans/scan/type","series_description");
+			}
+			
 			stMap.put("xsiType", "sermodality");
 			stMap.put("subject_ID", "patid");
 			stMap.put("label", "staccessionnum");
@@ -144,7 +156,8 @@ public class XNATVocabulary
 		if(alias.compareTo("stinstuid")==0 || alias.compareTo("id")==0)
 		{
 			if(val==null) return val;
-			return Utils.String2UID(val);
+			if(XNATGatewayServer.isDICOMUID()) return val;
+			else return Utils.String2UID(val);
 		}
 		if (alias.compareTo("stmodality") == 0)
 		{
@@ -163,8 +176,11 @@ public class XNATVocabulary
 			if (val == null || val.length() < 1)
 				return val;
 			if (val.compareTo("xnat:otherDicomScanData") == 0)
-				return "OT";
+				return "OT";			
 			int ind = val.indexOf("ScanData");
+			//fix for modality
+			if(ind<0 && XNATGatewayServer.isDICOMUID())
+				ind = val.indexOf("SessionData");
 			if (ind > 5)
 			{
 				return val.substring(5, ind).toUpperCase();

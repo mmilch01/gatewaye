@@ -65,7 +65,7 @@ public class XNATCFindRsp implements MultiDimseRsp
 		} else if (ieWanted.compareTo(InformationEntity.SERIES) <= 0)
 		// else if(ieWanted.compareTo(InformationEntity.SERIES)==0)
 		{
-			String path = XNATQueryGenerator.getRESTQuery(ieWanted, m_query);
+			String path = XNATQueryGenerator.getRESTQuery(ieWanted, m_query,true);
 			Tools.LogMessage(Priority.INFO_INT, "REST query string:\n" + path);
 			if (path == null)
 			{
@@ -99,7 +99,8 @@ public class XNATCFindRsp implements MultiDimseRsp
 						.GetDicomEntry(row, ieWanted);
 				resp.putAll(received);
 				// al.putAll(received);
-				XNATQueryGenerator.GetVocabulary().modifySOPInstUID(resp, true);
+				if(!XNATGatewayServer.isDICOMUID())
+					XNATQueryGenerator.GetVocabulary().modifySOPInstUID(resp, true);
 				if (resp.size() > 0)
 					m_curLst.add(resp);
 			}

@@ -20,7 +20,7 @@ public final class Result implements Comparable<Result>
 		"Cannot start server: error reading properties file",
 		"Cannot start server: exception during server initialization"
 	};
-	public String getMessage()
+	public String toString()
 	{
 		if(status<0 || status>=desc.length)
 			return "Unknown status";

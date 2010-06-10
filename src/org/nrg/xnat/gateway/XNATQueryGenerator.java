@@ -6,6 +6,7 @@ import java.util.Iterator;
 import org.dcm4che.data.Dataset;
 import org.dcm4che.data.DcmElement;
 import org.dcm4che.data.DcmObject;
+import org.dcm4che.dict.Tags;
 import org.nrg.xdat.bean.XdatCriteriaSetBean;
 import org.nrg.xdat.bean.XdatSearchFieldBean;
 import org.nrg.xdat.bean.XdatStoredSearchBean;
@@ -48,7 +49,7 @@ public class XNATQueryGenerator
 		if (ie.compareTo(InformationEntity.SERIES) == 0)
 		{
 			// get series path
-			String path = getRESTQuery(ie, ds);
+			String path = getRESTQuery(ie, ds,false);
 			String scanID = GetValueFromAttributeList("id", ds);
 			if (scanID == null)
 				return null;
@@ -58,17 +59,32 @@ public class XNATQueryGenerator
 		return null;
 	}
 
-	public static String getRESTQuery(InformationEntity ie, Dataset query)
+	public static String getRESTQuery(InformationEntity ie, Dataset query, boolean bDefineColumns)
 	{
 		if (ie.compareTo(InformationEntity.SERIES) == 0)
 		{
-			String path = "/experiments/";
-			// get experiment ID
-			String expID = GetValueFromAttributeList("stinstuid", query);
-			if (expID == null)
-				return null;
-			path += expID + "/scans";
+			String path = "/experiments";
+			if(!XNATGatewayServer.isDICOMUID())
+			{
+				// get experiment ID
+				String expID = GetValueFromAttributeList("stinstuid", query);
+				if (expID == null)
+					return null;
+				path += "/"+expID + "/scans";
+				if(bDefineColumns) 
+					path+="&columns=xnat:imagesessiondata/scans/scan/type,";
+				else return path;
+			}
+			else
+			{
+				String uid=query.getString(Tags.StudyInstanceUID);
+				if(uid==null) return null;
+				path+="?xsiType=xnat:imageSessionData&xnat:imageSessionData/UID="+uid;
+				path+="&columns=xnat:imagesessiondata/scans/scan/uid,xnat:imagesessiondata/scans/scan/type,";
+			}
+			path+="type,xsiType,series_description,subject_ID,label,subject_label";
 			return path;
+			
 		} else if (ie.compareTo(InformationEntity.STUDY) == 0)
 		{
 			String path = "/experiments";
@@ -110,14 +126,14 @@ public class XNATQueryGenerator
 				path += (bFirst ? "?" : "&") + "subject_ID=" + patid;
 				bFirst = false;
 			}
-/*
 			if(!bFirst)
 			{
 				path+="&";
 				bFirst=false;
 			}
-			path+="columns=studyInstanceUID";
-*/			
+			if(bDefineColumns)
+				path+="columns=studyInstanceUID,subject_ID,date,xsiType,label,subject_label,ID";
+			
 			return path;
 		}
 		return null;
@@ -135,6 +151,7 @@ public class XNATQueryGenerator
 		// Attribute attr=al.get(xve.m_DICOMTag);
 		// if(attr==null) return null;
 		// if(val==null) return null;
+		if(XNATGatewayServer.isDICOMUID()) return val;
 		return XNATVocabulary.dcmToXNATField(val, xnat_field_id);
 		// attr.getSingleStringValueOrNull(),xnat_field_id);
 	}

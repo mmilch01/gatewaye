@@ -54,7 +54,7 @@ import com.pixelmed.dicom.InformationEntity;
 
 public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 {
-	private static String m_ver = "May 20, 2010";
+	private static String m_ver = "June 10, 2010";
 	// private static QueryRetrieveScpService m_qrServ;
 	private Server m_dcmServer;
 	private boolean m_srvShutdown = false;
@@ -67,9 +67,11 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 	protected static XNATGatewayServer m_this = null;
 	protected AEServer m_ael=new AEServer();
 	
-	public static final boolean bUseDICOMUIDs=true;
+	public static boolean bUseDICOMUIDs=true;
 	private boolean m_bStartFlag=false;
 
+	public static boolean isDICOMUID(){return bUseDICOMUIDs;}
+	
 	public boolean test()
 	{
 		return true;
@@ -144,6 +146,13 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 			l.setLevel(Level.toLevel(str));			
 		}
 		else l.setLevel(Level.WARN);
+		if((str=props.getProperty("Xnat.UseDICOMUIDs"))!=null)
+		{
+			if(str.toLowerCase().startsWith("1"))
+				bUseDICOMUIDs=true;
+			else bUseDICOMUIDs=false;
+		}
+		else bUseDICOMUIDs=true;
 		
 		l.info(DateFormat.getDateTimeInstance().format(new Date())+" Server started");
 				
@@ -300,17 +309,17 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 		
 		//unregister previously registered MBean's
 		unregisterMBean("org.nrg.xnat.gateway:type=AEServer");
-		unregisterMBean("org.nrg.xnat.gateway:type=AEServer");
+//		unregisterMBean("org.nrg.xnat.gateway:type=AEServer");
 		unregisterMBean("org.nrg.xnag.gateway:type=GatewayServer");
 		
 		try
 		{
 			mbs.registerMBean(m_ael, new ObjectName(
-					"org.nrg.xnat.gateway:type=AEServer"));
-			
+					"org.nrg.xnat.gateway:type=AEServer"));			
 			srv.setAEServiceName(new ObjectName(
 					"org.nrg.xnat.gateway:type=AEServer"));
-			mbs.registerMBean(this, new ObjectName(
+			
+			mbs.registerMBean(XNATGatewayServer.this, new ObjectName(
 					"org.nrg.xnag.gateway:type=GatewayServer"));
 			// srv.setDcmServerName(dcmServerName)
 			bD = new SAXReader().read(new File(
@@ -368,47 +377,56 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 		}
 		return true;
 	}
-	public static Result start()
+	public static Result start (Properties props)
 	{
-/*		try
-		{
-			Thread.sleep(30000);
-		}
-		catch(Exception e){}
-*/		
-		String propertiesFileName = 
-//			arg.length > 0 ? arg[0] :
-				"./config/gateway.properties";
-		// ?? m_qrServ.setAcceptedStandardSOPClasses(s)
-		// ?? m_qrServ.setAcceptedTransferSyntax(s)
 		try
 		{
-			Properties props = new Properties();
-			try
-			{
-				FileInputStream in = new FileInputStream(propertiesFileName);
-				props.load(in);
-				in.close();
-			} catch (IOException e)
-			{
-				Result r=Result.PROPERTIES_FILE_ERROR;
-				Tools.LogException(Priority.ERROR,
-						r.getMessage(), e);
-				return r;
-			}
 			new XNATGatewayServer(props);
 			System.err.println("XNAT/DICOM gateway, "+ m_ver);
 			props.put(XnatServerProperties.XNATPass, "*****");
 			System.err.println("properties=" + props);
-		} catch (Exception e)
+		}
+		catch (Exception e)
 		{
 			Result r = Result.INITIALIZATION_EXCEPTION;
 			Tools.LogException(Priority.ERROR, 
-					r.getMessage(), e);
+					r.toString(), e);
 			return r;
 		}
 		getInstance().m_bStartFlag=true;
-		return Result.SERVER_STARTED;
+		return Result.SERVER_STARTED;		
+	}
+	
+	private static Properties loadProperties()
+	throws Exception
+	{
+		String propertiesFileName = 
+//			arg.length > 0 ? arg[0] :
+				"./config/gateway.properties";
+		Properties props=new Properties();
+		FileInputStream in = new FileInputStream(propertiesFileName);
+		props.load(in);
+		in.close();			
+		return props; 
+	}
+
+	public static Result start()
+	{
+		String propertiesFileName = 
+				"./config/gateway.properties";
+		Properties props;
+		try
+		{
+			props = loadProperties();
+		}
+		catch (Exception e)
+		{
+			Result r=Result.PROPERTIES_FILE_ERROR;
+			Tools.LogException(Priority.ERROR,
+					r.toString(), e);
+			return r;
+		}
+		return start(props);
 	}
 	public static Result stop()
 	{
@@ -425,13 +443,14 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 	
 	public static void main(String arg[])
 	{
-//		start();
-		
+		System.err.println(start());
+
+/*		
 		System.err.println("Server startup/shutdown test");
 		for(int i=0; i<3; i++)
 		{
 			Result r=start();
-			System.err.println(r.getMessage());
+			System.err.println(r);
 			try
 			{
 				Thread.sleep(10000);
@@ -439,7 +458,7 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 			catch(Exception e){}
 			
 			r=stop();
-			System.err.println(r.getMessage());
+			System.err.println(r);
 			try
 			{
 				Thread.sleep(10000);
@@ -447,6 +466,7 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 			catch(Exception e){}
 		}
 		System.err.println("End of test");
+*/		
 	}
 	@Override
 	protected void finalize() throws Throwable
