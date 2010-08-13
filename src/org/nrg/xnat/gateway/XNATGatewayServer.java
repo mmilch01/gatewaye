@@ -19,6 +19,8 @@ import java.util.zip.ZipInputStream;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
+import javax.rmi.CORBA.Util;
+import javax.swing.JOptionPane;
 
 import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.log4j.Appender;
@@ -49,14 +51,20 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.nrg.xnat.desktop.tools.XNATTableParser;
+import org.nrg.xnat.desktop.utils.Utils;
+import org.nrg.xnat.env.GatewayEnvironment;
+import org.nrg.xnat.env.IncomingAE;
+import org.nrg.xnat.env.XNATServer;
+import org.nrg.xnat.gui.GUIUtils;
+import org.nrg.xnat.gui.InitialProperties;
 import org.nrg.xnat.repository.XNATRestAdapter;
 import com.pixelmed.dicom.InformationEntity;
 
 public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 {
-	private static String m_ver = "June 10, 2010";
+	private static String m_ver = "Aug 18, 2010";
 	// private static QueryRetrieveScpService m_qrServ;
-	private Server m_dcmServer;
+	private Server m_dcmServer;	
 	private boolean m_srvShutdown = false;
 
 	protected long m_RandSeed = 0;
@@ -68,7 +76,29 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 	protected AEServer m_ael=new AEServer();
 	
 	public static boolean bUseDICOMUIDs=true;
+	private static boolean bConsole=false;
+	
 	private boolean m_bStartFlag=false;
+	private long start_time = 0;
+	
+    public void set_start_flag (boolean b) 
+    {
+        this.m_bStartFlag = b;
+    }
+    public boolean is_running () 
+    {
+        return this.m_bStartFlag;
+    }
+
+    public String uptime () 
+    {
+        long now = new Date().getTime();
+        return org.nrg.xnat.util.Utils.print_elapsed_time(now - start_time);
+    }
+
+    public long get_start_time () {
+        return this.start_time;
+    }
 
 	public static boolean isDICOMUID(){return bUseDICOMUIDs;}
 	
@@ -116,55 +146,24 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 		return rsp;
 	}
 
-	public XNATGatewayServer(Properties props) throws Exception
+	public XNATGatewayServer(GatewayEnvironment env) throws Exception
 	{
 		if(!test()) return;
-		Logger l=Logger.getRootLogger();
-		BasicConfigurator.configure(
-				new NullAppender());
+		Logger l=env.make_logger();
 		
-		Appender appender=null;
-		SimpleLayout layout=new SimpleLayout();
-		try
-		{
-			if(props.getProperty("Logger.Output").toLowerCase().compareTo("file")==0)
-				appender=new FileAppender(layout,"./gateway.log",false);
-			else 
-				appender=new ConsoleAppender(layout);
-//			m_maxCacheFiles=Integer.parseInt(props.getProperty("Application.FilesInCache"));
-		}
-		catch(Exception e)
-		{
-			if(appender==null)
-				appender=new ConsoleAppender(layout);
-		}
-
-		l.addAppender(appender);
-		String str;
-		if((str=props.getProperty("Dicom.DebugLevel"))!=null)
-		{
-			l.setLevel(Level.toLevel(str));			
-		}
-		else l.setLevel(Level.WARN);
-		if((str=props.getProperty("Xnat.UseDICOMUIDs"))!=null)
-		{
-			if(str.toLowerCase().startsWith("1"))
-				bUseDICOMUIDs=true;
-			else bUseDICOMUIDs=false;
-		}
-		else bUseDICOMUIDs=true;
+		bUseDICOMUIDs=env.isdcmuid();		
 		
 		l.info(DateFormat.getDateTimeInstance().format(new Date())+" Server started");
-				
+
 		QueryRetrieveScpService srv = new QueryRetrieveScpService();
 		if(!initServerParams(srv)) throw new IOException();
 
-		str=props.getProperty("Dicom.CallingAETitle");
+		String str=env.get_callingaetitle();
 		if(str==null)	throw new IOException();
-		srv.setCalledAETs(str);
-		// srv.setCallingAETs(props.getProperty("Dicom.CalledAETitile"));
+		srv.setCalledAETs(str);		
+		
 		srv.setCoerceRequestPatientIds(true);
-		initRemoteAEs(props);
+		initRemoteAEs(env);
 		
 		String aets = m_ael.getAETList();
 		if(aets!=null)
@@ -172,14 +171,22 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 			aets = aets.replace(' ', '\\');
 			srv.setCallingAETs(aets);		
 		}
-		// srv.setAcceptedStandardSOPClasses(s)			
-		// srv.setDcmServerName(new ObjectName("GatewayDcmQRSCP"));
+		else 
+		{
+			if(!bConsole)
+				JOptionPane.showMessageDialog(null, "No remote AEs are configured.\nPlease configure every DICOM AE you plan to use with Gateway.");
+			else
+			{
+				l.error("Error: No remote AEs are configured");
+				throw new IOException("No remote AEs are configured");				
+			}
+		}			
 		srv.startService();
+		
 		m_dcmServer = ServerFactory.getInstance()
 				.newServer(srv.getDcmHandler());
-		m_dcmServer.setPort(Integer.valueOf(
-				props.getProperty("Dicom.ListeningPort")).intValue());
-		m_StoreFolder = props.getProperty("Application.SavedImagesFolderName");
+		m_dcmServer.setPort(env.get_listening_port());
+		m_StoreFolder = env.get_cache_folder();
 		
 		File sf = new File(m_StoreFolder);
 		if (!sf.exists())
@@ -190,32 +197,20 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 			for(File f:new File(m_StoreFolder).listFiles()) f.delete();
 		}
 		finally{}
+		XNATServer xs=env.get_default_server();
+		if(xs==null || !xs.isValid())
+			throw new IOException ("Incorrect XNAT server configuration");
 		
-		m_XNATServer = props.getProperty(XnatServerProperties.XNATServerURL);
-		m_XNATUser = props.getProperty(XnatServerProperties.XNATUser);
-		m_XNATPass = props.getProperty(XnatServerProperties.XNATPass);
-		m_AETitle = props.getProperty(XnatServerProperties.AETitle);
-		if(m_XNATServer==null || m_XNATUser==null || m_XNATPass==null || m_AETitle==null) 
-			throw new IOException();
-		
-		// clean up from the previous run
-		try
-		{
-			for (File f : new File(m_StoreFolder).listFiles())
-				f.delete();
-		} finally
-		{
-		}
+		m_XNATServer = xs.getHostname();		
+		m_XNATUser = xs.getUsername();
+		m_XNATPass = xs.getPassword();
+		m_AETitle = env.get_calledae_title();		
 		m_this = this;
 		// m_dcmServer.start();
 		
-		m_localAE=new AEDTO(0,
-				m_AETitle,
-				"localhost",
-				Integer.parseInt(props.getProperty("Dicom.ListeningPort")),				
+		m_localAE=new AEDTO(0, m_AETitle, "localhost", env.get_listening_port(),				
 				"", "", "", "", "","", "");
 		m_ael.setLocalAE(m_localAE);
-//		m_ael=new AEServer(m_localAE);
 		srv.setAEManager(
 				new AEManager()
 				{
@@ -238,39 +233,15 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 		);
 
 		XNATQueryGenerator.LoadVocabulary("./config/vocabulary.xml");
-
-		new Thread(this).start();
-		// ?? srv.setPerfMonServiceName(perfMonServiceName)
-		// XNATQueryGenerator.LoadVocabulary("./config/vocabulary.xml");
-		// new Thread(new SCPServerRunnable(srv)).start();
+		start_time = new Date().getTime();		
+		new Thread(this).start();		
 	}
-	private void initRemoteAEs(Properties p)
+	private void initRemoteAEs(GatewayEnvironment env)
 	{
-		try
-		{
-			String[] aliases = p.getProperty("Dicom.RemoteAEs").split(" ");
-			String aet, host;
-			int port;
-			for (String alias : aliases)
-			{
-				try
-				{
-					aet = p.getProperty("Dicom.RemoteAEs." + alias
-							+ ".CalledAETitle");
-					host = p.getProperty("Dicom.RemoteAEs." + alias
-							+ ".HostNameOrIPAddress");
-					port = new Integer(p.getProperty("Dicom.RemoteAEs." + alias
-							+ ".Port")).intValue();
-				} catch (Exception e)
-				{
-					continue;
-				}
-				m_ael.addAE(new AEDTO(0, aet, host, port, "", "", "", "", "",
-						"", ""));
-			}
-		} catch (Exception e)
-		{
-		}
+		IncomingAE [] aes=env.get_all_incomingaes();
+		for(IncomingAE ae: aes)
+			m_ael.addAE(new AEDTO(0, ae.getCalledAETitle(), ae.getHostname(), ae.getPort(),
+					"", "", "", "", "",	"", ""));
 	}
 	public void run()
 	{
@@ -278,12 +249,13 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 		{
 			m_dcmServer.start();
 			while (!m_srvShutdown)
-			{
 				Thread.sleep(100);
-			}
 		} catch (Exception e)
 		{
-			System.err.println(e);
+			if(bConsole) 
+	            GUIUtils.warn("Server startup error! \n" + e.getMessage(), "Startup error");
+			else 
+				System.err.println("Server startup error! \n" + e.getMessage());
 		}
 		finally
 		{
@@ -302,6 +274,7 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 	}
 	
 	private boolean initServerParams(QueryRetrieveScpService srv)
+	throws Exception 
 	{
 		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
 		Document bD;
@@ -309,26 +282,20 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 		
 		//unregister previously registered MBean's
 		unregisterMBean("org.nrg.xnat.gateway:type=AEServer");
-//		unregisterMBean("org.nrg.xnat.gateway:type=AEServer");
 		unregisterMBean("org.nrg.xnag.gateway:type=GatewayServer");
 		
-		try
-		{
-			mbs.registerMBean(m_ael, new ObjectName(
-					"org.nrg.xnat.gateway:type=AEServer"));			
-			srv.setAEServiceName(new ObjectName(
-					"org.nrg.xnat.gateway:type=AEServer"));
-			
-			mbs.registerMBean(XNATGatewayServer.this, new ObjectName(
-					"org.nrg.xnag.gateway:type=GatewayServer"));
+		mbs.registerMBean(m_ael, new ObjectName(
+				"org.nrg.xnat.gateway:type=AEServer"));
+		srv.setAEServiceName(new ObjectName(
+				"org.nrg.xnat.gateway:type=AEServer"));
+		
+		mbs.registerMBean(XNATGatewayServer.this, new ObjectName(
+				"org.nrg.xnag.gateway:type=GatewayServer"));
 			// srv.setDcmServerName(dcmServerName)
-			bD = new SAXReader().read(new File(
-					"./config/dcm4chee-qrscp-xmbean.xml"));
-			vD = new SAXReader().read(new File("./config/qrscp-config.xml"));
-		} catch (Exception e)
-		{
-			return false;
-		}
+		bD = new SAXReader().read(new File(
+				"./config/dcm4chee-qrscp-xmbean.xml"));
+		vD = new SAXReader().read(new File("./config/qrscp-config.xml"));
+		
 		final class MAttr
 		{
 			String name, getMethod, setMethod, type;
@@ -377,57 +344,53 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 		}
 		return true;
 	}
-	public static Result start (Properties props)
+	public static XNATGatewayServer start(Properties p, final GatewayEnvironment env)
 	{
+		XNATGatewayServer s = null;		
 		try
 		{
-			new XNATGatewayServer(props);
-			System.err.println("XNAT/DICOM gateway, "+ m_ver);
-			props.put(XnatServerProperties.XNATPass, "*****");
-			System.err.println("properties=" + props);
+			s = new XNATGatewayServer(env);
+			if(bConsole)
+			{
+				System.err.println("XNAT/DICOM gateway, "+ m_ver);
+				p.put(XnatServerProperties.XNATPass, "*****");
+				System.err.println("properties=" + p);
+			}
 		}
 		catch (Exception e)
 		{
 			Result r = Result.INITIALIZATION_EXCEPTION;
 			Tools.LogException(Priority.ERROR, 
 					r.toString(), e);
-			return r;
+			return null;
 		}
-		getInstance().m_bStartFlag=true;
-		return Result.SERVER_STARTED;		
+		s.m_bStartFlag=true;
+		return s;		
 	}
-	
-	private static Properties loadProperties()
-	throws Exception
+	public static Result start(String prop)
 	{
-		String propertiesFileName = 
-//			arg.length > 0 ? arg[0] :
-				"./config/gateway.properties";
-		Properties props=new Properties();
-		FileInputStream in = new FileInputStream(propertiesFileName);
-		props.load(in);
-		in.close();			
-		return props; 
-	}
-
-	public static Result start()
-	{
-		String propertiesFileName = 
-				"./config/gateway.properties";
-		Properties props;
+		GatewayEnvironment env;
 		try
 		{
-			props = loadProperties();
+			env=new GatewayEnvironment(new File(prop));
 		}
-		catch (Exception e)
+		catch(Exception e)
 		{
-			Result r=Result.PROPERTIES_FILE_ERROR;
-			Tools.LogException(Priority.ERROR,
-					r.toString(), e);
-			return r;
+			return Result.PROPERTIES_FILE_ERROR;
 		}
-		return start(props);
+		XNATGatewayServer srv;
+		try
+		{
+			srv=new XNATGatewayServer(env);
+		}
+		catch(Exception e)
+		{
+			return Result.INITIALIZATION_EXCEPTION;
+		}
+		srv.m_bStartFlag=true;
+		return Result.SERVER_STARTED;
 	}
+	
 	public static Result stop()
 	{
 		getInstance().m_srvShutdown=true;
@@ -441,32 +404,22 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 		return Result.SERVER_STOPPED;
 	}
 	
-	public static void main(String arg[])
+	public static void main(String arg[]) throws IOException
 	{
-		System.err.println(start());
-
-/*		
-		System.err.println("Server startup/shutdown test");
-		for(int i=0; i<3; i++)
-		{
-			Result r=start();
-			System.err.println(r);
-			try
-			{
-				Thread.sleep(10000);
-			}
-			catch(Exception e){}
-			
-			r=stop();
-			System.err.println(r);
-			try
-			{
-				Thread.sleep(10000);
-			}
-			catch(Exception e){}
+		String propFile="/config/gateway.properties";
+		if((arg.length>0) && (arg[0].toLowerCase().compareTo("console")==0 
+				|| arg[0].toLowerCase().compareTo("c")==0))
+			bConsole=true;
+		else
+			bConsole=false;
+		if(bConsole)
+		{			
+			System.err.println(start(propFile));
 		}
-		System.err.println("End of test");
-*/		
+		else
+		{
+			InitialProperties i = new InitialProperties(new File(propFile));
+		}
 	}
 	@Override
 	protected void finalize() throws Throwable
