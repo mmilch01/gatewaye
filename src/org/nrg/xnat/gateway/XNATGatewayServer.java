@@ -406,7 +406,6 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 	
 	public static void main(String arg[]) throws IOException
 	{
-		String propFile="/config/gateway.properties";
 		if((arg.length>0) && (arg[0].toLowerCase().compareTo("console")==0 
 				|| arg[0].toLowerCase().compareTo("c")==0))
 			bConsole=true;
@@ -414,11 +413,11 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 			bConsole=false;
 		if(bConsole)
 		{			
-			System.err.println(start(propFile));
+			System.err.println(start("/config/gateway.properties"));
 		}
 		else
 		{
-			InitialProperties i = new InitialProperties(new File(propFile));
+			InitialProperties i = new InitialProperties(new File("./config/gateway.properties.test"));
 		}
 	}
 	@Override
