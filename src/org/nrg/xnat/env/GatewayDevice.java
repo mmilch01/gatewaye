@@ -3,6 +3,7 @@ package org.nrg.xnat.env;
 import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
+
 import org.nrg.xnat.env.GatewayEnvironment.Log;
 import org.nrg.xnat.util.Utils;
 

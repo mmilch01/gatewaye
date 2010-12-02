@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
+
 import org.nrg.xnat.env.GatewayEnvironment.Log;
 import org.nrg.xnat.util.Utils;
 

@@ -8,7 +8,9 @@ package org.nrg.xnat.gui;
 
 import java.io.IOException;
 import java.util.Properties;
+
 import javax.swing.JOptionPane;
+
 import org.nrg.xnat.util.Utils;
 
 /**

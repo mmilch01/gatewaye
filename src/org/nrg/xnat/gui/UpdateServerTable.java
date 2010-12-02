@@ -2,8 +2,10 @@ package org.nrg.xnat.gui;
 
 import java.io.IOException;
 import java.util.Vector;
+
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
+
 import org.nrg.xnat.env.DefaultDeviceDeleteException;
 import org.nrg.xnat.env.GatewayEnvironment;
 import org.nrg.xnat.env.IncompleteEntryException;

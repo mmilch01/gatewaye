@@ -5,24 +5,16 @@
 
 package org.nrg.xnat.gui;
 
-import org.nrg.xnat.gateway.XNATGatewayServer;
-import org.nrg.xnat.gui.About;
-import org.nrg.xnat.gui.Connect;
-import org.nrg.xnat.gui.XNATServers;
-import org.nrg.xnat.gui.Log;
-import org.nrg.xnat.gui.XNATServerProperties;
-import org.nrg.xnat.gui.About;
-
-import java.awt.SystemTray;
-import java.awt.TrayIcon;
-import java.awt.Image;
-import java.awt.Toolkit;
 import java.awt.AWTException;
-import javax.swing.JPopupMenu;
-import javax.swing.JMenuItem;
-import java.awt.event.ActionListener;
+import java.awt.Image;
+import java.awt.SystemTray;
+import java.awt.Toolkit;
+import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 import org.nrg.xnat.env.GatewayEnvironment;
+import org.nrg.xnat.gateway.XNATGatewayServer;
 /**
  *
  * @author deech

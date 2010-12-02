@@ -12,7 +12,8 @@
  */
 
 package EDU.oswego.cs.dl.util.concurrent;
-import java.util.*;
+import java.util.Comparator;
+import java.util.SortedMap;
 
 /**
  * SyncSortedMaps wrap Sync-based control around java.util.SortedMaps. They

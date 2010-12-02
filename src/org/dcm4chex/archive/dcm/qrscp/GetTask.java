@@ -56,8 +56,8 @@ import org.dcm4che.net.Association;
 import org.dcm4che.net.AssociationFactory;
 import org.dcm4che.net.Dimse;
 import org.dcm4che.net.DimseListener;
-import org.dcm4chex.archive.common.Availability; //import org.dcm4chex.archive.ejb.jdbc.RetrieveCmd;
-import org.dcm4chex.archive.exceptions.NoPresContextException; //!!import org.jboss.logging.Logger;
+import org.dcm4chex.archive.common.Availability;
+import org.dcm4chex.archive.exceptions.NoPresContextException;
 import org.nrg.xnat.gateway.FileInfo;
 
 /**

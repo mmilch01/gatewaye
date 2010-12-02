@@ -3,7 +3,6 @@ package org.nrg.xnat.gateway;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
@@ -15,15 +14,11 @@ import java.util.zip.ZipInputStream;
 import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.log4j.Priority;
 import org.dcm4che.data.Dataset;
-import org.dcm4che.data.DcmDecodeParam;
 import org.dcm4che.data.DcmObjectFactory;
-import org.dcm4che.data.DcmParser;
-import org.dcm4che.data.DcmParserFactory;
-import org.dcm4che.data.FileMetaInfo;
 import org.dcm4che.dict.Tags;
 import org.dom4j.io.SAXReader;
-import org.nrg.xnat.desktop.tools.XNATTableParser;
-import org.nrg.xnat.repository.XNATRestAdapter;
+import org.nrg.fileserver.XNATRestAdapter;
+import org.nrg.xnd.ontology.XNATTableParser;
 
 import com.pixelmed.dicom.InformationEntity;
 

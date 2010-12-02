@@ -12,7 +12,10 @@
  */
 
 package EDU.oswego.cs.dl.util.concurrent;
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 
 /**
  * SyncLists wrap Sync-based control around java.util.Lists. They support the

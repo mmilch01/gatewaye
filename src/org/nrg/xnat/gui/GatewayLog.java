@@ -7,6 +7,7 @@ package org.nrg.xnat.gui;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+
 import org.nrg.xnat.env.GatewayEnvironment;
 
 /**

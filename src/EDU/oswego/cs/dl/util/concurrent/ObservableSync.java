@@ -12,7 +12,7 @@
  */
 
 package EDU.oswego.cs.dl.util.concurrent;
-import java.util.*;
+import java.util.Iterator;
 
 /**
  * The ObservableSync class performs no synchronization itself, but invokes

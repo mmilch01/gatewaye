@@ -7,7 +7,6 @@ import org.apache.log4j.Logger;
 import org.dcm4che.net.ActiveAssociation;
 import org.dcm4che.net.Association;
 import org.dcm4che.net.Dimse;
-//!!import org.jboss.system.ServiceMBeanSupport;
 
 /**
  * This delegate passes all method calls to the real performance monitoring

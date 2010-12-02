@@ -12,7 +12,9 @@
  */
 
 package EDU.oswego.cs.dl.util.concurrent;
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * SyncMaps wrap Sync-based control around java.util.Maps. They operate in the

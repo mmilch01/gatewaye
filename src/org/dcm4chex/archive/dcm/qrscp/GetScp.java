@@ -39,11 +39,8 @@ package org.dcm4chex.archive.dcm.qrscp;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.management.ObjectName;
-import javax.security.auth.Subject;
 
 import org.apache.log4j.Logger;
 import org.dcm4che.data.Command;
@@ -55,9 +52,6 @@ import org.dcm4che.net.Association;
 import org.dcm4che.net.DcmServiceBase;
 import org.dcm4che.net.DcmServiceException;
 import org.dcm4che.net.Dimse;
-import org.dcm4chex.archive.ejb.interfaces.StudyPermissionDTO; //import org.dcm4chex.archive.ejb.jdbc.RetrieveCmd;
-//import org.dcm4chex.archive.ejb.interfaces.StudyPermissionManager;
-//import org.jboss.logging.Logger;
 import org.nrg.xnat.gateway.FileInfo;
 
 /**

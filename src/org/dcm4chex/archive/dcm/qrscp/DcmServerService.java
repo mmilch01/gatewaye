@@ -40,7 +40,6 @@ package org.dcm4chex.archive.dcm.qrscp;
  * ***** END LICENSE BLOCK ***** */
 
 import javax.management.MBeanServer;
-import javax.management.Notification;
 import javax.management.ObjectName;
 
 import org.dcm4che.net.AcceptorPolicy;
@@ -50,10 +49,8 @@ import org.dcm4che.net.UserIdentityNegotiator;
 import org.dcm4che.server.DcmHandler;
 import org.dcm4che.server.Server;
 import org.dcm4che.server.ServerFactory;
-import org.dcm4che.util.DcmProtocol; //import org.dcm4chex.archive.mbean.DicomSecurityDelegate;
+import org.dcm4che.util.DcmProtocol;
 import org.dcm4chex.archive.mbean.TLSConfigDelegate;
-import org.dcm4chex.archive.notif.CallingAetChanged;
-//!!import org.jboss.system.ServiceMBeanSupport;
 
 /**
  * @author Gunter.Zeilinger@tiani.com

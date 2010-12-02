@@ -43,7 +43,6 @@ import java.io.File;
 import java.io.Serializable;
 
 import org.dcm4che.data.Dataset;
-import org.dcm4che.data.FileMetaInfo;
 import org.dcm4che.dict.Tags;
 import org.dcm4chex.archive.common.Availability;
 

@@ -1,10 +1,12 @@
 package org.nrg.xnat.gui;
 
-import org.nrg.xnat.gateway.XNATGatewayServer;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.swing.JLabel;
+
+import org.nrg.xnat.gateway.XNATGatewayServer;
 
 /**
  *

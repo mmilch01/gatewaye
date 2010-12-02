@@ -49,7 +49,6 @@ import java.util.regex.Pattern;
 
 import javax.management.ObjectName;
 import javax.security.auth.Subject;
-import javax.xml.transform.Templates;
 
 import org.apache.log4j.Logger;
 import org.dcm4che.data.Command;
@@ -66,13 +65,11 @@ import org.dcm4che.net.DcmServiceBase;
 import org.dcm4che.net.DcmServiceException;
 import org.dcm4che.net.Dimse;
 import org.dcm4che.net.DimseListener;
-import org.dcm4che.net.PDU; //import org.dcm4chex.archive.ejb.jdbc.QueryCmd;
-
+import org.dcm4che.net.PDU;
 import org.dcm4chex.archive.perf.PerfCounterEnum;
 import org.dcm4chex.archive.perf.PerfMonDelegate;
 import org.dcm4chex.archive.perf.PerfPropertyEnum;
 import org.nrg.xnat.gateway.XNATGatewayServer;
-//!!import org.jboss.logging.Logger;
 
 /**
  * @author Gunter.Zeilinger@tiani.com

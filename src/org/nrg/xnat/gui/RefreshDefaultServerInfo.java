@@ -1,6 +1,7 @@
 package org.nrg.xnat.gui;
 
 import javax.swing.JLabel;
+
 import org.nrg.xnat.env.GatewayEnvironment;
 
 /**

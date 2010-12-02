@@ -40,8 +40,6 @@ package org.dcm4chex.archive.common;
 
 import java.io.Serializable;
 
-import org.dcm4chex.archive.common.BaseJmsOrder;
-
 /**
  * JMS order for purging a study
  * 

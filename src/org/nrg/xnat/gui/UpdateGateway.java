@@ -1,8 +1,10 @@
 package org.nrg.xnat.gui;
 
 import java.io.IOException;
-import org.nrg.xnat.env.GatewayEnvironment;
+
 import javax.swing.JLabel;
+
+import org.nrg.xnat.env.GatewayEnvironment;
 
 
 /**

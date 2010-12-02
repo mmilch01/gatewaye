@@ -67,11 +67,11 @@ import org.dcm4che.net.AssociationFactory;
 import org.dcm4che.net.DcmServiceException;
 import org.dcm4che.net.Dimse;
 import org.dcm4che.net.DimseListener;
-import org.dcm4che.net.PDU; //!!import org.dcm4chex.archive.common.Availability;
-import org.dcm4chex.archive.ejb.interfaces.AEDTO; //import org.dcm4chex.archive.ejb.jdbc.RetrieveCmd;
+import org.dcm4che.net.PDU;
+import org.dcm4chex.archive.ejb.interfaces.AEDTO;
 import org.dcm4chex.archive.perf.PerfCounterEnum;
 import org.dcm4chex.archive.perf.PerfMonDelegate;
-import org.dcm4chex.archive.perf.PerfPropertyEnum; //!!import org.jboss.logging.Logger;
+import org.dcm4chex.archive.perf.PerfPropertyEnum;
 import org.nrg.xnat.gateway.FileInfo;
 
 /**

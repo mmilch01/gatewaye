@@ -54,7 +54,6 @@ import org.dcm4che.data.DcmParser;
 import org.dcm4che.data.DcmParserFactory;
 import org.dcm4che.data.FileFormat;
 import org.dcm4che.dict.Tags;
-//!!import org.jboss.system.server.ServerConfigLocator;
 
 /**
  * @author gunter.zeilinger@tiani.com

@@ -12,7 +12,7 @@
  */
 
 package EDU.oswego.cs.dl.util.concurrent;
-import java.lang.reflect.*;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * A class maintaining a single reference variable serving as the result of an

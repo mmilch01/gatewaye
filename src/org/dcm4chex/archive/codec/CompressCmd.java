@@ -77,7 +77,6 @@ import org.dcm4che.dict.UIDs;
 import org.dcm4che.dict.VRs;
 import org.dcm4che.util.BufferedOutputStream;
 import org.dcm4cheri.image.ImageWriterFactory;
-import org.dcm4chex.archive.common.DatasetUtils;
 import org.nrg.xnat.gateway.FileInfo;
 
 import com.sun.media.imageio.plugins.jpeg2000.J2KImageWriteParam;

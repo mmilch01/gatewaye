@@ -7,6 +7,7 @@ package org.nrg.xnat.env;
 
 import java.util.Properties;
 import java.util.Vector;
+
 import org.nrg.xnat.util.Utils;
 
 /**

@@ -12,7 +12,7 @@
  */
 
 package EDU.oswego.cs.dl.util.concurrent;
-import java.util.*;
+import java.util.Set;
 
 /**
  * SyncSets wrap Sync-based control around java.util.Sets. They support two

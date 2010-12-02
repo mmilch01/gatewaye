@@ -67,8 +67,6 @@ import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.sax.TransformerHandler;
 
 import org.apache.log4j.Logger;
-import org.dcm4che.auditlog.AuditLoggerFactory;
-import org.dcm4che.auditlog.RemoteNode;
 import org.dcm4che.data.Dataset;
 import org.dcm4che.data.DcmElement;
 import org.dcm4che.data.DcmObject;
@@ -86,23 +84,12 @@ import org.dcm4che.net.UserIdentityNegotiator;
 import org.dcm4che.server.DcmHandler;
 import org.dcm4che.server.ServerFactory;
 import org.dcm4che.util.DTFormat;
-import org.dcm4che2.audit.message.AuditMessage;
-import org.dcm4che2.audit.message.QueryMessage;
 import org.dcm4cheri.util.StringUtils;
-import org.dcm4chex.archive.common.DatasetUtils;
 import org.dcm4chex.archive.common.PatientMatching;
-import org.dcm4chex.archive.ejb.interfaces.AEDTO; //!!import org.dcm4chex.archive.ejb.interfaces.AEManager;
-//!!import org.dcm4chex.archive.ejb.interfaces.AEManagerHome;
-//!!import org.dcm4chex.archive.ejb.interfaces.StudyPermissionManager;
-//!!import org.dcm4chex.archive.ejb.interfaces.StudyPermissionManagerHome;
-import org.dcm4chex.archive.exceptions.UnknownAETException; //import org.dcm4chex.archive.mbean.AuditLoggerDelegate;
-//!!import org.dcm4chex.archive.mbean.TemplatesDelegate;
+import org.dcm4chex.archive.ejb.interfaces.AEDTO;
 import org.dcm4chex.archive.notif.AetChanged;
-import org.dcm4chex.archive.notif.CallingAetChanged; //!!import org.dcm4chex.archive.util.EJBHomeFactory;
+import org.dcm4chex.archive.notif.CallingAetChanged;
 import org.dcm4chex.archive.util.XSLTUtils;
-//!!import org.jboss.logging.Logger;
-//!!import org.jboss.system.ServiceMBeanSupport;
-//!!import org.jboss.system.server.ServerConfigLocator;
 
 /**
  * @author Gunter.Zeilinger@tiani.com

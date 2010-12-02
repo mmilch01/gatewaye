@@ -1,7 +1,5 @@
 package org.nrg.xnat.env;
 
-import org.nrg.xnat.util.NonExistentEntryException;
-import org.nrg.xnat.util.DuplicateEntryException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -12,6 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Appender;
@@ -19,11 +18,13 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.FileAppender;
 import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.apache.log4j.Priority;
 import org.apache.log4j.SimpleLayout;
-import org.apache.log4j.Logger;
 import org.apache.log4j.varia.NullAppender;
 import org.nrg.xnat.gateway.Tools;
+import org.nrg.xnat.util.DuplicateEntryException;
+import org.nrg.xnat.util.NonExistentEntryException;
 import org.nrg.xnat.util.Utils;
 
 /**

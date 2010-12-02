@@ -17,14 +17,14 @@
 
 package EDU.oswego.cs.dl.util.concurrent;
 
-import java.beans.VetoableChangeListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyVetoException;
-import java.util.HashMap;
-import java.io.Serializable;
-import java.io.ObjectOutputStream;
-import java.io.ObjectInputStream;
+import java.beans.VetoableChangeListener;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.HashMap;
 
 /**
  * This class is interoperable with java.beans.VetoableChangeSupport, but relies

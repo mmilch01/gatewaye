@@ -14,7 +14,8 @@
  */
 
 package EDU.oswego.cs.dl.util.concurrent;
-import java.lang.reflect.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Abstract class for channels that use Semaphores to control puts and takes.

@@ -2,6 +2,7 @@ package org.nrg.xnat.gui;
 
 import java.util.ListIterator;
 import java.util.Vector;
+
 import javax.swing.JFrame;
 
 /**

@@ -12,7 +12,8 @@
  */
 
 package EDU.oswego.cs.dl.util.concurrent;
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * SyncCollections wrap Sync-based control around java.util.Collections. They

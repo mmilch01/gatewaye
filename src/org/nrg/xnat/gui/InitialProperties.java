@@ -1,12 +1,14 @@
 
 package org.nrg.xnat.gui;
 
-import org.nrg.xnat.gateway.XNATGatewayServer;
 import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
+
 import javax.swing.JOptionPane;
+
 import org.nrg.xnat.env.GatewayEnvironment;
+import org.nrg.xnat.gateway.XNATGatewayServer;
 
 /**
  *

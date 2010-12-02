@@ -12,7 +12,9 @@
  */
 
 package EDU.oswego.cs.dl.util.concurrent;
-import java.util.*;
+import java.util.AbstractSet;
+import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * This class implements a java.util.Set that uses a CopyOnWriteArrayList for

@@ -1,11 +1,8 @@
 package org.nrg.xnat.gateway;
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
-import java.net.InetAddress;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -14,34 +11,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.TreeMap;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import javax.rmi.CORBA.Util;
 import javax.swing.JOptionPane;
 
-import org.apache.commons.httpclient.HttpMethodBase;
-import org.apache.log4j.Appender;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.FileAppender;
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.Priority;
-import org.apache.log4j.SimpleLayout;
-import org.apache.log4j.varia.NullAppender;
-import org.dcm4che.data.Command;
 import org.dcm4che.data.Dataset;
-import org.dcm4che.data.DcmObjectFactory;
-import org.dcm4che.dict.Status;
-import org.dcm4che.dict.Tags;
-import org.dcm4che.net.ActiveAssociation;
-import org.dcm4che.net.DcmServiceException;
-import org.dcm4che.net.Dimse;
-import org.dcm4che.net.DimseListener;
-import org.dcm4che.net.DcmServiceBase.MultiDimseRsp;
 import org.dcm4che.server.Server;
 import org.dcm4che.server.ServerFactory;
 import org.dcm4chex.archive.dcm.qrscp.AEManager;
@@ -50,15 +27,11 @@ import org.dcm4chex.archive.ejb.interfaces.AEDTO;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
-import org.nrg.xnat.desktop.tools.XNATTableParser;
-import org.nrg.xnat.desktop.utils.Utils;
 import org.nrg.xnat.env.GatewayEnvironment;
 import org.nrg.xnat.env.IncomingAE;
 import org.nrg.xnat.env.XNATServer;
 import org.nrg.xnat.gui.GUIUtils;
 import org.nrg.xnat.gui.InitialProperties;
-import org.nrg.xnat.repository.XNATRestAdapter;
-import com.pixelmed.dicom.InformationEntity;
 
 public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 {

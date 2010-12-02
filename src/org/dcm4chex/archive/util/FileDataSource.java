@@ -63,7 +63,6 @@ import org.dcm4che.dict.VRs;
 import org.dcm4che.net.DataSource;
 import org.dcm4che.util.UIDGenerator;
 import org.dcm4chex.archive.codec.DecompressCmd;
-//!!import org.jboss.logging.Logger;
 
 /**
  * @author Gunter.Zeilinger@tiani.com

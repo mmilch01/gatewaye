@@ -6,16 +6,10 @@ import java.util.TreeMap;
 import org.dcm4che.data.Dataset;
 import org.dcm4che.data.DcmObjectFactory;
 import org.dcm4che.dict.Tags;
-import org.dcm4chex.archive.common.DatasetUtils;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
-/*
- import com.pixelmed.dicom.Attribute;
- import com.pixelmed.dicom.AttributeList;
- import com.pixelmed.dicom.AttributeTag;
- */
 import com.pixelmed.dicom.InformationEntity;
 
 public class XNATVocabulary

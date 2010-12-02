@@ -41,11 +41,8 @@ package org.dcm4chex.archive.dcm.qrscp;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.Iterator;
 
 import javax.management.ObjectName;
-import javax.security.auth.Subject;
 
 import org.apache.log4j.Logger;
 import org.dcm4che.data.Command;
@@ -63,13 +60,11 @@ import org.dcm4che.net.DcmServiceException;
 import org.dcm4che.net.Dimse;
 import org.dcm4che.net.PDU;
 import org.dcm4chex.archive.ejb.interfaces.AEDTO;
-import org.dcm4chex.archive.ejb.interfaces.StudyPermissionDTO; //!!import org.dcm4chex.archive.ejb.interfaces.StudyPermissionManager;
 import org.dcm4chex.archive.exceptions.UnknownAETException;
 import org.dcm4chex.archive.perf.PerfCounterEnum;
 import org.dcm4chex.archive.perf.PerfMonDelegate;
-import org.dcm4chex.archive.perf.PerfPropertyEnum; //!!import org.jboss.logging.Logger;
+import org.dcm4chex.archive.perf.PerfPropertyEnum;
 import org.nrg.xnat.gateway.FileInfo;
-//import org.nrg.xnat.gateway.RetrieveCmd;
 
 /**
  * @author Gunter.Zeilinger@tiani.com

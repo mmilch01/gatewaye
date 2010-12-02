@@ -16,8 +16,8 @@ import org.dcm4che.net.Dimse;
 import org.dcm4che.net.DimseListener;
 import org.dcm4che.net.DcmServiceBase.MultiDimseRsp;
 import org.dom4j.io.SAXReader;
-import org.nrg.xnat.desktop.tools.XNATTableParser;
-import org.nrg.xnat.repository.XNATRestAdapter;
+import org.nrg.fileserver.XNATRestAdapter;
+import org.nrg.xnd.ontology.XNATTableParser;
 
 import com.pixelmed.dicom.InformationEntity;
 

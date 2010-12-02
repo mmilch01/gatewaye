@@ -59,7 +59,6 @@ import org.dcm4che.net.DimseListener;
 import org.dcm4che.net.ExtNegotiation;
 import org.dcm4che.net.PDU;
 import org.dcm4chex.archive.ejb.interfaces.AEDTO;
-//!!import org.jboss.logging.Logger;
 
 /**
  * @author Gunter Zeilinger <gunterze@gmail.com>

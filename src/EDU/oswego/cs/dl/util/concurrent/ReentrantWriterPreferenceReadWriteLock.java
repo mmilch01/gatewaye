@@ -15,7 +15,7 @@
  */
 
 package EDU.oswego.cs.dl.util.concurrent;
-import java.util.*;
+import java.util.HashMap;
 
 /**
  * A writer-preference ReadWriteLock that allows both readers and writers to

@@ -5,7 +5,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 import org.dcm4che.data.Dataset;
-import org.dcm4che.data.DcmElement;
 import org.dom4j.Element;
 import org.nrg.xdat.bean.XdatCriteriaBean;
 import org.nrg.xdat.bean.XdatCriteriaSetBean;

@@ -5,16 +5,10 @@ import java.util.Iterator;
 
 import org.dcm4che.data.Dataset;
 import org.dcm4che.data.DcmElement;
-import org.dcm4che.data.DcmObject;
 import org.dcm4che.dict.Tags;
 import org.nrg.xdat.bean.XdatCriteriaSetBean;
 import org.nrg.xdat.bean.XdatSearchFieldBean;
 import org.nrg.xdat.bean.XdatStoredSearchBean;
-
-//!!import com.pixelmed.dicom.Attribute;
-//!!import com.pixelmed.dicom.AttributeList;
-//!!import com.pixelmed.dicom.AttributeTag;
-//!!import com.pixelmed.dicom.DicomDictionary;
 
 import com.pixelmed.dicom.InformationEntity;
 

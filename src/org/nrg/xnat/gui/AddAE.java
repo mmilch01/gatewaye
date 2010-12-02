@@ -11,7 +11,6 @@
 
 package org.nrg.xnat.gui;
 
-import org.nrg.xnat.env.GatewayEnvironment;
 
 /**
  *

@@ -46,11 +46,8 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import javax.management.ReflectionException;
 import javax.net.ServerSocketFactory;
 import javax.net.SocketFactory;
 import javax.net.ssl.HandshakeCompletedListener;
@@ -58,7 +55,6 @@ import javax.net.ssl.HandshakeCompletedListener;
 import org.dcm4che.util.HandshakeFailedListener;
 import org.dcm4chex.archive.ejb.interfaces.AEDTO;
 import org.dcm4chex.archive.exceptions.ConfigurationException;
-//!!import org.jboss.system.ServiceMBeanSupport;
 
 /**
  * @author gunter.zeilinger@tiani.com

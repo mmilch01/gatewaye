@@ -6,15 +6,15 @@
 
 package org.nrg.xnat.gui;
 
-import org.nrg.xnat.gateway.XNATGatewayServer;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Vector;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 import javax.swing.JOptionPane;
+
 import org.nrg.xnat.env.GatewayEnvironment;
 import org.nrg.xnat.env.XNATServer;
+import org.nrg.xnat.gateway.XNATGatewayServer;
 
 /**
  *

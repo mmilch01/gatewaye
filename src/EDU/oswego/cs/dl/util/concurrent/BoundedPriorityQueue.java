@@ -14,8 +14,8 @@
  */
 
 package EDU.oswego.cs.dl.util.concurrent;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Comparator;
-import java.lang.reflect.*;
 
 /**
  * A heap-based priority queue, using semaphores for concurrency control. The
