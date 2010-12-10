@@ -1,17 +1,15 @@
 package org.nrg.xnat.gui;
 
 import java.io.IOException;
-
-import javax.swing.JLabel;
-
 import org.nrg.xnat.env.GatewayEnvironment;
+import javax.swing.JLabel;
 
 
 /**
  *
  * @author Aditya Siram
  */
-public class UpdateGateway {
+public class UpdateGateway implements UpdateableComponent {
     private  JLabel ae_label;
     private  JLabel port_label;
     private final GatewayEnvironment env;

@@ -5,8 +5,8 @@
 
 package org.nrg.xnat.env;
 
+import java.io.IOException;
 import java.util.Properties;
-
 import org.nrg.xnat.env.GatewayEnvironment.Log;
 
 /**
@@ -22,7 +22,7 @@ interface PropertiesSynchronizedInterface {
      * @throws IncompleteEntryException Thrown if the device does not have minimum
      *                                  required information (see isValid())
      */
-    Properties add_to_properties(Properties p);
+    Properties add_to_properties(Properties p, Log log) throws IOException;
     /**
      * Remove this device's information from the properties. Expects that the
      * device has minimum information and ensures that the one default device (if it exists)
@@ -33,7 +33,7 @@ interface PropertiesSynchronizedInterface {
      * @throws IncompleteEntryException
      * @throws DefaultDeviceDeleteException
      */
-    Properties remove_from_properties(Properties p);
+    Properties remove_from_properties(Properties p) throws IOException;
     /**
      * Populate attributes about this device from the given properties. Warnings/errors
      * if any are added to the given log.
@@ -41,5 +41,5 @@ interface PropertiesSynchronizedInterface {
      * @param log
      * @return true if the read was successful and false otherwise.
      */
-    boolean read_from_properties(Properties p, Log log);
+    boolean read_from_properties(Properties p, Log log) throws IOException;
 }

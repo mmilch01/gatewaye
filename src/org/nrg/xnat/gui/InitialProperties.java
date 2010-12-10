@@ -1,14 +1,12 @@
 
 package org.nrg.xnat.gui;
 
+import org.nrg.xnat.gateway.XNATGatewayServer;
 import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
-
 import javax.swing.JOptionPane;
-
 import org.nrg.xnat.env.GatewayEnvironment;
-import org.nrg.xnat.gateway.XNATGatewayServer;
 
 /**
  *
@@ -22,40 +20,63 @@ public class InitialProperties {
     public InitialProperties(File f) throws IOException {
         if (f.exists()) {
             this.env = new GatewayEnvironment(f);
-            final XNATGatewayServer s = XNATGatewayServer.start(p,env);
+            XNATGatewayServer.start(p,env);
             java.awt.EventQueue.invokeLater(new Runnable() {
+                @Override
                 public void run() {
-                    new Status(env, s).setVisible(true);
+                    new Status(env).setVisible(true);
                 }
             });
         }
         else {
-            run_gui();
+            runInitialSetupScreen();
         }
     }
 
     public InitialProperties() {
-        run_gui();
+        runInitialSetupScreen();
     }
 
 
-    public void run_gui () {
+    private void runInitialSetupScreen () {
         final InitialProperties that = this;
         java.awt.EventQueue.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 new InitialSetupGUI(that).setVisible(true);
             }
         });
     }
+    private void runInitialRemoteAEScreen () {
+        final InitialProperties that = this;
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                new InitialRemoteAESetupGUI(that).setVisible(true);
+            }
+        });
+    }
 
-    public void initializeEnvironment (Properties p) throws IOException {
+    public void initialSetupDone(Properties p) throws IOException {
         p.setProperty("Logger.Output","file");
         p.setProperty("Application.SavedImagesFolderName","./tmp/");
+        this.p = p;        
+        runInitialRemoteAEScreen ();        
+        initializeEnvironment(p);
+    }
+
+    public void initialRemoteAESetupDone (Properties p) throws IOException {
+        this.p.putAll(p);
+        initializeEnvironment(p);
+    }
+
+    public void initializeEnvironment (Properties p) throws IOException {
         this.env = new GatewayEnvironment(p, filename);
-        final XNATGatewayServer s = XNATGatewayServer.start(p,env);
+        XNATGatewayServer.start(p,env);
         java.awt.EventQueue.invokeLater(new Runnable() {
+            @Override
             public void run() {
-                new Status(env,s).setVisible(true);
+                new Status(env).setVisible(true);
             }
         });
     }

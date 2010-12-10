@@ -16,6 +16,7 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.swing.JOptionPane;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.Priority;
 import org.dcm4che.data.Dataset;
@@ -53,11 +54,13 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 	
 	private boolean m_bStartFlag=false;
 	private long start_time = 0;
+        private Logger l;
 	
-    public void set_start_flag (boolean b) 
+    private void set_start_flag (boolean b)
     {
         this.m_bStartFlag = b;
     }
+
     public boolean is_running () 
     {
         return this.m_bStartFlag;
@@ -68,9 +71,8 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
         long now = new Date().getTime();
         return org.nrg.xnat.util.Utils.print_elapsed_time(now - start_time);
     }
-
-    public long get_start_time () {
-        return this.start_time;
+    public static long get_start_time () {
+        return getInstance().start_time;
     }
 
 	public static boolean isDICOMUID(){return bUseDICOMUIDs;}
@@ -121,8 +123,10 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 
 	public XNATGatewayServer(GatewayEnvironment env) throws Exception
 	{
+            
+
 		if(!test()) return;
-		Logger l=env.make_logger();
+		this.l=env.make_logger();
 		
 		bUseDICOMUIDs=env.isdcmuid();		
 		
@@ -220,15 +224,22 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 	{
 		try
 		{
-			m_dcmServer.start();
+ 			m_dcmServer.start();
+                        this.set_start_flag(true);
 			while (!m_srvShutdown)
 				Thread.sleep(100);
-		} catch (Exception e)
+		}
+                catch (Exception e)
 		{
-			if(bConsole) 
-	            GUIUtils.warn("Server startup error! \n" + e.getMessage(), "Startup error");
-			else 
-				System.err.println("Server startup error! \n" + e.getMessage());
+                    this.set_start_flag(false);
+                    l.log(Level.FATAL, e.getMessage());
+                    if (bConsole) {
+                        System.err.println("Server startup error! \n" + e.getMessage());
+                        System.exit(1);
+                    }
+                    else{
+                        GUIUtils.warn("Server startup error! \n" + e.getMessage(), "Startup error");
+                    }
 		}
 		finally
 		{
@@ -317,12 +328,12 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 		}
 		return true;
 	}
-	public static XNATGatewayServer start(Properties p, final GatewayEnvironment env)
+	public static void start(Properties p, final GatewayEnvironment env)
 	{
-		XNATGatewayServer s = null;		
 		try
 		{
-			s = new XNATGatewayServer(env);
+			m_this = new XNATGatewayServer(env);
+                        
 			if(bConsole)
 			{
 				System.err.println("XNAT/DICOM gateway, "+ m_ver);
@@ -335,11 +346,12 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 			Result r = Result.INITIALIZATION_EXCEPTION;
 			Tools.LogException(Priority.ERROR, 
 					r.toString(), e);
-			return null;
-		}
-		s.m_bStartFlag=true;
-		return s;		
+		}	
 	}
+        public static boolean isRunning(){
+            return (getInstance() != null && getInstance().is_running());
+        }
+
 	public static Result start(String prop)
 	{
 		GatewayEnvironment env;
@@ -366,15 +378,17 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 	
 	public static Result stop()
 	{
-		getInstance().m_srvShutdown=true;
-		try
-		{
-			Thread.sleep(1000);
-		}
-		catch(Exception e){}
-		
-		m_this=null;
-		return Result.SERVER_STOPPED;
+            try {
+                getInstance().m_srvShutdown = true;
+                try {
+                    Thread.sleep(1000);
+		}catch(Exception e){
+                    System.out.println("Could not stop");
+                }
+                m_this = null;
+            }
+            catch (NullPointerException e) {}
+            return Result.SERVER_STOPPED;
 	}
 	
 	public static void main(String arg[]) throws IOException

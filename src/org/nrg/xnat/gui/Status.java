@@ -1,59 +1,71 @@
 /*
  * Status.java
- *
+ * The root UI that gives the user access to Gateway's configurations, displays whether
+ * the Gateway dicom server running and uptime.
  * Created on May 27, 2010, 12:03:26 PM
  */
 
 package org.nrg.xnat.gui;
 
+import java.awt.Cursor;
+import org.nrg.xnat.gateway.XNATGatewayServer;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Vector;
-
 import javax.swing.JOptionPane;
-
 import org.nrg.xnat.env.GatewayEnvironment;
 import org.nrg.xnat.env.XNATServer;
-import org.nrg.xnat.gateway.XNATGatewayServer;
 
 /**
- *
+
  * @author Aditya Siram
  */
 public class Status extends javax.swing.JFrame {
     private GatewayEnvironment env;
-    private XNATGatewayServer server;
+
+    // modal windows that cannot be opened when the dicom server is running.
     private ChildManager server_windows;
     private ChildManager aes_windows;
     private ChildManager log_window;
     private ChildManager root;
-    private boolean running;
+
+    // separate thread that displays the uptime of the dicom server.
     private UptimeUpdate up;
-    private Thread t = new Thread();
 
     /** Creates new form Status */
-    public Status(GatewayEnvironment env, XNATGatewayServer server) {
+    public Status(GatewayEnvironment env) {
         initComponents();
-        initialize(env,server);
+        initialize(env);
     }
-    
-    public void initialize (GatewayEnvironment env, XNATGatewayServer server) {
+
+    /*
+     * Initialize the GUI environment, should only be called once by the constructor
+     */
+    private void initialize(GatewayEnvironment env) {
         this.env = env;
-        this.server = server;
+
+        // Give the modal windows the GUI buttons that create child windows, the buttons
+        // will be disabled until all the child windows are closed
         server_windows = new DefaultChildManager(this.configure_servers_button);
         aes_windows = new DefaultChildManager(this.configure_aes_button);
         log_window = new DefaultChildManager(this.view_logs_button);
         root = new DefaultChildManager(this.server_start_stop_button);
+
+        // give the child windows a link back to the main parent window (this screen)
         server_windows.add_parent(root);
         aes_windows.add_parent(root);
-        up = new UptimeUpdate(this.uptime_label, server);
+
+        // start the uptime monitor with a label that updates everytime the monitor
+        // polls the Gateway
+        up = new UptimeUpdate(this.uptime_label);
         up.start();
     }
 
-    public void set_xnat_server(XNATGatewayServer s) {
+    /*
+     * Reset the uptime monitor
+     */
+    private void restartUptimeMonitor() {
         up.stop();
-        this.server = s;
-        up.set_server(s);
         up.start();
     }
 
@@ -198,12 +210,13 @@ public class Status extends javax.swing.JFrame {
 
     private void configure_servers_buttonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_configure_servers_buttonMouseClicked
         if (this.configure_servers_button.isEnabled()) {
-            if (!server.is_running()) {
+            if (!XNATGatewayServer.isRunning()) {
                 this.server_windows.add_to_child_count();
-                final Vector<RefreshableComponent> v = new Vector<RefreshableComponent>();
+                final Vector<UpdateableComponent> v = new Vector<UpdateableComponent>();
                 RefreshDefaultServerInfo r = new RefreshDefaultServerInfo(this.current_xnat_server_user_label, env);
                 v.add(r);
                 java.awt.EventQueue.invokeLater(new Runnable() {
+                    @Override
                     public void run() {
                         new XNATServers(env, server_windows, v).setVisible(true);
                     }
@@ -218,8 +231,22 @@ public class Status extends javax.swing.JFrame {
         XNATGatewayServer.stop();
     }//GEN-LAST:event_formWindowClosed
 
+    private void showDefaultXNATServer () {
+        XNATServer s = this.env.get_default_server();
+        this.current_xnat_server_user_label.setText("(" + s.getName() + "," + s.getUsername() + ")");
+    }
+
     private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
-        if (this.server.is_running()) {
+        // The server is automatically started on application startup and should display an
+        // error if it couldn't. Once the server is started it needs a bit to settle in, so
+        // block.
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {}
+
+        // The check to see if the server is running is currently unnecessary,
+        // but the logic might change in the future.
+        if (XNATGatewayServer.isRunning()) {
             this.server_start_stop_button.setText("Stop");
             this.server_running_or_stopped_label.setText("Running");
         }
@@ -227,14 +254,15 @@ public class Status extends javax.swing.JFrame {
             this.server_start_stop_button.setText("Start");
             this.server_running_or_stopped_label.setText("Stopped");
         }
-
-        XNATServer s = this.env.get_default_server();
-        this.current_xnat_server_user_label.setText("(" + s.getName() + "," + s.getUsername() + ")");
+        this.showDefaultXNATServer();
     }//GEN-LAST:event_formWindowOpened
 
+    /*
+     * Bring up the UI that configures the Remote AE devices but make sure the server isn't running.
+     */
     private void configure_aes_buttonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_configure_aes_buttonMousePressed
         if (this.configure_aes_button.isEnabled()) {
-            if (!server.is_running()) {
+            if (!XNATGatewayServer.isRunning()) {
                 this.aes_windows.add_to_child_count();
                 java.awt.EventQueue.invokeLater(new Runnable() {
                     public void run() {
@@ -247,31 +275,48 @@ public class Status extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_configure_aes_buttonMousePressed
 
+    /*
+     * Button to start and stop the server. The "Status" and "Uptime" label are kept in sync when
+     * this button is clicked.
+     */
     private void server_start_stop_buttonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_server_start_stop_buttonMousePressed
         if (this.server_start_stop_button.isEnabled()) {
-            if (server.is_running()) {
-                XNATGatewayServer.stop();
-                up.stop();
-                this.server_start_stop_button.setText("Start");
-                this.server_running_or_stopped_label.setText("Stopped");
-            } else {
-                try {
-                    XNATGatewayServer s = XNATGatewayServer.start(env.get_properties(), env);
-                    this.set_xnat_server(s);
-                } catch (Exception e) {
-                    StringWriter writer = new StringWriter();
-                    e.printStackTrace(new PrintWriter(writer));
-                    String trace = writer.toString();
-                    GUIUtils.application_stop(e.toString() + "\n" + trace, "Start here error");
+            try {
+                // Stop a currently running server
+                if (XNATGatewayServer.isRunning()) {
+                    XNATGatewayServer.stop();
+                    up.stop();
+                    this.server_start_stop_button.setText("Start");
+                    this.server_running_or_stopped_label.setText("Stopped");
+                } // Or start the server. One thing to keep in mind is that since a server is automatically started
+                // when this application is started, this code will only be executed at runtime after the user has
+                // explictly stopped the server.
+                else {
+                    XNATGatewayServer.start(env.get_properties(), env);
+                    this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                    // wait for the server thread to get started. Not the best
+                    Thread.sleep(1000);
+                    this.setCursor(Cursor.getDefaultCursor());
+                    // if the start() call above worked, reflect that in the GUI. If it didn't any exception thrown is
+                    // handled by the server startup code so all we have to do is make sure the GUI accurately reflects
+                    // the state of the server.
+                    if (XNATGatewayServer.isRunning()) {
+                        this.restartUptimeMonitor();
+                        this.server_start_stop_button.setText("Stop");
+                        this.server_running_or_stopped_label.setText("Running");
+                    }
                 }
-                this.server_start_stop_button.setText("Stop");
-                this.server_running_or_stopped_label.setText("Running");
+            } catch (Exception e) {
+                StringWriter writer = new StringWriter();
+                e.printStackTrace(new PrintWriter(writer));
+                String trace = writer.toString();
+                GUIUtils.application_stop(e.toString() + "\n" + trace, "Start here error");
             }
         }
     }//GEN-LAST:event_server_start_stop_buttonMousePressed
 
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
-        if (server.is_running()) {
+        if (XNATGatewayServer.isRunning()) {
             int delete_confirm = JOptionPane.showConfirmDialog(null, "Closing the window stops the Gateway server.\n Are you sure you want to quit?", "Delete Confirmation", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
             if (delete_confirm == JOptionPane.YES_OPTION) {
                 System.exit(0);

@@ -8,26 +8,33 @@ package org.nrg.xnat.gui;
 
 import java.util.ListIterator;
 import java.util.Vector;
-
 import javax.swing.JFrame;
 import javax.swing.table.DefaultTableModel;
-
 import org.nrg.xnat.env.GatewayEnvironment;
 
 
 /**
- *
+ * The XNAT server configuration screen. Displays the available servers in a table
+ * and allows the user to add, delete, edit and set the default server.
  * @author Aditya Siram
  */
 public class XNATServers extends javax.swing.JFrame {
+    // The internal configuration of this gateway
     private final GatewayEnvironment env;
+
+    // Holds references to child windows (eg. the "Add XNAT Server" window)
+    // and the parent window (the main status screen)
     private final ChildManager c;
+    // windows that can be spawned by this one
     private final ChildManager add_window;
     private final ChildManager edit_window;
-    private final UpdateServerTable table_controller;
-    private final Vector<RefreshableComponent> v;
+    // A collection of the child windows
     private final Vector<JFrame> children;
-    private boolean changed = false;
+
+    // takes care of updating the table and the backend
+    private final UpdateServerTable table_controller;
+
+    private final Vector<UpdateableComponent> v;
 
     private DefaultTableModel table_model = new DefaultTableModel() {
         @Override
@@ -36,7 +43,7 @@ public class XNATServers extends javax.swing.JFrame {
         };
     };
     /** Creates new form XNATServers */
-    public XNATServers(GatewayEnvironment env, ChildManager c, Vector<RefreshableComponent> v) {
+    public XNATServers(GatewayEnvironment env, ChildManager c, Vector<UpdateableComponent> v) {
         this.env = env;
         this.v = v;
         children = new Vector<JFrame>();
@@ -48,7 +55,7 @@ public class XNATServers extends javax.swing.JFrame {
     }
 
     public XNATServers(GatewayEnvironment env, ChildManager c) {
-        this(env, c, new Vector<RefreshableComponent>());
+        this(env, c, new Vector<UpdateableComponent>());
     }
 
     /** This method is called from within the constructor to

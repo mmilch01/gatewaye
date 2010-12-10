@@ -6,6 +6,10 @@
 
 package org.nrg.xnat.gui;
 
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  *
  * @author Aditya Siram
@@ -41,7 +45,7 @@ public class AddXNATServer extends javax.swing.JFrame {
         url_textfield = new javax.swing.JTextField();
         server_name = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
-        password_textfield = new javax.swing.JTextField();
+        password_textfield = new javax.swing.JPasswordField();
 
         error_dialog.setTitle("Add error");
         error_dialog.setAlwaysOnTop(true);
@@ -113,14 +117,18 @@ public class AddXNATServer extends javax.swing.JFrame {
                             .addComponent(username_label)
                             .addComponent(password_label)
                             .addComponent(jLabel1))
-                        .addGap(12, 12, 12)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(server_properties_title)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                .addComponent(password_textfield, javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(username_textfield, javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(url_textfield, javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(server_name, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 173, Short.MAX_VALUE))))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(12, 12, 12)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(server_properties_title)
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                        .addComponent(username_textfield, javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(url_textfield, javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(server_name, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 173, Short.MAX_VALUE))))
+                            .addGroup(layout.createSequentialGroup()
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(password_textfield))))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(add_button, javax.swing.GroupLayout.PREFERRED_SIZE, 67, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
@@ -145,9 +153,9 @@ public class AddXNATServer extends javax.swing.JFrame {
                     .addComponent(username_textfield, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(username_label))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(password_textfield, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(password_label))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(password_label)
+                    .addComponent(password_textfield, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(add_button)
@@ -175,8 +183,12 @@ public class AddXNATServer extends javax.swing.JFrame {
     }//GEN-LAST:event_formWindowClosed
 
     private void add_buttonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_add_buttonMousePressed
-        if (t.add_server(server_name.getText(), url_textfield.getText(), username_textfield.getText(), password_textfield.getText())) {
-            this.dispose();
+        try {
+            if (t.add_server(server_name.getText(), url_textfield.getText(), username_textfield.getText(), new String(password_textfield.getPassword()))) {
+                this.dispose();
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(AddXNATServer.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_add_buttonMousePressed
 
@@ -187,7 +199,7 @@ public class AddXNATServer extends javax.swing.JFrame {
     private javax.swing.JDialog error_dialog;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel password_label;
-    private javax.swing.JTextField password_textfield;
+    private javax.swing.JPasswordField password_textfield;
     private javax.swing.JTextField server_name;
     private javax.swing.JLabel server_properties_title;
     private javax.swing.JLabel url_label;

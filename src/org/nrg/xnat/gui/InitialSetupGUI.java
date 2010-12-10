@@ -6,11 +6,20 @@
 
 package org.nrg.xnat.gui;
 
+import java.io.File;
 import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Properties;
-
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.swing.JOptionPane;
-
+import org.nrg.xnat.env.AuthenticatedDevice;
+import org.nrg.xnat.env.util.EncryptionUtils;
 import org.nrg.xnat.util.Utils;
 
 /**
@@ -51,9 +60,9 @@ public class InitialSetupGUI extends javax.swing.JFrame {
         initial_xnat_name = new javax.swing.JTextField();
         initial_xnat_hostname = new javax.swing.JTextField();
         initial_xnat_username = new javax.swing.JTextField();
-        initial_xnat_password = new javax.swing.JTextField();
         initial_apply_button = new javax.swing.JButton();
         initial_cancel_button = new javax.swing.JButton();
+        initial_xnat_password = new javax.swing.JPasswordField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -94,6 +103,12 @@ public class InitialSetupGUI extends javax.swing.JFrame {
             }
         });
 
+        initial_xnat_password.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                initial_xnat_passwordActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -116,7 +131,7 @@ public class InitialSetupGUI extends javax.swing.JFrame {
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                     .addComponent(initial_listening_port)
                                     .addComponent(initial_ae_title, javax.swing.GroupLayout.DEFAULT_SIZE, 227, Short.MAX_VALUE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 20, Short.MAX_VALUE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 22, Short.MAX_VALUE))
                             .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jLabel7)
@@ -131,8 +146,8 @@ public class InitialSetupGUI extends javax.swing.JFrame {
                                     .addComponent(jLabel8))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(initial_xnat_username)
-                                    .addComponent(initial_xnat_password)))))
+                                    .addComponent(initial_xnat_password, javax.swing.GroupLayout.DEFAULT_SIZE, 229, Short.MAX_VALUE)
+                                    .addComponent(initial_xnat_username)))))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(137, 137, 137)
                         .addComponent(initial_apply_button, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -188,9 +203,25 @@ public class InitialSetupGUI extends javax.swing.JFrame {
             GUIUtils.warn("The following errors were found: \n" + error, "Add error");
             error = null;
         } else {
-            this.p = fill_in_properties();
             try {
-                controller.initializeEnvironment(p);
+                this.p = fill_in_properties();
+            } catch (NoSuchAlgorithmException ex) {
+                Logger.getLogger(InitialSetupGUI.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException ex) {
+                Logger.getLogger(InitialSetupGUI.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (NoSuchPaddingException ex) {
+                Logger.getLogger(InitialSetupGUI.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (InvalidKeyException ex) {
+                Logger.getLogger(InitialSetupGUI.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (InvalidAlgorithmParameterException ex) {
+                Logger.getLogger(InitialSetupGUI.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IllegalBlockSizeException ex) {
+                Logger.getLogger(InitialSetupGUI.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (BadPaddingException ex) {
+                Logger.getLogger(InitialSetupGUI.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            try {
+                controller.initialSetupDone(p);
                 this.dispose();
             } catch (IOException ex) {
                 GUIUtils.warn(ex.toString(), "Setup error");
@@ -207,6 +238,10 @@ public class InitialSetupGUI extends javax.swing.JFrame {
         quit();
     }//GEN-LAST:event_formWindowClosing
 
+    private void initial_xnat_passwordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_initial_xnat_passwordActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_initial_xnat_passwordActionPerformed
+
     private void quit() {
         int quit_confirm = JOptionPane.showConfirmDialog(null,
                                                        "The server cannot run without this information.\n Are you sure you want to quit?",
@@ -218,13 +253,15 @@ public class InitialSetupGUI extends javax.swing.JFrame {
         }
     }
 
-    private Properties fill_in_properties() {
+    private Properties fill_in_properties() throws NoSuchAlgorithmException, IOException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
         Properties _p = new Properties ();
         _p.setProperty("Dicom.CalledAETitle", initial_ae_title.getText());
         _p.setProperty("Dicom.CallingAETitle", initial_ae_title.getText());
-        _p.setProperty("Dicom.ListeningPort", initial_ae_title.getText());
+        _p.setProperty("Dicom.ListeningPort", initial_listening_port.getText());
         _p.setProperty("XNATServers." + initial_xnat_name.getText() + ".User", initial_xnat_username.getText());
-        _p.setProperty("XNATServers." + initial_xnat_name.getText() + ".Pass", initial_xnat_password.getText());
+        EncryptionUtils.createKeyFile(new File(AuthenticatedDevice.keyFile));
+        _p.setProperty("XNATServers." + initial_xnat_name.getText() + ".Pass", 
+                       EncryptionUtils.encrypt(new String(initial_xnat_password.getPassword()), new File(AuthenticatedDevice.keyFile)));
         _p.setProperty("XNATServers." + initial_xnat_name.getText() + ".ServerURL", initial_xnat_hostname.getText());
         _p.setProperty("XNATServers.default", initial_xnat_name.getText());
         _p.setProperty("XNATServers", initial_xnat_name.getText());
@@ -265,7 +302,7 @@ public class InitialSetupGUI extends javax.swing.JFrame {
     private javax.swing.JTextField initial_listening_port;
     private javax.swing.JTextField initial_xnat_hostname;
     private javax.swing.JTextField initial_xnat_name;
-    private javax.swing.JTextField initial_xnat_password;
+    private javax.swing.JPasswordField initial_xnat_password;
     private javax.swing.JTextField initial_xnat_username;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;

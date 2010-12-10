@@ -5,7 +5,6 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
-
 import org.apache.commons.lang.ArrayUtils;
 import org.nrg.xnat.util.DuplicateEntryException;
 import org.nrg.xnat.util.NonExistentEntryException;

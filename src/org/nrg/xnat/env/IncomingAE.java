@@ -1,8 +1,8 @@
 package org.nrg.xnat.env;
 
+import java.io.IOException;
 import java.util.Properties;
 import java.util.Vector;
-
 import org.nrg.xnat.env.GatewayEnvironment.Log;
 import org.nrg.xnat.util.DuplicateEntryException;
 import org.nrg.xnat.util.NonExistentEntryException;
@@ -22,12 +22,12 @@ public class IncomingAE extends NetworkDevice implements  PropertiesSynchronized
     private static final String defaultGroupName = "Dicom.RemoteAEs";
 
 
-    public IncomingAE (String name, String group_name) {
-        super(name,group_name);
+    public IncomingAE (String name, String group_name, Log log) {
+        super(name,group_name, log);
     }
 
-    public IncomingAE (String name) {
-        this(name,getDefaultGroupName());
+    public IncomingAE (String name, Log log) {
+        this(name,getDefaultGroupName(), log);
     }
     
     public static String getDefaultGroupName () {
@@ -95,7 +95,7 @@ public class IncomingAE extends NetworkDevice implements  PropertiesSynchronized
      *                                  required information (see isValid())
      */
     @Override
-    public Properties add_to_properties(Properties p) {
+    public Properties add_to_properties(Properties p, Log log) {
         p.setProperty("Dicom.RemoteAEs." + getName() + ".CalledAETitle", getCalledAETitle());
         p.setProperty("Dicom.RemoteAEs." + getName() + ".HostNameOrIPAddress", getHostname());
         p.setProperty("Dicom.RemoteAEs." + getName() + ".Port", Integer.toString(getPort()));
@@ -157,7 +157,7 @@ public class IncomingAE extends NetworkDevice implements  PropertiesSynchronized
         return p;
     }
 
-    public void removeFrom (InternalNetworkDevices _i) throws DefaultDeviceDeleteException, IncompleteEntryException, NonExistentEntryException {
+    public void removeFrom (InternalNetworkDevices _i) throws DefaultDeviceDeleteException, IncompleteEntryException, NonExistentEntryException, IOException {
        if (!isValid()) {
            throw new IncompleteEntryException("Either the ae title or hostname were not set");
        }
@@ -165,19 +165,19 @@ public class IncomingAE extends NetworkDevice implements  PropertiesSynchronized
        _i.removeDevice(getName());
     }
 
-    public void addTo (InternalNetworkDevices _i) throws IncompleteEntryException, DuplicateEntryException {
+    public void addTo (InternalNetworkDevices _i) throws IncompleteEntryException, DuplicateEntryException, IOException {
         if (!isValid()) {
             throw new IncompleteEntryException("Either the ae title or hostname were not set");
         }
-        _i.setProperties(add_to_properties(_i.getProperties()));
+        _i.setProperties(add_to_properties(_i.getProperties(), this.log));
         _i.addDevice(this);
     }
 
-    public void update (InternalNetworkDevices _i) throws IncompleteEntryException, NonExistentEntryException, DuplicateEntryException {
+    public void update (InternalNetworkDevices _i) throws IncompleteEntryException, NonExistentEntryException, DuplicateEntryException, IOException {
         if (!isValid()) {
             throw new IncompleteEntryException("Either the ae title or hostname were not set");
         }
-        _i.setProperties(add_to_properties(_i.getProperties()));
+        _i.setProperties(add_to_properties(_i.getProperties(), this.log));
         _i.updateDevice(this);
     }
 

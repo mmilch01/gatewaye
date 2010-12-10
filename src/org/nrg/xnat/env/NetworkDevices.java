@@ -5,13 +5,12 @@
 
 package org.nrg.xnat.env;
 
+import org.nrg.xnat.util.NonExistentEntryException;
 import java.io.File;
 import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Properties;
-
 import org.nrg.xnat.util.DuplicateEntryException;
-import org.nrg.xnat.util.NonExistentEntryException;
 
 /**
  * A collection of network devices and properties. Each collection can only have one

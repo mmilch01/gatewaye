@@ -3,6 +3,7 @@ package org.nrg.xnat.gui;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import org.nrg.xnat.gateway.XNATGatewayServer;
 
 /**
  *
@@ -26,4 +27,21 @@ public class GUIUtils {
         JOptionPane.showMessageDialog(null, error, title, JOptionPane.WARNING_MESSAGE);
     }
 
+    public static void fatal (String error, String title) {
+        GUIUtils.warn(error, title);
+        System.exit(1);
+    }
+
+    public static void stopGatewayServer () {
+        try {
+            XNATGatewayServer.stop();
+        }
+        catch (NullPointerException e) {
+        }
+        finally {
+            if (XNATGatewayServer.isRunning()) {
+                stopGatewayServer();
+            }
+        }
+    }
  }

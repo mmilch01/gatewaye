@@ -1,14 +1,14 @@
 package org.nrg.xnat.gui;
 
 import javax.swing.JLabel;
-
 import org.nrg.xnat.env.GatewayEnvironment;
 
 /**
- *
+ * A service class that updates the default XNAT server label with a new server and
+ * username
  * @author Aditya Siram
  */
-public class RefreshDefaultServerInfo extends RefreshableComponent {
+public class RefreshDefaultServerInfo implements UpdateableComponent {
     private final GatewayEnvironment env;
     private final JLabel default_server_user_label;
 

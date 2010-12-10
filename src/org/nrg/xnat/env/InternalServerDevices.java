@@ -30,7 +30,7 @@ import org.nrg.xnat.util.Utils;
        super(h,p,name);
     }
 
-    public void set_default_server (String name) throws NonExistentEntryException {
+    public void set_default_server (String name) throws NonExistentEntryException, IOException {
         XNATServer d = (XNATServer) Utils.try_get(name,getDevices());
         if (!d.is_default()) {
             for (Enumeration e = getDevices().keys(); e.hasMoreElements();) {
@@ -41,7 +41,7 @@ import org.nrg.xnat.util.Utils;
                 }
             }
             d.set_default();
-            d.add_to_properties(this.p);
+            d.add_to_properties(this.p, this.log);
         }
     }
 
@@ -60,7 +60,7 @@ import org.nrg.xnat.util.Utils;
         rewrite_properties_device_list();
     }
 
-    public void updateDevice (XNATServer s) throws NonExistentEntryException, IncompleteEntryException {
+    public void updateDevice (XNATServer s) throws NonExistentEntryException, IncompleteEntryException, IOException {
         if (!s.isValid()) {
             throw new IncompleteEntryException("Either name, hostname, username or password are missing");
         }
@@ -68,8 +68,8 @@ import org.nrg.xnat.util.Utils;
         addDevice_helper(s);
     }
 
-    private void addDevice_helper (XNATServer s) throws NonExistentEntryException {
-        s.add_to_properties(this.p);
+    private void addDevice_helper (XNATServer s) throws NonExistentEntryException, IOException {
+        s.add_to_properties(this.p, this.log);
         getDevices().put(s.getName(),s);
         if (s.is_default()) {
             set_default_server(s.getName());
@@ -77,7 +77,7 @@ import org.nrg.xnat.util.Utils;
         rewrite_properties_device_list();
     }
 
-    public void addDevice (XNATServer s) throws IncompleteEntryException, NonExistentEntryException  {
+    public void addDevice (XNATServer s) throws IncompleteEntryException, NonExistentEntryException, IOException  {
         if (!s.isValid()) {
             throw new IncompleteEntryException("Either name, hostname, username or password are missing");
         }

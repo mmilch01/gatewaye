@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package org.nrg.xnat.env;
 
 import java.io.File;
@@ -11,7 +6,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Priority;
 import org.nrg.xnat.env.GatewayEnvironment.Log;

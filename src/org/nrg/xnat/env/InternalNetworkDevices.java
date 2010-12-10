@@ -5,7 +5,6 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
-
 import org.nrg.xnat.env.GatewayEnvironment.Log;
 import org.nrg.xnat.util.DuplicateEntryException;
 import org.nrg.xnat.util.NonExistentEntryException;
@@ -74,31 +73,31 @@ import org.nrg.xnat.util.Utils;
         this.ps.execute(this);
     }
 
-    void removeDevice(String device_name) throws NonExistentEntryException, IncompleteEntryException, DefaultDeviceDeleteException {
+    void removeDevice(String device_name) throws NonExistentEntryException, IncompleteEntryException, DefaultDeviceDeleteException, IOException {
         NetworkDevice d = (NetworkDevice) Utils.try_get(device_name,this.devices);
         d.remove_from_properties(this.p);
         this.devices.remove(device_name);
         rewrite_properties_device_list();
     }
 
-    void addDevice (NetworkDevice d) throws DuplicateEntryException {
+    void addDevice (NetworkDevice d) throws DuplicateEntryException, IOException {
         NetworkDevice dup = find_duplicate(d);
         if (dup != null) {
             throw new DuplicateEntryException(dup.getName() + " is a duplicate device");
         }
         this.devices = Utils.try_put(d.getName(), d, this.devices);
-        d.add_to_properties(this.p);
+        d.add_to_properties(this.p, this.log);
         rewrite_properties_device_list();
     }
 
-    void updateDevice (NetworkDevice d) throws NonExistentEntryException, DuplicateEntryException {
+    void updateDevice (NetworkDevice d) throws NonExistentEntryException, DuplicateEntryException, IOException {
         Utils.try_get(d.getName(), this.devices);
         NetworkDevice dup = find_duplicate(d);
         if (dup != null) {
             throw new DuplicateEntryException(dup.getName() + " is a duplicate device");
         }
         this.devices.put(d.getName(), d);
-        d.add_to_properties(this.p);
+        d.add_to_properties(this.p, this.log);
         rewrite_properties_device_list();
     }
 

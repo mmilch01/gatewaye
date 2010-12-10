@@ -2,7 +2,6 @@ package org.nrg.xnat.env;
 
 import java.util.Properties;
 import java.util.Vector;
-
 import org.nrg.xnat.env.GatewayEnvironment.Log;
 import org.nrg.xnat.util.Utils;
 
@@ -17,10 +16,12 @@ public abstract class NetworkDevice implements NetworkDeviceInterface,
     private String hostname;
     private String name;
     private String group_name;
+    protected Log log;
 
-    public NetworkDevice (String name, String group_name) {
+    public NetworkDevice (String name, String group_name, Log log) {
         this.name = name;
         this.group_name = group_name;
+        this.log = log;
     }
 
     /**

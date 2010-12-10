@@ -1,5 +1,8 @@
 package org.nrg.xnat.env;
 
+import java.security.NoSuchAlgorithmException;
+import org.nrg.xnat.util.NonExistentEntryException;
+import org.nrg.xnat.util.DuplicateEntryException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -10,7 +13,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Appender;
@@ -18,13 +20,11 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.FileAppender;
 import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.apache.log4j.Priority;
 import org.apache.log4j.SimpleLayout;
+import org.apache.log4j.Logger;
 import org.apache.log4j.varia.NullAppender;
 import org.nrg.xnat.gateway.Tools;
-import org.nrg.xnat.util.DuplicateEntryException;
-import org.nrg.xnat.util.NonExistentEntryException;
 import org.nrg.xnat.util.Utils;
 
 /**
@@ -82,14 +82,14 @@ public class GatewayEnvironment {
                                                                              "XNATServers",
                                                                              this.global_log,
                                                                              new PopulateWithDefaultStrategy(),
-                                                                             new ServerFactory("XNATServers"));
+                                                                             new ServerFactory("XNATServers", this.global_log));
 
         InternalNetworkDevices internal_incomingAEs = new InternalNetworkDevices(new Hashtable<String, NetworkDevice>(),
                                                                                  this.p,
                                                                                  "Dicom.RemoteAEs",
                                                                                  this.global_log,
                                                                                  new PopulateStrategy(),
-                                                                                 new IncomingAEFactory("Dicom.RemoteAEs"));
+                                                                                 new IncomingAEFactory("Dicom.RemoteAEs", this.global_log));
 
         this.settings = new GatewayDevice("Dicom",this.p,this.f,this.global_log);
 
@@ -397,7 +397,7 @@ public class GatewayEnvironment {
         if ((str = this.p.getProperty("Dicom.DebugLevel")) != null) {
             l.setLevel(Level.toLevel(str));
         } else {
-            l.setLevel(Level.WARN);
+            l.setLevel(Level.ALL);
         }
 
         return l;
@@ -439,5 +439,22 @@ public class GatewayEnvironment {
 
     public List get_log_messages () throws IOException {
         return FileUtils.readLines(this.log_file);
+    }
+
+    public IncomingAE make_ae (String name) {
+        return new IncomingAE(name, this.global_log);
+    }
+
+    public XNATServer make_xnat (String name) throws IOException {
+        XNATServer s = null;
+        try {
+            s = new XNATServer(name, this.global_log);
+        } catch (NoSuchAlgorithmException ex) {
+            this.global_log.addFatal(ex.toString());
+            java.util.logging.Logger.getLogger(GatewayEnvironment.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            this.global_log.addFatal(ex.toString());
+        }
+        return s;
     }
 }

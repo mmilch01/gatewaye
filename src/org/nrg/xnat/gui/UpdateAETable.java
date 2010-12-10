@@ -2,10 +2,8 @@ package org.nrg.xnat.gui;
 
 import java.io.IOException;
 import java.util.Vector;
-
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
-
 import org.nrg.xnat.env.DefaultDeviceDeleteException;
 import org.nrg.xnat.env.GatewayEnvironment;
 import org.nrg.xnat.env.IncomingAE;
@@ -45,7 +43,7 @@ public class UpdateAETable extends UpdateTable {
     }
 
     public boolean add_ae(String name, String hostname, String callingAETitle, String _port) {
-        IncomingAE s = new IncomingAE(name);
+        IncomingAE s = env.make_ae(name);
         s.setHostname(hostname);
         s.setCalledAETitle(callingAETitle);
         try {
@@ -72,7 +70,7 @@ public class UpdateAETable extends UpdateTable {
     }
 
     public boolean update_ae (String name,String hostname, String callingAETitle, String port) {
-        IncomingAE s = new IncomingAE(name);
+        IncomingAE s = env.make_ae(name);
         s.setHostname(hostname);
         s.setCalledAETitle(callingAETitle);
         try {

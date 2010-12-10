@@ -5,6 +5,7 @@
 
 package org.nrg.xnat.env;
 
+import java.io.IOException;
 import org.nrg.xnat.util.DuplicateEntryException;
 import org.nrg.xnat.util.NonExistentEntryException;
 
@@ -20,7 +21,7 @@ public interface DeviceCollectionInterface extends DeviceInterface {
      * @throws IncompleteEntryException Thrown if the device is invalid.
      * @throws DuplicateEntryException  Thrown if the device already exists in the collection.
      */
-    void addTo(InternalNetworkDevices d) throws IncompleteEntryException, DuplicateEntryException;
+    void addTo(InternalNetworkDevices d) throws IncompleteEntryException, DuplicateEntryException, IOException;
     /**
      * Remove this device from the parent collection
      * @param d
@@ -28,7 +29,7 @@ public interface DeviceCollectionInterface extends DeviceInterface {
      * @throws IncompleteEntryException     Thrown if the device is invalid.
      * @throws NonExistentEntryException    Thrown if this device does not exist in the collection.
      */
-    void removeFrom(InternalNetworkDevices d) throws DefaultDeviceDeleteException, IncompleteEntryException, NonExistentEntryException;
+    void removeFrom(InternalNetworkDevices d) throws DefaultDeviceDeleteException, IncompleteEntryException, NonExistentEntryException, IOException;
     /**
      * Modify an existing device. Everything can be modified but the unique name.
      * To modify the name the device has to be completely removed and added back
@@ -42,5 +43,5 @@ public interface DeviceCollectionInterface extends DeviceInterface {
      *                                    example, the hostnames are the same. All devices in the collection
      *                                    must have unique names and hostnames.
      */
-    void update(InternalNetworkDevices d) throws IncompleteEntryException, NonExistentEntryException, DuplicateEntryException;
+    void update(InternalNetworkDevices d) throws IncompleteEntryException, NonExistentEntryException, DuplicateEntryException, IOException;
 }

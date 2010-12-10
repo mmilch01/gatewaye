@@ -4,27 +4,28 @@
  */
 
 /*
- * AddAE.java
+ * InitialRemoteAESetupGUI.java
  *
- * Created on May 28, 2010, 1:40:09 PM
+ * Created on Dec 9, 2010, 10:40:04 AM
  */
 
 package org.nrg.xnat.gui;
 
-import org.nrg.xnat.env.GatewayEnvironment;
+import java.io.IOException;
+import java.util.Properties;
 
 /**
  *
- * @author deech
+ * @author aditya
  */
-public class AddAE extends javax.swing.JFrame {
-    private UpdateAETable t;
-    private ChildManager c;
-    /** Creates new form AddAE */
-    public AddAE(UpdateAETable t, ChildManager c) {
-        this.t = t;
+public class InitialRemoteAESetupGUI extends javax.swing.JFrame {
+    private InitialProperties controller;
+    private Properties p;
+    /** Creates new form InitialRemoteAESetupGUI */
+    public InitialRemoteAESetupGUI(InitialProperties controller) {
+        this.controller = controller;
         initComponents();
-        this.c = c;
+        warning_label.setText("Without at least one remote device configured Gateway </br> will only be able to stream images to </br> the computer on which the server is running.");
     }
 
     /** This method is called from within the constructor to
@@ -36,7 +37,10 @@ public class AddAE extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jLabel6 = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
+        ae_add_button = new javax.swing.JButton();
+        ae_cancel_button = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
@@ -45,17 +49,25 @@ public class AddAE extends javax.swing.JFrame {
         ae_title = new javax.swing.JTextField();
         ae_hostname = new javax.swing.JTextField();
         ae_port = new javax.swing.JTextField();
-        ae_add_button = new javax.swing.JButton();
-        ae_cancel_button = new javax.swing.JButton();
+        warning_label = new javax.swing.JLabel();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        addWindowListener(new java.awt.event.WindowAdapter() {
-            public void windowClosed(java.awt.event.WindowEvent evt) {
-                formWindowClosed(evt);
+        jLabel6.setText("jLabel6");
+
+        jLabel1.setText("Add Remote AE");
+
+        ae_add_button.setText("Add");
+        ae_add_button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                ae_add_buttonMousePressed(evt);
             }
         });
 
-        jLabel1.setText("Add Remote AE Title");
+        ae_cancel_button.setText("I will do this later");
+        ae_cancel_button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                ae_cancel_buttonMousePressed(evt);
+            }
+        });
 
         jLabel2.setText("Name");
 
@@ -65,22 +77,10 @@ public class AddAE extends javax.swing.JFrame {
 
         jLabel5.setText("Port");
 
-        ae_add_button.setText("Add");
-        ae_add_button.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mousePressed(java.awt.event.MouseEvent evt) {
-                ae_add_buttonMousePressed(evt);
-            }
-        });
+        warning_label.setText("Warning");
 
-        ae_cancel_button.setText("Cancel");
-        ae_cancel_button.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mousePressed(java.awt.event.MouseEvent evt) {
-                ae_cancel_buttonMousePressed(evt);
-            }
-        });
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
+        this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
@@ -99,27 +99,32 @@ public class AddAE extends javax.swing.JFrame {
                                 .addContainerGap())
                             .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(ae_hostname, javax.swing.GroupLayout.DEFAULT_SIZE, 172, Short.MAX_VALUE)
+                                    .addComponent(ae_hostname, javax.swing.GroupLayout.DEFAULT_SIZE, 173, Short.MAX_VALUE)
                                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                         .addComponent(ae_title)
                                         .addComponent(ae_name, javax.swing.GroupLayout.DEFAULT_SIZE, 172, Short.MAX_VALUE)))
-                                .addContainerGap(24, Short.MAX_VALUE))))
+                                .addContainerGap(26, Short.MAX_VALUE))))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(ae_add_button)
                         .addGap(18, 18, 18)
                         .addComponent(ae_cancel_button)
-                        .addGap(26, 26, 26))))
-            .addGroup(layout.createSequentialGroup()
-                .addGap(78, 78, 78)
-                .addComponent(jLabel1)
-                .addContainerGap(89, Short.MAX_VALUE))
+                        .addGap(26, 26, 26))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(66, 66, 66)
+                        .addComponent(jLabel1)
+                        .addContainerGap(121, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(warning_label)
+                        .addContainerGap(236, Short.MAX_VALUE))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel1)
-                .addGap(35, 35, 35)
+                .addGap(6, 6, 6)
+                .addComponent(warning_label)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
                     .addComponent(ae_name, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -141,22 +146,32 @@ public class AddAE extends javax.swing.JFrame {
                     .addComponent(ae_cancel_button))
                 .addContainerGap())
         );
-
-        pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
-        this.c.remove_from_child_count();
-    }//GEN-LAST:event_formWindowClosed
+    private void ae_add_buttonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ae_add_buttonMousePressed
+//        if (t.add_ae(this.ae_name.getText(), this.ae_hostname.getText(),this.ae_title.getText(),this.ae_port.getText()))
+//            this.dispose();
+        try {
+                controller.initialRemoteAESetupDone(this.p);
+                this.dispose();
+            } catch (IOException ex) {
+                GUIUtils.warn(ex.toString(), "Setup error");
+                System.exit(1);
+            }
+}//GEN-LAST:event_ae_add_buttonMousePressed
 
+    private Properties fill_in_properties() throws IOException {
+        Properties _p = new Properties ();
+        return _p;
+    }
+
+    private boolean ensure_all_there () {
+        return true;
+    }
     private void ae_cancel_buttonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ae_cancel_buttonMousePressed
         this.dispose();
-    }//GEN-LAST:event_ae_cancel_buttonMousePressed
+}//GEN-LAST:event_ae_cancel_buttonMousePressed
 
-    private void ae_add_buttonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ae_add_buttonMousePressed
-        if (t.add_ae(this.ae_name.getText(), this.ae_hostname.getText(),this.ae_title.getText(),this.ae_port.getText()))
-            this.dispose();
-    }//GEN-LAST:event_ae_add_buttonMousePressed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton ae_add_button;
@@ -170,6 +185,8 @@ public class AddAE extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel warning_label;
     // End of variables declaration//GEN-END:variables
 
 }

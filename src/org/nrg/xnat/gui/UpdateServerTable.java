@@ -2,10 +2,8 @@ package org.nrg.xnat.gui;
 
 import java.io.IOException;
 import java.util.Vector;
-
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
-
 import org.nrg.xnat.env.DefaultDeviceDeleteException;
 import org.nrg.xnat.env.GatewayEnvironment;
 import org.nrg.xnat.env.IncompleteEntryException;
@@ -15,6 +13,7 @@ import org.nrg.xnat.util.DuplicateEntryException;
 import org.nrg.xnat.util.NonExistentEntryException;
 
 /**
+ * Coordinates a table showing the XNAT servers configured by the user.
  *
  * @author Aditya Siram
  */
@@ -22,7 +21,7 @@ public class UpdateServerTable extends UpdateTable {
     public UpdateServerTable (JTable table, GatewayEnvironment env) {
         super(table,env);
     }
-    public UpdateServerTable (JTable table, GatewayEnvironment env, Vector<RefreshableComponent> v) {
+    public UpdateServerTable (JTable table, GatewayEnvironment env, Vector<UpdateableComponent> v) {
         super(table,env,v);
     }
 
@@ -33,6 +32,8 @@ public class UpdateServerTable extends UpdateTable {
         fill_table();
     }
 
+    // fill the table from the environment adding a "(default)" in front of the default
+    // XNAT server. Also each row number is stored along with its the server name
     public void fill_table () {
         int i = 0;
         for (XNATServer _s : this.env.get_all_servers()) {
@@ -49,8 +50,8 @@ public class UpdateServerTable extends UpdateTable {
         }
     }
 
-    public boolean add_server (String name, String hostname, String username, String password) {
-        XNATServer s = new XNATServer(name);
+    public boolean add_server (String name, String hostname, String username, String password) throws IOException {
+        XNATServer s = env.make_xnat(name);
         s.setHostname(hostname);
         s.setUsername(username);
         s.setPassword(password);

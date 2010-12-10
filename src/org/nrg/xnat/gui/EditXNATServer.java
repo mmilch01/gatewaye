@@ -45,8 +45,8 @@ public class EditXNATServer extends javax.swing.JFrame {
         cancel_button = new javax.swing.JButton();
         edit_hostname_textfield = new javax.swing.JTextField();
         edit_username_textfield = new javax.swing.JTextField();
-        edit_password_textfield = new javax.swing.JTextField();
         edit_server_label = new javax.swing.JLabel();
+        edit_password_textfield = new javax.swing.JPasswordField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -77,6 +77,13 @@ public class EditXNATServer extends javax.swing.JFrame {
 
         edit_server_label.setText("Edit XNAT Server <>");
 
+        edit_password_textfield.setText("jPasswordField1");
+        edit_password_textfield.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                edit_password_textfieldActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -89,7 +96,10 @@ public class EditXNATServer extends javax.swing.JFrame {
                         .addGap(18, 18, 18)
                         .addComponent(cancel_button))
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(jLabel3)
+                        .addGroup(layout.createSequentialGroup()
+                            .addComponent(jLabel3)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(edit_password_textfield, javax.swing.GroupLayout.DEFAULT_SIZE, 187, Short.MAX_VALUE))
                         .addGroup(layout.createSequentialGroup()
                             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                 .addComponent(jLabel2)
@@ -97,9 +107,8 @@ public class EditXNATServer extends javax.swing.JFrame {
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                 .addComponent(edit_hostname_textfield, javax.swing.GroupLayout.PREFERRED_SIZE, 182, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(edit_password_textfield, javax.swing.GroupLayout.DEFAULT_SIZE, 182, Short.MAX_VALUE)
-                                .addComponent(edit_username_textfield, javax.swing.GroupLayout.DEFAULT_SIZE, 182, Short.MAX_VALUE)))))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addComponent(edit_username_textfield, javax.swing.GroupLayout.DEFAULT_SIZE, 185, Short.MAX_VALUE)))))
+                .addGap(15, 15, 15))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap(84, Short.MAX_VALUE)
                 .addComponent(edit_server_label)
@@ -139,7 +148,7 @@ public class EditXNATServer extends javax.swing.JFrame {
     private void apply_buttonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_apply_buttonMousePressed
         device.setHostname(this.edit_hostname_textfield.getText());
         device.setUsername(this.edit_username_textfield.getText());
-        device.setPassword(this.edit_password_textfield.getText());
+        device.setPassword(new String(this.edit_password_textfield.getPassword()));
         if(t.update_server(device.getName(), device.getHostname(), device.getUsername(), device.getPassword())) {
             this.dispose();
         }
@@ -149,11 +158,15 @@ public class EditXNATServer extends javax.swing.JFrame {
         this.c.remove_from_child_count();
     }//GEN-LAST:event_formWindowClosed
 
+    private void edit_password_textfieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_edit_password_textfieldActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_edit_password_textfieldActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton apply_button;
     private javax.swing.JButton cancel_button;
     private javax.swing.JTextField edit_hostname_textfield;
-    private javax.swing.JTextField edit_password_textfield;
+    private javax.swing.JPasswordField edit_password_textfield;
     private javax.swing.JLabel edit_server_label;
     private javax.swing.JTextField edit_username_textfield;
     private javax.swing.JLabel jLabel1;

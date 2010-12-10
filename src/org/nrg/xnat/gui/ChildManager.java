@@ -2,11 +2,15 @@ package org.nrg.xnat.gui;
 
 import java.util.ListIterator;
 import java.util.Vector;
-
 import javax.swing.JFrame;
 
 /**
  *
+ * This class is not much more that a concrete implementation of ChildManager but
+ * specialized to JFrame objects.
+ *
+ * As stated in documentation for the ChildManager interface, added_first_child
+ * and removed_last_child should not be called outside this class.
  * @author Aditya Siram
  */
 public class ChildManager implements ChildManagementInterface {
@@ -41,6 +45,7 @@ public class ChildManager implements ChildManagementInterface {
         parents.add(c);
     }
 
+    @Override
     public void added_first_child() {
         ListIterator l = parents.listIterator();
         while (l.hasNext()) {

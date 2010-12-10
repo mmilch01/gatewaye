@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
-
 import org.nrg.xnat.env.GatewayEnvironment.Log;
 import org.nrg.xnat.util.Utils;
 
@@ -96,12 +95,12 @@ class PopulateStrategy implements PopulateStrategyInterface {
         }
     }
 
-    void create_shell_devices_helper (String names_value, InternalNetworkDevices ds) {
+    void create_shell_devices_helper (String names_value, InternalNetworkDevices ds) throws IOException {
         names_value = names_value.trim();
         String [] device_names = read_names(names_value, ds.getLog());
         ds.getProperties().setProperty(ds.getName(), Utils.create_delimited(device_names, " "));
         for (String device_name : device_names) {
-            NetworkDevice d = ds.getFactory().make(device_name);
+            NetworkDevice d = ds.getFactory().make(device_name, ds.getLog());
             ds.getDevices().put(device_name, d);
         }
     }
