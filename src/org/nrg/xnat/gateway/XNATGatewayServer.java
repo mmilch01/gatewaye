@@ -308,7 +308,6 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 			Element eln = it.next();
 			try
 			{
-
 				MAttr att = attMap.get(eln.attribute("name").getText());
 				Class type = Class.forName(att.type);
 				Method method = srv.getClass().getMethod(att.setMethod, type);

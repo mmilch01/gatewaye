@@ -115,7 +115,8 @@ public class GatewayAESettings extends javax.swing.JFrame {
                 .addContainerGap(15, Short.MAX_VALUE))
         );
 
-        pack();
+        java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+        setBounds((screenSize.width-256)/2, (screenSize.height-214)/2, 256, 214);
     }// </editor-fold>//GEN-END:initComponents
 
     private void cancel_buttonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_cancel_buttonMousePressed

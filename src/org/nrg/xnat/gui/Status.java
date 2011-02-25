@@ -155,7 +155,7 @@ public class Status extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 15, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 27, Short.MAX_VALUE)
                         .addComponent(server_running_or_stopped_label)
                         .addGap(191, 191, 191))
                     .addGroup(layout.createSequentialGroup()
@@ -166,15 +166,15 @@ public class Status extends javax.swing.JFrame {
                             .addComponent(server_start_stop_button, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(38, 38, 38)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(view_logs_button, javax.swing.GroupLayout.DEFAULT_SIZE, 132, Short.MAX_VALUE)
-                            .addComponent(configure_aes_button, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 132, Short.MAX_VALUE)
-                            .addComponent(configure_servers_button, javax.swing.GroupLayout.DEFAULT_SIZE, 132, Short.MAX_VALUE))
+                            .addComponent(view_logs_button, javax.swing.GroupLayout.DEFAULT_SIZE, 139, Short.MAX_VALUE)
+                            .addComponent(configure_aes_button, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 139, Short.MAX_VALUE)
+                            .addComponent(configure_servers_button, javax.swing.GroupLayout.DEFAULT_SIZE, 139, Short.MAX_VALUE))
                         .addContainerGap())
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(uptime_label)
-                        .addContainerGap(230, Short.MAX_VALUE))))
+                        .addContainerGap(241, Short.MAX_VALUE))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -205,7 +205,8 @@ public class Status extends javax.swing.JFrame {
                 .addGap(43, 43, 43))
         );
 
-        pack();
+        java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+        setBounds((screenSize.width-371)/2, (screenSize.height-283)/2, 371, 283);
     }// </editor-fold>//GEN-END:initComponents
 
     private void configure_servers_buttonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_configure_servers_buttonMouseClicked

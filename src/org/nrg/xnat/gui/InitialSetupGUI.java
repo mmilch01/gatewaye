@@ -195,7 +195,8 @@ public class InitialSetupGUI extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        pack();
+        java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+        setBounds((screenSize.width-340)/2, (screenSize.height-437)/2, 340, 437);
     }// </editor-fold>//GEN-END:initComponents
 
     private void initial_apply_buttonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_initial_apply_buttonMousePressed

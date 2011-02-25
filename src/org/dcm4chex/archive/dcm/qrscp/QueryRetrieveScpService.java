@@ -61,6 +61,7 @@ import java.util.Map.Entry;
 import javax.management.JMException;
 import javax.management.ObjectName;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.dcm4che.auditlog.InstancesAction;
 import org.dcm4che.auditlog.RemoteNode;
@@ -233,6 +234,7 @@ public class QueryRetrieveScpService extends AbstractScpService
 	public QueryRetrieveScpService()
 	{
 		log = Logger.getRootLogger();
+		log.setLevel(Level.INFO);
 		moveScp = createMoveScp();
 		getScp = createGetScp();
 		dicomFindScp = createFindScp();

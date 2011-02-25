@@ -99,7 +99,7 @@ public class EditXNATServer extends javax.swing.JFrame {
                         .addGroup(layout.createSequentialGroup()
                             .addComponent(jLabel3)
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(edit_password_textfield, javax.swing.GroupLayout.DEFAULT_SIZE, 187, Short.MAX_VALUE))
+                            .addComponent(edit_password_textfield, javax.swing.GroupLayout.DEFAULT_SIZE, 192, Short.MAX_VALUE))
                         .addGroup(layout.createSequentialGroup()
                             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                 .addComponent(jLabel2)
@@ -110,7 +110,7 @@ public class EditXNATServer extends javax.swing.JFrame {
                                 .addComponent(edit_username_textfield, javax.swing.GroupLayout.DEFAULT_SIZE, 185, Short.MAX_VALUE)))))
                 .addGap(15, 15, 15))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(84, Short.MAX_VALUE)
+                .addContainerGap(86, Short.MAX_VALUE)
                 .addComponent(edit_server_label)
                 .addGap(83, 83, 83))
         );
@@ -138,7 +138,8 @@ public class EditXNATServer extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        pack();
+        java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+        setBounds((screenSize.width-313)/2, (screenSize.height-260)/2, 313, 260);
     }// </editor-fold>//GEN-END:initComponents
 
     private void cancel_buttonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_cancel_buttonMousePressed

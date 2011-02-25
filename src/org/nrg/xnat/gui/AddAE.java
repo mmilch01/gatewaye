@@ -103,7 +103,7 @@ public class AddAE extends javax.swing.JFrame {
                                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                         .addComponent(ae_title)
                                         .addComponent(ae_name, javax.swing.GroupLayout.DEFAULT_SIZE, 172, Short.MAX_VALUE)))
-                                .addContainerGap(24, Short.MAX_VALUE))))
+                                .addContainerGap(25, Short.MAX_VALUE))))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(ae_add_button)
                         .addGap(18, 18, 18)
@@ -142,7 +142,8 @@ public class AddAE extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        pack();
+        java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+        setBounds((screenSize.width-307)/2, (screenSize.height-315)/2, 307, 315);
     }// </editor-fold>//GEN-END:initComponents
 
     private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed

@@ -129,7 +129,8 @@ public class EditAE extends javax.swing.JFrame {
                 .addContainerGap(23, Short.MAX_VALUE))
         );
 
-        pack();
+        java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+        setBounds((screenSize.width-338)/2, (screenSize.height-261)/2, 338, 261);
     }// </editor-fold>//GEN-END:initComponents
 
     private void cancel_buttonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_cancel_buttonMousePressed

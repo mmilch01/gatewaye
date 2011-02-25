@@ -163,7 +163,8 @@ public class AddXNATServer extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        pack();
+        java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+        setBounds((screenSize.width-303)/2, (screenSize.height-262)/2, 303, 262);
     }// </editor-fold>//GEN-END:initComponents
 
     private void username_textfieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_username_textfieldActionPerformed

@@ -99,7 +99,8 @@ public class GatewayLog extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        pack();
+        java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+        setBounds((screenSize.width-410)/2, (screenSize.height-334)/2, 410, 334);
     }// </editor-fold>//GEN-END:initComponents
 
     private void gateway_log_close_buttonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_gateway_log_close_buttonMousePressed
