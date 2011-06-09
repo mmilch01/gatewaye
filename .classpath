@@ -18,6 +18,6 @@
 	<classpathentry kind="lib" path="lib/slf4j-log4j12-1.5.0.jar"/>
 	<classpathentry kind="lib" path="lib/xdat-beans-1.0-source.jar"/>
 	<classpathentry kind="lib" path="lib/xdat-beans-1.0.jar"/>
-	<classpathentry kind="lib" path="lib/xnd-beans.jar"/>
+	<classpathentry kind="lib" path="lib/xnd-beans.jar" sourcepath="/xnd/src"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
