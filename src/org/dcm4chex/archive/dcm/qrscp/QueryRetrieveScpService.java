@@ -230,6 +230,8 @@ public class QueryRetrieveScpService extends AbstractScpService
 	 * is name (as in config string), value is real uid)
 	 */
 	private Map privateTSuidMap = new LinkedHashMap();
+	private Map cgetCuidMap = new LinkedHashMap();
+	
 
 	public QueryRetrieveScpService()
 	{
@@ -678,6 +680,16 @@ public class QueryRetrieveScpService extends AbstractScpService
 		return toString(standardCuidMap);
 	}
 
+	public String getAcceptedCGETSOPClasses()
+	{
+		return toString(cgetCuidMap);
+	}
+	
+	public void setAcceptedCGETSOPClasses(String s)
+	{
+		updateAcceptedSOPClass(cgetCuidMap, s, null);
+	}
+	
 	public void setAcceptedStandardSOPClasses(String s)
 	{
 		updateAcceptedSOPClass(standardCuidMap, s, null);
@@ -1172,6 +1184,10 @@ public class QueryRetrieveScpService extends AbstractScpService
 		putPresContexts(policy, valuesToStringArray(privateCuidMap),
 				valuesToStringArray(privateTSuidMap));
 		putPresContexts(policy, valuesToStringArray(standardCuidMap),
+				valuesToStringArray(tsuidMap));
+		
+// comment this out to disable C-GET.		
+		putPresContexts(policy, valuesToStringArray(cgetCuidMap), 
 				valuesToStringArray(tsuidMap));
 	}
 

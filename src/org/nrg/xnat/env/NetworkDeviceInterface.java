@@ -31,6 +31,6 @@ public interface NetworkDeviceInterface extends DeviceInterface {
      */
     boolean isValid();
 
-    @Override
+ //   @Override
     String toString();
 }

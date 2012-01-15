@@ -404,6 +404,22 @@ QueryRetrieveScp service.</description>
       </descriptors>
    </attribute>
    <attribute access="read-write"
+        getMethod="getAcceptedCGETSOPClasses"
+        setMethod="setAcceptedCGETSOPClasses">
+        <description><![CDATA[
+            List of accepted C-GET Query/Retrieve SOP Classes. 
+            Need to list all SOP classes supported by C-GET here.
+        ]]>
+        </description>
+        <name>AcceptedCGETSOPClasses</name>
+        <type>java.lang.String</type>
+        <descriptors>
+            <value value="
+            MRImageStorage
+            "/>
+        </descriptors>
+    </attribute>
+   <attribute access="read-write"
       getMethod="getAcceptedStandardSOPClasses"
       setMethod="setAcceptedStandardSOPClasses">
       <description><![CDATA[
