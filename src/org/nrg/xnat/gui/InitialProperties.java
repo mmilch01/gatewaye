@@ -16,7 +16,7 @@ public class InitialProperties {
     GatewayEnvironment env;
     InitialSetupGUI gui;
     Properties p;
-    private final String filename = "./config/gateway.properties.test";
+    private final String filename = System.getProperty("user.home")+"/.xnatgateway/gateway.properties.test";
     public InitialProperties(File f) throws IOException {
         if (f.exists()) {
             this.env = new GatewayEnvironment(f);
@@ -59,7 +59,7 @@ public class InitialProperties {
 
     public void initialSetupDone(Properties p) throws IOException {
         p.setProperty("Logger.Output","file");
-        p.setProperty("Application.SavedImagesFolderName","./tmp/");
+        p.setProperty("Application.SavedImagesFolderName",System.getProperty("user.home")+"/.xnatgateway/tmp/");
         this.p = p;        
         runInitialRemoteAEScreen ();        
         initializeEnvironment(p);

@@ -122,9 +122,7 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 	}
 
 	public XNATGatewayServer(GatewayEnvironment env) throws Exception
-	{
-            
-
+	{            
 		if(!test()) return;
 		this.l=env.make_logger();
 		
@@ -390,21 +388,22 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
             return Result.SERVER_STOPPED;
 	}
 	
-	public static void main(String arg[]) throws IOException
+	public static void main(String arg[]) throws IOException, SecurityException
 	{
 		if((arg.length>0) && (arg[0].toLowerCase().compareTo("console")==0 
 				|| arg[0].toLowerCase().compareTo("c")==0))
 			bConsole=true;
 		else
 			bConsole=false;
+		new File(System.getProperty("user.home")+"/.xnatgateway/tmp").mkdirs();
 		if(bConsole)
 		{			
 			System.err.println(start("/config/gateway.properties"));
 		}
 		else
 		{
-			InitialProperties i = new InitialProperties(new File("./config/gateway.properties.test"));
-		}
+			InitialProperties i = new InitialProperties(new File(System.getProperty("user.home")+"/.xnatgateway/gateway.properties.test"));
+		}		
 	}
 	@Override
 	protected void finalize() throws Throwable

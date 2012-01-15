@@ -33,8 +33,8 @@ public class AuthenticatedDevice {
     private String username;
     private String password;
     private String group_name;
-    private String name;
-    public static String keyFile = "./config/password.key";
+    private String name; 
+    public static String keyFile = System.getProperty("user.home")+"/.xnatgateway/password.key";
 
     AuthenticatedDevice(String name, String group_name) throws NoSuchAlgorithmException, IOException {
         this.name = name;

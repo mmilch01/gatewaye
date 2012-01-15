@@ -85,8 +85,9 @@ class GatewayDevice  {
 
     public void setCacheFolder (String name) throws IOException {
         if (!Utils.has_content(name)) {
-            write_property("Application.SavedImagesFolderName",name);
-            this.cache_folder = name;
+//            write_property("Application.SavedImagesFolderName",name);
+            this.cache_folder = System.getProperty("user.home")+"/.xnatgateway/tmp"; 
+//            	name;
         }
         else {
             this.l.addWarning("Bad Cache Folder : Cannot give the gateway an empty folder name");
@@ -108,7 +109,8 @@ class GatewayDevice  {
     public void populate() throws IOException {
         String _name = this.p.getProperty(this.group_name + "." + "CallingAETitle");
         String _port = this.p.getProperty(this.group_name + "." + "ListeningPort");
-        String _cache = this.p.getProperty("Application.SavedImagesFolderName");
+        String _cache = System.getProperty("user.home")+"/.xnatgateway/tmp";      	
+//        	this.p.getProperty("Application.SavedImagesFolderName");
 
         if (!Utils.has_content(_name)) {
             this.l.addFatal("Gateway AE title is missing.");

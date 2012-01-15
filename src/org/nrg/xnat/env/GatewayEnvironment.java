@@ -53,13 +53,16 @@ public class GatewayEnvironment {
     public GatewayEnvironment(File f) throws IOException {
         if (!initialized) {
             this.f = f;
+            //??
+            //System.out.println(System.getProperty("user.home"));
+            System.out.println("GatewayEnvironment.line 57: " + f.toString());
             this.p = read_props(this.f);
             initialize(this.p);
         }
         else {
             throw new IOException("Cannot initialize more than one GatewayEnvironment");
         }
-        this.log_file = new File("./gateway.log");
+        this.log_file = new File(System.getProperty("user.home")+"/.xnatgateway/gateway.log");
     }
 
     public GatewayEnvironment(Properties p, String filename) throws IOException {
@@ -72,7 +75,7 @@ public class GatewayEnvironment {
         else {
             throw new IOException("Cannot initialize more than one GatewayEnvironment");
         }
-        this.log_file = new File("./gateway.log");
+        this.log_file = new File(System.getProperty("user.home")+"/.xnatgateway/gateway.log");
     }
 
     private void initialize (Properties p) throws IOException {
@@ -382,7 +385,7 @@ public class GatewayEnvironment {
         SimpleLayout layout = new SimpleLayout();
         try {
             if (this.p.getProperty("Logger.Output").toLowerCase().compareTo("file") == 0) {
-                appender = new FileAppender(layout, "./gateway.log", false);
+                appender = new FileAppender(layout, System.getProperty("user.home")+"/.xnatgateway/gateway.log", false);
             } else {
                 appender = new ConsoleAppender(layout);
             }
@@ -397,7 +400,7 @@ public class GatewayEnvironment {
         if ((str = this.p.getProperty("Dicom.DebugLevel")) != null) {
             l.setLevel(Level.toLevel(str));
         } else {
-            l.setLevel(Level.ALL);
+            l.setLevel(Level.INFO);
         }
 
         return l;

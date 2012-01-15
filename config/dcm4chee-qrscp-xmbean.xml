@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mbean PUBLIC "-//JBoss//DTD JBOSS XMBEAN 1.1//EN" "http://www.jboss.org/j2ee/dtd/jboss_xmbean_1_1.dtd">
-
 <mbean>
    <description>DICOM Query/Retrieve SCP. Provides the DICOM Query/Retrieve SCP.  Note that the value of the &lt;b&gt;MaxConcurrentCodec&lt;/b&gt; attribute in the Compression Service also effects the on-the-fly
 compression and decompression during the retrieve of images by the
@@ -1088,10 +1086,9 @@ QueryRetrieveScp service.</description>
       <type>javax.management.ObjectName</type>
    </attribute>
 
-   &defaultAttributes;
+   
 
    <!-- Operations -->
-   &defaultOperations;
    <operation impact="ACTION">
       <description>Used internally</description>
       <name>queueStgCmtOrder</name>

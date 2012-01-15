@@ -10,7 +10,7 @@
 	<classpathentry kind="lib" path="lib/commons-logging-1.1.1.jar"/>
 	<classpathentry kind="lib" path="lib/dcm4che-audit-2.0.21.jar"/>
 	<classpathentry kind="lib" path="lib/dcm4che-imageio-rle-2.0.21.jar"/>
-	<classpathentry kind="lib" path="lib/dcm4che.jar"/>
+	<classpathentry kind="lib" path="lib/dcm4che.jar" sourcepath="/dcm4chee/dcm4che14/src/java"/>
 	<classpathentry kind="lib" path="lib/dom4j-1.6.1.jar"/>
 	<classpathentry kind="lib" path="lib/jai_imageio_api.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-1.2.15.jar"/>

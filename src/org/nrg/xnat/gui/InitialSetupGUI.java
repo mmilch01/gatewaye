@@ -76,19 +76,25 @@ public class InitialSetupGUI extends javax.swing.JFrame {
         jLabel2.setText("Gateway Settings");
 
         jLabel3.setText("AE Title");
+        initial_ae_title.setText("GATEWAY");
 
         jLabel4.setText("Port");
+        initial_listening_port.setText("4008");
 
         jLabel5.setText("Default XNAT Server");
 
         jLabel6.setText("Name");
+        initial_xnat_name.setText("XNAT_Central");
 
         jLabel7.setText("Hostname");
-
+        initial_xnat_hostname.setText("http://central.xnat.org");
+        
         jLabel8.setText("Username");
-
+        initial_xnat_username.setText("guest");
+        
         jLabel9.setText("Password");
-
+        initial_xnat_password.setText("guest");
+        
         initial_apply_button.setText("Apply");
         initial_apply_button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mousePressed(java.awt.event.MouseEvent evt) {
