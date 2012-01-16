@@ -419,9 +419,13 @@ public class QueryRetrieveScpService extends AbstractScpService
 
 	final boolean hasUnrestrictedQueryPermissions(String aet)
 	{
-		return unrestrictedQueryPermissionsToAETitles == null
+	
+		return true;
+		//uncomment to tune query permissions to specific AE titles.
+/*		return unrestrictedQueryPermissionsToAETitles == null
 				|| Arrays.asList(unrestrictedQueryPermissionsToAETitles)
 						.contains(aet);
+*/						
 	}
 
 	public final String getUnrestrictedReadPermissionsToAETitles()
@@ -687,6 +691,7 @@ public class QueryRetrieveScpService extends AbstractScpService
 	
 	public void setAcceptedCGETSOPClasses(String s)
 	{
+		//comment out to disable C-GET
 		updateAcceptedSOPClass(cgetCuidMap, s, null);
 	}
 	

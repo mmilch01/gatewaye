@@ -118,7 +118,7 @@ public abstract class AbstractScpService /* extends ServiceMBeanSupport */
 		return log;
 	}
 	// !! protected AuditLoggerDelegate auditLogger = new
-	// AuditLoggerDelegate(this);
+	// AuditLoggerDelegate(this);f
 
 	protected DcmHandler dcmHandler;
 
@@ -522,7 +522,8 @@ public abstract class AbstractScpService /* extends ServiceMBeanSupport */
 			if (policy1 == null)
 			{
 				policy1 = AssociationFactory.getInstance().newAcceptorPolicy();
-				policy1.setCallingAETs(callingAETs);
+				//uncomment this to enable filtering by calling AETs
+				//policy1.setCallingAETs(callingAETs);
 				policy1.setUserIdentityNegotiator(userIdentityNegotiator);
 				policy.putPolicyForCalledAET(calledAETs[i], policy1);
 				policy.addCalledAET(calledAETs[i]);
