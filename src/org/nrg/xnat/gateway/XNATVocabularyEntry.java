@@ -23,8 +23,8 @@ public class XNATVocabularyEntry
 	public String m_elementName = "";
 	public String m_field_id = "";
 	public String m_type = "";
-	// public String m_header="";
-	public String m_search_column_alias = "";
+	public String m_restvar="";
+	public String m_dcmid = "";
 	public String m_rest_column_alias = "";
 
 	public Collection<criterion> m_criteria = null;
@@ -77,8 +77,8 @@ public class XNATVocabularyEntry
 		m_elementName = el.attributeValue("xnat_element_name");
 		m_field_id = el.attributeValue("xnat_field_id");
 		m_type = "string";
-		// m_header=el.attributeValue("xnat_header");
-		m_search_column_alias = el.attributeValue("search_column_alias");
+		m_restvar=el.attributeValue("rest_var");
+		m_dcmid = el.attributeValue("dcmid");
 
 		LinkedList<criterion> llsw = new LinkedList<criterion>();
 		for (Iterator it = el.elementIterator(); it.hasNext();)
@@ -99,8 +99,8 @@ public class XNATVocabularyEntry
 		el.addAttribute("xnat_element_name", m_elementName);
 		el.addAttribute("xnat_field_id", m_field_id);
 		el.addAttribute("xnat_type", m_type);
-		// el.addAttribute("xnat_header", m_header);
-		el.addAttribute("search_column_alias", m_search_column_alias);
+		el.addAttribute("rest_var", m_restvar);
+		el.addAttribute("dcmid", m_dcmid);
 		if (m_criteria != null)
 		{
 			for (criterion c : m_criteria)

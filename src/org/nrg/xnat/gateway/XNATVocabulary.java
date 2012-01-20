@@ -35,7 +35,7 @@ public class XNATVocabulary
 				{
 					xve = new XNATVocabularyEntry(el);
 					m_dcm_entries.put(new Integer(xve.m_DICOMTag), xve);
-					m_xnat_entries.put(xve.m_search_column_alias, xve);
+					m_xnat_entries.put(xve.m_dcmid, xve);
 				}
 			}
 		} catch (Exception e)
@@ -105,10 +105,10 @@ public class XNATVocabulary
 		} else if (ie.compareTo(InformationEntity.SERIES) == 0)
 		{
 			if(!XNATGatewayServer.isDICOMUID())				
-				stMap.put("ID", "id");
+				stMap.put("ID", "serinstuid");
 			else
 			{
-				stMap.put("xnat:imagesessiondata/scans/scan/uid","id");
+				stMap.put("xnat:imagesessiondata/scans/scan/uid","serinstuid");
 				stMap.put("xnat:imagesessiondata/scans/scan/type","series_description");
 			}
 			
@@ -147,7 +147,7 @@ public class XNATVocabulary
 	}
 	public static String xnatTodcm(String val, String alias)
 	{
-		if(alias.compareTo("stinstuid")==0 || alias.compareTo("id")==0)
+		if(alias.compareTo("stinstuid")==0 || alias.compareTo("serinstuid")==0)
 		{
 			if(val==null) return val;
 			if(XNATGatewayServer.isDICOMUID()) return val;
@@ -185,7 +185,7 @@ public class XNATVocabulary
 	}
 	public static String dcmToXNATField(String field, String dcmAlias)
 	{
-		if (dcmAlias.compareTo("stinstuid")==0 || dcmAlias.compareTo("id")==0)
+		if (dcmAlias.compareTo("stinstuid")==0 || dcmAlias.compareTo("serinstuid")==0)
 		{
 			if(field==null) return null;
 			return Utils.UID2String(field);

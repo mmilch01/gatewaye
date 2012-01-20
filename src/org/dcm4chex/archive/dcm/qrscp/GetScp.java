@@ -38,6 +38,7 @@
 package org.dcm4chex.archive.dcm.qrscp;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.sql.SQLException;
 
 import javax.management.ObjectName;
@@ -79,7 +80,26 @@ public class GetScp extends DcmServiceBase
 		this.service = service;
 		this.log = service.getLog();
 	}
+	private boolean isLocalAddress(InetAddress ia)
+	{		
+        try {
+            //check 127.0.0.1
+            InetAddress localhost = InetAddress.getByName("127.0.0.1");
+            if( ia.equals(localhost))
+                return true;
 
+            //this really is the way you have to check all IP addresses to see if one is local
+            InetAddress[] allMyIps = InetAddress.getAllByName(localhost.getCanonicalHostName());
+            if (allMyIps != null && allMyIps.length > 1) {
+                for(InetAddress ip : allMyIps) { 
+                    if( ia.equals(ip) )
+                        return true; //success!! it's local
+                }
+            }
+        }
+        catch(Exception e){}
+        return false;
+	}	
 	@Override
 	public void c_get(ActiveAssociation assoc, Dimse rq) throws IOException
 	{
@@ -88,6 +108,10 @@ public class GetScp extends DcmServiceBase
 		Association a = assoc.getAssociation();
 		try
 		{
+			if (!isLocalAddress(a.getSocket().getInetAddress()))
+			{
+				throw new DcmServiceException(
+						Status.UnableToProcess, "C-GET is only allowed from the local host");}
 			Dataset rqData = rq.getDataset();
 			if (log.isDebugEnabled())
 			{
@@ -109,9 +133,25 @@ public class GetScp extends DcmServiceBase
 							"retrieveFiles", new Object[]{rqData},
 							new String[]{Dataset.class.getName()});												
 //					RetrieveCmd.create(rqData).getFileInfos();
+				
+				//now, try to split send in two parts.
+				int l1=fileInfos.length/2;
+				int l2=fileInfos.length-l1;								
+				FileInfo[][] fi1=new FileInfo[l1][];
+				FileInfo[][] fi2=new FileInfo[l2][];
+				for (int i=0; i<l1+l2; i++)
+				{
+					if(i<l1) fi1[i]=fileInfos[i];
+					else fi2[i-l1]=fileInfos[i-l1];
+				}							
 				checkPermission(a, fileInfos);
+//split in two.				
 				new Thread(new GetTask(service, assoc, pcid, rqCmd, rqData,
 						fileInfos)).start();
+//				new Thread(new GetTask(service, assoc, pcid, rqCmd, rqData,
+//				fi1)).start();
+//				new Thread(new GetTask(service, assoc, pcid, rqCmd, rqData,
+//				fi2)).start();												
 			} catch (DcmServiceException e)
 			{
 				throw e;

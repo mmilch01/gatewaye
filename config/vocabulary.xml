@@ -1,94 +1,114 @@
 <vocabulary>
 <!--
-Note: xnat_column_alias is a vocabulary-defined key that is used internally for 
-entry indexing. It should be unique throughout the vocabulary.
+dicom_group + dicom_element: hexadecimal DICOM tag identifier that is mapped to the XNAT field.
+
+For available XNAT variables, see: http://docs.xnat.org/XNAT+REST+XML+Path+Shortcuts
+
+xnat_element_name: parent element in XNAT schema for the given XNAT field.
+xnat_field_id: field in XNAT schema that is mapped to the DICOM tag.
+rest_var: column header label (variable name) in table returned by XNAT.
+xnat_column_alias is a DICOM vocabulary-based key that is used internally for entry indexing. It should be unique throughout the vocabulary.
+ xnat_column_alias is hard wired to the DICOM tag.
+criterion & value maps: used for building xml search queries, should normally be ignored.
  -->
 
 <!-- PatientID -->
-<entry dicom_group="0010" dicom_element="0020" xnat_element_name="xnat:subjectData" 
-		xnat_field_id="xnat:subjectData/ID" xnat_header="PatientID" search_column_alias="patid" >
+<entry dicom_group="0010" dicom_element="0020" dcmid="patid" xnat_element_name="xnat:experimentdata" 
+		xnat_field_id="xnat:experimentdata/label" rest_var="label">
 	<criterion search_schema_field="xnat:subjectData/ID" method="OR" comparison_type="LIKE"/>
 </entry>
 
 <!-- Patient Name -->
-<entry dicom_group="0010" dicom_element="0010" xnat_element_name="xnat:subjectData"
-		xnat_field_id="xnat:subjectData/label" xnat_header="PatientName" search_column_alias="patname">
+<entry dicom_group="0010" dicom_element="0010" dcmid="patname" xnat_element_name="xnat:subjectData" 
+		xnat_field_id="xnat:subjectData/label" rest_var="subject_label" >
 	<criterion search_schema_field="xnat:subjectData/label" method="OR" comparison_type="LIKE"/>
 </entry>
 
 <!-- Patient Sex -->
-<entry dicom_group="0010" dicom_element="0040" xnat_element_name="xnat:subjectData"
-		xnat_field_id="xnat:demographicData/gender" xnat_header="PatientSex" search_column_alias="patsex">
+<entry dicom_group="0010" dicom_element="0040" dcmid="patsex" xnat_element_name="xnat:subjectData"
+		xnat_field_id="xnat:subjectData/demographics[@xsi:type=xnat:demographicData]/gender" rest_var="xnat:subjectData/demographics[@xsi:type=xnat:demographicData]/gender" >
 	<criterion search_schema_field="xnat:subjectData/gender" method="OR" comparison_type="LIKE"/>		
 	<value_map dcm_val="M" xnat_val="male"/>
 	<value_map dcm_val="F" xnat_val="female"/>
 </entry>
 
 <!-- Patient Birth Date -->
-<entry dicom_group="0010" dicom_element="0030" xnat_element_name="xnat:subjectData"
-		xnat_field_id="xnat:demographicData/dob" xnat_header="PatientDOB" search_column_alias="patdob">
+<entry dicom_group="0010" dicom_element="0030" dcmid="patdob" xnat_element_name="xnat:subjectData"
+		xnat_field_id="xnat:subjectData/demographics[@xsi:type=xnat:demographicData]/dob" rest_var="xnat:subjectData/demographics[@xsi:type=xnat:demographicData]/dob" >
 	<criterion search_schema_field="xnat:subjectData/dob" method="OR" comparison_type="LIKE"/>
 </entry>
 
-<!-- Study instance UID  -->
+<!-- Study instance UID for data that doesn't have real DICOM stinstuid 
 <entry dicom_group="0020" dicom_element="000D" xnat_element_name="xnat:imageSessionData" 
-		 xnat_field_id="xnat:imageSessionData/ID" xnat_header="ID" search_column_alias="stinstuid">
+		 xnat_field_id="xnat:imageSessionData/ID" rest_var="ID" dcmid="stinstuid">
+</entry>
+-->
+
+<!-- Study instance UID (as of Jan 2012) (real DICOM UID should be populated)  -->
+<entry dicom_group="0020" dicom_element="000D" dcmid="stinstuid" xnat_element_name="xnat:imageSessionData" 
+		 xnat_field_id="xnat:imageSessionData/UID" rest_var="UID" >
 </entry>
 
 <!-- Study accession number  -->
-<entry dicom_group="0008" dicom_element="0050" xnat_element_name="xnat:mrSessionData" 
-		xnat_field_id="xnat:imageSessionData/label" xnat_header="Label" search_column_alias="staccessionnum">
+<entry dicom_group="0008" dicom_element="0050" dcmid="staccessionnum" xnat_element_name="xnat:projectData" 
+		xnat_field_id="xnat:projectData/ID" rest_var="project" >
 </entry>
 
-<!-- Referring physician -->
-<entry dicom_group="0008" dicom_element="0090" xnat_element_name="xnat:mrSessionData"
-		xnat_field_id="xnat:imageSessionData/investigator/lastname" xnat_header="Investigator"	search_column_alias="strefphysician">
+<!-- Referring physician - no XNAT equivalent
+<entry dicom_group="0008" dicom_element="0090" dcmid="strefphysician" xnat_element_name="xnat:mrSessionData"
+		xnat_field_id="xnat:imageSessionData/investigator/lastname" rest_var="Investigator"	>
 </entry>
+-->
 
 <!-- Study description -->
-<entry dicom_group="0008" dicom_element="1030" xnat_element_name="xnat:mrSessionData"
-		xnat_field_id="xnat:imageSessionData/session_type" xnat_header="TYPE"	search_column_alias="stdescr">
+<entry dicom_group="0008" dicom_element="1030" dcmid="stdescr" xnat_element_name="xnat:imageSessionData" 
+		xnat_field_id="xnat:imageSessionData/session_type" rest_var="session_type"	>
 </entry>
 
-<!-- Study modality -->
+<!-- old study modality
 <entry dicom_group="0008" dicom_element="0061" xnat_element_name="xnat:mrSessionData"
-		xnat_field_id="xnat:imageSessionData/modality" xnat_header="MODALITY"	search_column_alias="stmodality">
+		xnat_field_id="xnat:imageSessionData/modality" rest_var="MODALITY"	dcmid="stmodality">
+</entry>
+ -->
+<!-- new (as of Jan 2012) Study modality -->
+<entry dicom_group="0008" dicom_element="0061" dcmid="stmodality" xnat_element_name="xsiType"
+		xnat_field_id="xsiType" rest_var="xsiType">
 </entry>
 
 <!-- Study date -->
-<entry dicom_group="0008" dicom_element="0020" xnat_element_name="xnat:mrSessionData"
-		xnat_field_id="xnat:imageSessionData/date" xnat_header="DATE"	search_column_alias="stdate">
+<entry dicom_group="0008" dicom_element="0020" dcmid="stdate" xnat_element_name="xnat:imageSessionData"
+		xnat_field_id="xnat:imageSessionData/date" rest_var="date">
 </entry>
 
 <!-- Study time -->
-<entry dicom_group="0008" dicom_element="0030" xnat_element_name="xnat:mrSessionData"
-		xnat_field_id="xnat:imageSessionData/time" xnat_header="TIME"	search_column_alias="sttime">
+<entry dicom_group="0008" dicom_element="0030" dcmid="sttime" xnat_element_name="xnat:imageSessionData"
+		xnat_field_id="xnat:imageSessionData/time" rest_var="time" >
 </entry>
 
 <!-- Series instance UID --> 
-<entry dicom_group="0020" dicom_element="000E" xnat_element_name="xnat:mrScanData"
-		xnat_field_id="xnat:imageScanData/ID" xnat_header="Scan"	search_column_alias="id">
+<entry dicom_group="0020" dicom_element="000E" dcmid="serinstuid" xnat_element_name="xnat:imageScanData"
+		xnat_field_id="xnat:imagescandata/uid" rest_var="xnat:imagescandata/uid" >
 </entry>
 
 <!-- Series modality --> 
-<entry dicom_group="0008" dicom_element="0060" xnat_element_name="xnat:mrScanData"
-		xnat_field_id="xnat:imageScanData/modality" xnat_header="modality"	search_column_alias="sermodality">
+<entry dicom_group="0008" dicom_element="0060" dcmid="sermodality" xnat_element_name="xnat:imageScanData"
+		xnat_field_id="xnat:imagescandata/modality" rest_var="xnat:imagescandata/modality" >
 </entry>
 
 <!-- Series number  
 <entry dicom_group="0020" dicom_element="0011" xnat_element_name="xnat:mrScanData"
-		xnat_field_id="xnat:imageScanData/ID" xnat_header="Scan" search_column_alias="id">
+		xnat_field_id="xnat:imageScanData/ID" rest_var="Scan" dcmid="id">
 </entry>
 -->
 
 <!-- Series description --> 
-<entry dicom_group="0008" dicom_element="103E" xnat_element_name="xnat:mrScanData"
-		xnat_field_id="xnat:imageScanData/type" xnat_header="type"	search_column_alias="series_description">
+<entry dicom_group="0008" dicom_element="103E" dcmid="series_description" xnat_element_name="xnat:imageScanData"
+		xnat_field_id="xnat:imagescandata/type" rest_var="xnat:imagescandata/type" >
 </entry>
 
 <!-- Series number of images --> 
-<entry dicom_group="0020" dicom_element="1209" xnat_element_name="xnat:mrScanData"
-		xnat_field_id="xnat:imageScanData/frames" xnat_header="Files"	search_column_alias="sernumimages">
+<entry dicom_group="0020" dicom_element="1209" dcmid="sernumimages" xnat_element_name="xnat:mrScanData"
+		xnat_field_id="xnat:imageScanData/frames" rest_var="xnat:imagescandata/frames">
 </entry>
 
 </vocabulary>
