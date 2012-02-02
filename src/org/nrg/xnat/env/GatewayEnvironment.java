@@ -440,6 +440,14 @@ public class GatewayEnvironment {
         return this.settings.getName();
     }
 
+    public boolean get_anoymous_ae_allowed() {
+        return this.settings.getAllowAnonymousAERetrieve();
+    }
+
+    public void set_anonymous_ae_allowed(boolean b) throws IOException {
+        this.settings.setAllowAnonymousAERetrieve(b);
+    }
+
     public List get_log_messages () throws IOException {
         return FileUtils.readLines(this.log_file);
     }

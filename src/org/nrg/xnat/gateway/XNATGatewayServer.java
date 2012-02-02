@@ -176,14 +176,14 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 		if(xs==null || !xs.isValid())
 			throw new IOException ("Incorrect XNAT server configuration");
 		
-		m_XNATServer = xs.getHostname();		
+		m_XNATServer = xs.getHostname();
 		m_XNATUser = xs.getUsername();
 		m_XNATPass = xs.getPassword();
-		m_AETitle = env.get_calledae_title();		
+		m_AETitle = env.get_calledae_title();
 		m_this = this;
 		// m_dcmServer.start();
 		
-		m_localAE=new AEDTO(0, m_AETitle, "localhost", env.get_listening_port(),				
+		m_localAE=new AEDTO(0, m_AETitle, "localhost", env.get_listening_port(),
 				"", "", "", "", "","", "");
 		m_ael.setLocalAE(m_localAE);
 		srv.setAEManager(
@@ -208,6 +208,7 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 		);
 
 		XNATQueryGenerator.LoadVocabulary("./config/vocabulary.xml");
+		System.out.println("Anonymous AE allowed: " + env.get_anoymous_ae_allowed());
 		start_time = new Date().getTime();		
 		new Thread(this).start();		
 	}

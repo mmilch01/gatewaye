@@ -1,6 +1,7 @@
 package org.nrg.xnat.gui;
 
 import java.io.IOException;
+import javax.swing.JCheckBox;
 import org.nrg.xnat.env.GatewayEnvironment;
 import javax.swing.JLabel;
 
@@ -14,17 +15,18 @@ public class UpdateGateway implements UpdateableComponent {
     private  JLabel port_label;
     private final GatewayEnvironment env;
 
-    public UpdateGateway (JLabel ae_label, JLabel port_label, GatewayEnvironment env) {
+    public UpdateGateway (JLabel ae_label, JLabel port_label,GatewayEnvironment env) {
         this.env = env;
         this.ae_label = ae_label;
         this.port_label = port_label;
     }
 
-    public boolean update_gateway (String ae, String _port) {
+    public boolean update_gateway (String ae, String _port, boolean b) {
         try {
             int port = Integer.parseInt(_port);
             env.set_callingaetitle(ae);
             env.set_listening_port(port);
+            env.set_anonymous_ae_allowed(b);
             refresh();
         }
         catch (NumberFormatException e ) {
