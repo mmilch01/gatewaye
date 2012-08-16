@@ -20,14 +20,13 @@ import org.nrg.xdat.bean.XdatCriteriaSetBean;
 public class XNATVocabularyEntry
 {
 	public int m_DICOMTag;
-	public String m_elementName = "";
-	public String m_field_id = "";
 	public String m_type = "";
 	public String m_restvar="";
 	public String m_dcmid = "";
-	public String m_rest_column_alias = "";
-
+	public static final int PATIENT=1,STUDY=2,SERIES=3;
+	public int m_qLevel=0;
 	public Collection<criterion> m_criteria = null;
+	public Collection<String> m_aliases = null;
 
 	public boolean isDateTag()
 	{
@@ -39,18 +38,10 @@ public class XNATVocabularyEntry
 	{
 		try
 		{
-			// Attribute attr=AttributeFactory.newAttribute(m_DICOMTag);
-
-			// if(attr instanceof DateAttribute)
-
-			// workaround for overly-sensitive parser that doesn't accept dashes
-			// for dates.
 			if (isDateTag())
 			{
 				val = val.replace("-", "");
 			}
-
-			// for now, we only support string values.
 			ds.putXX(m_DICOMTag, val);
 		} catch (Exception de)
 		{
@@ -68,36 +59,40 @@ public class XNATVocabularyEntry
 	{
 		return tag & 0xffff;
 	}
-	public XNATVocabularyEntry(Element el)
+	public XNATVocabularyEntry(Element el) throws Exception
 	{
-		int group = Integer.parseInt(el.attributeValue("dicom_group"), 16), elem = Integer
-				.parseInt(el.attributeValue("dicom_element"), 16);
+		String tag=el.attributeValue("dcm_tag");
+		int group = Integer.parseInt(tag.substring(0,4), 16), elem = Integer
+		.parseInt(tag.substring(4,8), 16);		
 		m_DICOMTag = tagFromGrElem(group, elem);
-		// m_DICOMTag=new AttributeTag(group,elem);
-		m_elementName = el.attributeValue("xnat_element_name");
-		m_field_id = el.attributeValue("xnat_field_id");
 		m_type = "string";
 		m_restvar=el.attributeValue("rest_var");
 		m_dcmid = el.attributeValue("dcmid");
+		String qLevel=el.attributeValue("qLevel");
+		if(qLevel==null) m_qLevel=PATIENT;
+		if(qLevel.compareTo("PATIENT")==0) m_qLevel=PATIENT;
+		else if(qLevel.compareTo("STUDY")==0) m_qLevel=STUDY;
+		else if(qLevel.compareTo("SERIES")==0) m_qLevel=SERIES;
+		else throw new Exception("Unsupported query level value for entry: tag="+m_DICOMTag+", dcmid="+m_dcmid);				
 
 		LinkedList<criterion> llsw = new LinkedList<criterion>();
+		LinkedList<String> fid=new LinkedList<String>();
 		for (Iterator it = el.elementIterator(); it.hasNext();)
 		{
 			Element se = (Element) it.next();
 			if (se.getName().compareTo("criterion") == 0)
 				llsw.add(new criterion(se));
+			if (se.getName().compareTo("alias") == 0)
+				fid.add(se.getText());				
 		}
 		if (llsw.size() > 0)
 			m_criteria = llsw;
+		if (fid.size() > 0) 
+			m_aliases = fid;
 	}
 	public void toElement(Element el)
 	{
-		el.addAttribute("dicom_group", Integer
-				.toHexString(getGroup(m_DICOMTag)));
-		el.addAttribute("dicom_element", Integer
-				.toHexString(getElem(m_DICOMTag)));
-		el.addAttribute("xnat_element_name", m_elementName);
-		el.addAttribute("xnat_field_id", m_field_id);
+		el.addAttribute("dcm_tag",getDcmTag());
 		el.addAttribute("xnat_type", m_type);
 		el.addAttribute("rest_var", m_restvar);
 		el.addAttribute("dcmid", m_dcmid);
@@ -109,6 +104,20 @@ public class XNATVocabularyEntry
 				c.fillElement(sub);
 			}
 		}
+		if (m_aliases != null)
+		{
+			for (String s : m_aliases)
+			{
+				Element sub = el.addElement("alias");
+				sub.setText(s);
+			}
+		}			
+	}
+	public String getDcmTag()
+	{
+		return Integer
+		.toHexString(getGroup(m_DICOMTag)).concat(
+				Integer.toHexString(getElem(m_DICOMTag)));
 	}
 	public XdatCriteriaSetBean getCriteriaSet(String val)
 	{

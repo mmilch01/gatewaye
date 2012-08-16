@@ -42,8 +42,7 @@ public class XNATCFindRsp implements MultiDimseRsp
 		HttpMethodBase method = null;
 		InformationEntity ieWanted = Utils
 				.getInformationEntityForQueryRetieveLevel(qLevel);
-		// if(qLevel.toLowerCase().compareTo("patient")==0)
-		if (ieWanted.compareTo(InformationEntity.PATIENT) == 0)
+/*		if (ieWanted.compareTo(InformationEntity.PATIENT) == 0)
 		{
 			// now, for Patient/Study level, use generic xml search.
 			try
@@ -63,9 +62,9 @@ public class XNATCFindRsp implements MultiDimseRsp
 						+ ", message: " + e.getMessage());
 			}
 		} else if (ieWanted.compareTo(InformationEntity.SERIES) <= 0)
-		// else if(ieWanted.compareTo(InformationEntity.SERIES)==0)
+*/			
 		{
-			String path = XNATQueryGenerator.getRESTQuery(ieWanted, m_query,true);
+			String path = XNATQueryGenerator.getRESTQuery(ieWanted, m_query);
 			Tools.LogMessage(Priority.INFO_INT, "REST query string:\n" + path);
 			if (path == null)
 			{
@@ -73,8 +72,8 @@ public class XNATCFindRsp implements MultiDimseRsp
 				return -1;
 			}
 			method = m_xre.PerformConnection(XNATRestAdapter.GET, path, "");
-		} else
-			return 0;
+		} 
+//		else return 0;
 		if (method == null)
 			return 0;
 		/*

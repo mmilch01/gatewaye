@@ -369,7 +369,7 @@ public class XNATCMoveRsp
 		{
 			// m_sdf=null;
 			String path = XNATQueryGenerator.getRESTQuery(
-					InformationEntity.SERIES, query,true);
+					InformationEntity.SERIES, query);
 			Tools.LogMessage(Priority.INFO_INT, "REST query: " + path);
 
 			if (path == null)

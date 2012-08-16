@@ -126,7 +126,8 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 		if(!test()) return;
 		this.l=env.make_logger();
 		
-		bUseDICOMUIDs=env.isdcmuid();		
+		bUseDICOMUIDs=true;
+//			env.isdcmuid();		
 		
 		l.info(DateFormat.getDateTimeInstance().format(new Date())+" Server started");
 
