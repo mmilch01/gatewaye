@@ -51,7 +51,7 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 	
 	public static boolean bUseDICOMUIDs=true;
 	private static boolean bConsole=false;
-	
+		
 	private boolean m_bStartFlag=false;
 	private long start_time = 0;
         private Logger l;
@@ -112,10 +112,17 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 		return m_this;
 	}
 
-	public FileInfo[][] retrieveFiles(Dataset query)
+	public FileInfo[][] retrieveSeries(Dataset query, TreeMap scanMap)
+	{
+//		return new XNATCMoveRsp(m_XNATServer, m_XNATUser, m_XNATPass,
+//				m_StoreFolder).performRetrieve(query);
+		return new XNATCMoveRsp(m_XNATServer, m_XNATUser, m_XNATPass,
+				m_StoreFolder).retrieveSeries(query,scanMap);
+	}
+	public LinkedList<Object> getSeriesRequests(Dataset query)
 	{
 		return new XNATCMoveRsp(m_XNATServer, m_XNATUser, m_XNATPass,
-				m_StoreFolder).performRetrieve(query);
+				m_StoreFolder).getSeriesRequests(query);		
 	}
 	public XNATCFindRsp getMultiCFindRsp(Dataset query)
 	{

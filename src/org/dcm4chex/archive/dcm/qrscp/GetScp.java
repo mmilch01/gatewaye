@@ -40,6 +40,8 @@ package org.dcm4chex.archive.dcm.qrscp;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.sql.SQLException;
+import java.util.LinkedList;
+import java.util.TreeMap;
 
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
@@ -57,6 +59,8 @@ import org.dcm4che.net.Association;
 import org.dcm4che.net.DcmServiceBase;
 import org.dcm4che.net.DcmServiceException;
 import org.dcm4che.net.Dimse;
+import org.dcm4chex.archive.perf.PerfCounterEnum;
+import org.dcm4chex.archive.perf.PerfPropertyEnum;
 import org.nrg.xnat.gateway.FileInfo;
 
 /**
@@ -133,17 +137,26 @@ public class GetScp extends DcmServiceBase
 					UIDs.StudyRootQueryRetrieveInformationModelGET,
 					UIDs.PatientStudyOnlyQueryRetrieveInformationModelGET);
 			qrLevel.checkRetrieveRQ(rqData);
-			FileInfo[][] fileInfos = null;
+			FileInfo[][] fileInfos = null;									
 			try
 			{
-				fileInfos = 
-					(FileInfo[][]) service.server.invoke(
-							new ObjectName(
-									"org.nrg.xnag.gateway:type=GatewayServer"),
-							"retrieveFiles", new Object[]{rqData},
-							new String[]{Dataset.class.getName()});												
-//					RetrieveCmd.create(rqData).getFileInfos();
+				//Split the request into series requests.
+				LinkedList<Object> llo = (LinkedList<Object>) service.server.invoke(
+						new ObjectName("org.nrg.xnag.gateway:type=GatewayServer"),
+						"getSeriesRequests", new Object[]{rqData}, new String[]{Dataset.class.getName()});
+				Dataset[] requests = (Dataset[]) llo.get(1);
+				TreeMap<String,String[]> scanMap=(TreeMap<String,String[]>)llo.get(0);
 				
+				for (Dataset ds:requests)
+				{
+					fileInfos = (FileInfo[][]) service.server.invoke(
+							new ObjectName("org.nrg.xnag.gateway:type=GatewayServer"),
+							"retrieveSeries", new Object[]{ds,scanMap},	new String[]{Dataset.class.getName(),TreeMap.class.getName()});	
+					checkPermission(a, fileInfos);	
+					new Thread(new GetTask(service, assoc, pcid, rqCmd, ds,
+							fileInfos)).start();
+				}
+/*				
 				//now, try to split send in two parts.
 				int l1=fileInfos.length/2;
 				int l2=fileInfos.length-l1;								
@@ -155,13 +168,9 @@ public class GetScp extends DcmServiceBase
 					else fi2[i-l1]=fileInfos[i-l1];
 				}							
 				checkPermission(a, fileInfos);
-//split in two.				
 				new Thread(new GetTask(service, assoc, pcid, rqCmd, rqData,
 						fileInfos)).start();
-//				new Thread(new GetTask(service, assoc, pcid, rqCmd, rqData,
-//				fi1)).start();
-//				new Thread(new GetTask(service, assoc, pcid, rqCmd, rqData,
-//				fi2)).start();												
+*/						
 			} catch (DcmServiceException e)
 			{
 				throw e;

@@ -300,6 +300,146 @@ public class XNATCMoveRsp
 		}
 		return res;
 	}
+	public LinkedList<Object> getSeriesRequests(Dataset query)
+	{
+		String qLevel = query.getString(Tags.QueryRetrieveLevel);
+		InformationEntity ieWanted = Utils
+				.getInformationEntityForQueryRetieveLevel(qLevel);
+		Tools.LogMessage(Priority.INFO_INT, ieWanted.toString()
+				+ " retrieve request received");
+		boolean bStudyDefined = HasUniqueID(query, InformationEntity.STUDY), bSeriesDefined = HasUniqueID(
+				query, InformationEntity.SERIES);
+		//update the attribute list with subject info.
+		HttpMethodBase get;
+		String p="experiments?"+(XNATGatewayServer.isDICOMUID()?
+				"xnat:imageSessionData/UID=":"ID=");
+		p+= XNATQueryGenerator.GetValueFromAttributeList("stinstuid", query)
+					+ "&columns=ID,project,label,subject_ID,subject_label";
+		if(XNATGatewayServer.isDICOMUID())
+		{
+//			p+=",xnat:imageSessionData/Scans/Scan/ID,xnat:imageSessionData/Scans/Scan/UID";
+			p+=",xnat:imagescandata/id,xnat:imagescandata/uid";
+		}
+		
+		p+="&format=xml";
+		
+		get = m_xre.PerformConnection(XNATRestAdapter.GET, p, "");
+		TreeMap<String,String[]> scanMap=new TreeMap<String,String[]>();
+		try
+		{
+			String rsp = get.getResponseBodyAsString();
+			LinkedList<TreeMap<String, String>> rm = XNATTableParser.GetRows(
+					new SAXReader().read(get.getResponseBodyAsStream()), true,
+					"header");// bGenSearch?"header":null);
+			int i = 0;
+			
+			for (TreeMap<String, String> row : rm)
+			{
+				if(XNATGatewayServer.isDICOMUID())
+				{					
+//					String scanUID=row.get("xnat:imagesessiondata/scans/scan/uid");
+					String scanUID=row.get("xnat:imagescandata/uid");
+//					String[] ids={row.get("ID"),row.get("xnat:imagesessiondata/scans/scan/id")};
+					String[] ids={row.get("ID"),row.get("xnat:imagescandata/id")};
+					scanMap.put(scanUID,ids);
+				}
+				if (i == 0)
+				{
+					
+					Dataset received = XNATQueryGenerator.GetVocabulary()
+							.GetDicomEntry(row, ieWanted);
+					// patient name, id and staccessionnum
+					query.putXX(0x00100010, received.getString(0x00100010));
+					query.putXX(0x00100020, received.getString(0x00100020));
+					query.putXX(0x00080050, received.getString(0x00080050));
+				}
+				i++;
+			}
+			get.releaseConnection();
+		} catch (Exception e)
+		{
+		}	
+		LinkedList<Object> llo=new LinkedList<Object>();
+		if (ieWanted.compareTo(InformationEntity.SERIES) == 0 && bSeriesDefined)
+		{
+			llo.add(scanMap);
+			llo.add(new Dataset[]{query});
+			return llo;			
+		} 
+		else if ((ieWanted.compareTo(InformationEntity.STUDY) == 0 && bStudyDefined)
+				|| (ieWanted.compareTo(InformationEntity.SERIES) == 0 && !bSeriesDefined))
+		{
+			// m_sdf=null;
+			LinkedList<Dataset> lld=new LinkedList<Dataset>();
+			String path = XNATQueryGenerator.getRESTQuery(
+					InformationEntity.SERIES, query,false);
+			Tools.LogMessage(Priority.INFO_INT, "REST query: " + path);
+
+			if (path == null)
+			{
+				Tools.LogMessage(Priority.ERROR_INT, "Error generating REST query");
+				return null;
+			}
+			// query for all series.
+			// XNATRestAdapter xre=new
+			// XNATRestAdapter(m_XNATServer,m_XNATUser,m_XNATPass);
+			HttpMethodBase method = m_xre.PerformConnection(
+					XNATRestAdapter.GET, path, "");
+
+			if (method == null)
+				return null;
+			try
+			{
+				String resp = method.getResponseBodyAsString();
+				Tools.LogMessage(Priority.INFO_INT, "REST query response: " + resp);
+			} catch (Exception e)
+			{
+				return null;
+			}
+			method.releaseConnection();
+			try
+			{
+				// 2. parse the response - using XND's classes
+				LinkedList<TreeMap<String, String>> row_map = XNATTableParser
+						.GetRows(new SAXReader().read(method
+								.getResponseBodyAsStream()), true, "header");// bGenSearch?"header":null);
+				for (TreeMap<String, String> row : row_map)
+				{
+					// 3. translate the response to DICOM's AttributeList
+					Dataset ds = DcmObjectFactory.getInstance().newDataset();
+					// AttributeList al=new AttributeList();
+					ds.putAll(query);
+					// al.putAll(queryIdentifier);
+					Dataset received = XNATQueryGenerator.GetVocabulary()
+							.GetDicomEntry(row, InformationEntity.SERIES/*ieWanted*/);
+					ds.putAll(received);
+					// al.putAll(received);
+					XNATQueryGenerator.GetVocabulary().modifySOPInstUID(ds,
+							true);
+					if (ds.size() > 0)
+					{
+						ds.putCS(Tags.QueryRetrieveLevel, "SERIES");
+						lld.add(ds);
+					}
+				}
+			} catch (Exception e)
+			{
+				Tools.LogException(Priority.ERROR,
+						"Error parsing the response to REST query", e);
+			}
+			llo.add(scanMap);
+			llo.add(lld.toArray(new Dataset[]{}));
+			return llo;
+		}
+		else return llo;
+	}
+	//Called directly by C-MOVE or C-GET SCP with query populated by call to getSeriesRequests(). 
+	public FileInfo[][] retrieveSeries(Dataset query,TreeMap sMap)
+	{
+		TreeMap<String,String[]> scanMap=(TreeMap<String,String[]>) sMap;
+		Collection<FileInfo> files = retrieveSeries(query, true,scanMap);
+		return (files != null) ? fromCollection(files) : new FileInfo[0][];
+	}
 	public FileInfo[][] performRetrieve(Dataset query)
 	{
 		String qLevel = query.getString(Tags.QueryRetrieveLevel);
@@ -311,8 +451,6 @@ public class XNATCMoveRsp
 				query, InformationEntity.SERIES);
 
 		// first, update the attribute list with subject info.
-		// XNATRestAdapter xra = new
-		// XNATRestAdapter(m_XNATServer,m_XNATUser,m_XNATPass);
 		HttpMethodBase get;
 		String p="experiments?"+(XNATGatewayServer.isDICOMUID()?
 				"xnat:imageSessionData/UID=":"ID=");
@@ -367,7 +505,8 @@ public class XNATCMoveRsp
 		if (ieWanted.compareTo(InformationEntity.SERIES) == 0 && bSeriesDefined)
 		{
 			files = retrieveSeries(query, true,scanMap); // ??
-		} else if ((ieWanted.compareTo(InformationEntity.STUDY) == 0 && bStudyDefined)
+		} 
+		else if ((ieWanted.compareTo(InformationEntity.STUDY) == 0 && bStudyDefined)
 				|| (ieWanted.compareTo(InformationEntity.SERIES) == 0 && !bSeriesDefined))
 		{
 			// m_sdf=null;
