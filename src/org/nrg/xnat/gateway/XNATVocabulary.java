@@ -2,7 +2,6 @@ package org.nrg.xnat.gateway;
 import java.io.File;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.TreeMap;
@@ -21,12 +20,13 @@ public class XNATVocabulary
 	// index by DICOM tag
 	private TreeMap<Integer, XNATVocabularyEntry> m_dcmtag_map = new TreeMap<Integer, XNATVocabularyEntry>();
 
-	// index by dcmid
-	private TreeMap<String, XNATVocabularyEntry> m_dcmid_map = new TreeMap<String, XNATVocabularyEntry>();
+	// index by dcmid field ID
+	public TreeMap<String, XNATVocabularyEntry> m_dcmid_map = new TreeMap<String, XNATVocabularyEntry>();
 	
-	// Aug 2012-index of dcmid by restvar (vocabulary.xml)
-	private TreeMap<String,String> m_alias_dcmid_mapStudy=new TreeMap<String,String>();
-	private TreeMap<String,String> m_alias_dcmid_mapSeries=new TreeMap<String,String>();
+	//index by XNAT path or alias.
+	public TreeMap<String, String> m_alias_dcmidStudy = new TreeMap<String, String>();
+	public TreeMap<String, String> m_alias_dcmidSeries = new TreeMap<String, String>();
+
 	public Collection<String> m_dcmFieldsStudy=new LinkedList<String>();
 	public Collection<String> m_dcmFieldsSeries=new LinkedList<String>();
 	
@@ -46,18 +46,16 @@ public class XNATVocabulary
 					xve = new XNATVocabularyEntry(el);
 					m_dcmtag_map.put(new Integer(xve.m_DICOMTag), xve);
 					m_dcmid_map.put(xve.m_dcmid, xve);
-					
 					if(xve.m_qLevel==XNATVocabularyEntry.PATIENT || xve.m_qLevel==XNATVocabularyEntry.STUDY)
 					{
-						for (String s : xve.m_aliases)						
-							m_alias_dcmid_mapStudy.put(s.toLowerCase(), xve.m_dcmid);
+						m_alias_dcmidStudy.put(xve.m_alias.toLowerCase(), xve.m_dcmid);
+						m_alias_dcmidStudy.put(xve.m_schema_path.toLowerCase(), xve.m_dcmid);		
 						m_dcmFieldsStudy.add(xve.m_dcmid);
-						m_dcmFieldsSeries.add(xve.m_dcmid);
 					}
-					else 
+					else
 					{
-						for (String s : xve.m_aliases)						
-							m_alias_dcmid_mapSeries.put(s.toLowerCase(), xve.m_dcmid);
+						m_alias_dcmidSeries.put(xve.m_alias.toLowerCase(), xve.m_dcmid);
+						m_alias_dcmidSeries.put(xve.m_schema_path.toLowerCase(), xve.m_dcmid);
 						m_dcmFieldsSeries.add(xve.m_dcmid);
 					}
 				}
@@ -68,40 +66,76 @@ public class XNATVocabulary
 			e.printStackTrace();
 		}
 	}
-	
+
 	public Dataset GetDicomEntry(TreeMap<String, String> row,
 			InformationEntity ie)
 	{
 		Dataset list = DcmObjectFactory.getInstance().newDataset();
+		// AttributeList list=new AttributeList();
 		String val;
-		TreeMap<String, String> stMap = new TreeMap<String, String>();
 		String nm;
 
-// First, populate common attributes.
-		String dcmid=null;
-		XNATVocabularyEntry xve=null;
-		for (String s : row.keySet())
-		{
-			if (ie.compareTo(InformationEntity.SERIES) == 0)			
-				dcmid=m_alias_dcmid_mapSeries.get(s.toLowerCase());
-			if(dcmid==null || ie.compareTo(InformationEntity.STUDY) == 0)
-				dcmid=m_alias_dcmid_mapStudy.get(s.toLowerCase());			
-			xve=(dcmid==null)?null:m_dcmid_map.get(dcmid);
-			if (xve != null)
+		// for now, special-case the STUDY level as new functionality
+		// (05/19/2009)
+		if (ie.compareTo(InformationEntity.STUDY) == 0)
+		{			
+			for (String s : row.keySet())
 			{
-				val = xnatTodcm(row.get(s),dcmid);
-				try
+				XNATVocabularyEntry xve;
+				nm = m_alias_dcmidStudy.get(s.toLowerCase());
+				if (nm == null)
+					continue;					
+				xve = m_dcmid_map.get(nm);
+				if (xve != null)
 				{
+					val = xnatTodcm(row.get(s), nm);
 					xve.putDICOMAttribute(list, val);
 				}
-				catch(Exception e){};
 			}
-			dcmid=null;
+		} else if (ie.compareTo(InformationEntity.SERIES) == 0)
+		{
+			TreeMap<String, String> stMap = new TreeMap<String, String>();			
+			if(!XNATGatewayServer.isDICOMUID())				
+				stMap.put("ID", "id");
+			else
+			{
+//				stMap.put("xnat:imagesessiondata/scans/scan/uid","serinstuid");
+//				stMap.put("xnat:imagesessiondata/scans/scan/type","series_description");
+				stMap.put("xnat:imagescandata/uid","serinstuid");
+				stMap.put("xnat:imagescandata/type","series_description");
+			}
+			
+			for (String s : row.keySet())
+			{
+				XNATVocabularyEntry xve;
+				nm=m_alias_dcmidSeries.get(s);				
+				if (nm == null)
+					nm=m_alias_dcmidStudy.get(s);
+				if (nm==null) 
+					nm=stMap.get(s);
+				if (nm==null)
+						continue;
+				xve = m_dcmid_map.get(nm);
+				if (xve != null)
+				{
+					val = xnatTodcm(row.get(s), nm);
+					list.putXX(xve.m_DICOMTag, val);
+				}
+			}
+		}
+		for (String s : row.keySet())
+		{
+			XNATVocabularyEntry xve = m_dcmid_map.get(s);
+			if (xve != null)
+			{
+				val = row.get(s);
+				list.putXX(xve.m_DICOMTag, val);
+			}
 		}
 		return list;
 	}
 	public static String xnatTodcm(String val, String dcmid)
-	{		
+	{
 		if(dcmid.compareTo("stinstuid")==0 || dcmid.compareTo("serinstuid")==0)
 		{
 			if(val==null) return val;
@@ -164,7 +198,7 @@ public class XNATVocabulary
 	}
 	
 	public static String dcmToXNATField(String field, String dcmid)
-	{
+		{
 		if(dcmid.compareTo("stdate")==0 || dcmid.compareTo("patdob")==0)
 			return DcmDateToXNAT(field);
 		if(dcmid.compareTo("patdob")==0 || dcmid.compareTo("stdate")==0)
@@ -172,7 +206,7 @@ public class XNATVocabulary
 			if(field.length()!=8) return field;
 			String s=field.substring(0,3)+"-"+field.substring(4,6)+"-"+field.substring(7,9);
 			return s;
-		}		
+		}
 		if (dcmid.compareTo("stmodality") == 0)
 		{
 			String allModalities = "xnat:imageSessionData";

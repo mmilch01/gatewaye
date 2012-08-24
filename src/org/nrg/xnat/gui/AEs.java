@@ -164,7 +164,7 @@ public class AEs extends javax.swing.JFrame {
 
         jLabel5.setText("(only devices on this list will be able to retrieve studies)");
 
-        jLabel6.setText("Anonymous Remote AE Retrieval Allowed: ");
+        jLabel6.setText("Allow C-GET retrieve from remote AE: ");
 
         anonymousAEAllowed_textfield.setText("<uninitialized>");
 

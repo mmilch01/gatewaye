@@ -41,7 +41,11 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.sql.SQLException;
 
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanException;
+import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
+import javax.management.ReflectionException;
 
 import org.apache.log4j.Logger;
 import org.dcm4che.data.Command;
@@ -108,10 +112,16 @@ public class GetScp extends DcmServiceBase
 		Association a = assoc.getAssociation();
 		try
 		{
-			if (!isLocalAddress(a.getSocket().getInetAddress()))
+			boolean bAnonAEAllowed =  (Boolean) service.server.invoke(
+					new ObjectName("org.nrg.xnag.gateway:type=GatewayServer"),
+										"isAnonymousAEAllowed",null,null);
+			
+			
+			if (!bAnonAEAllowed && !isLocalAddress(a.getSocket().getInetAddress()))
 			{
 				throw new DcmServiceException(
-						Status.UnableToProcess, "C-GET is only allowed from the local host");}
+						Status.UnableToProcess, "C-GET is only allowed from the local host");
+			}
 			Dataset rqData = rq.getDataset();
 			if (log.isDebugEnabled())
 			{
@@ -165,7 +175,8 @@ public class GetScp extends DcmServiceBase
 				log.error("Unexpected exception:", e);
 				throw new DcmServiceException(Status.UnableToProcess, e);
 			}
-		} catch (DcmServiceException e)
+		} 
+		catch (DcmServiceException e)
 		{
 			Command rspCmd = objFact.newCommand();
 			rspCmd.initCGetRSP(rqCmd.getMessageID(), rqCmd
@@ -174,6 +185,26 @@ public class GetScp extends DcmServiceBase
 			Dimse rsp = fact.newDimse(pcid, rspCmd);
 			a.write(rsp);
 		}
+		catch (MBeanException e)
+		{
+			log.error("MBean exception:", e);
+		} catch (InstanceNotFoundException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (MalformedObjectNameException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ReflectionException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NullPointerException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
 	}
 
 	private void checkPermission(Association a, FileInfo[][] fileInfos)

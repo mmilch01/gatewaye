@@ -74,7 +74,7 @@ public class GatewayAESettings extends javax.swing.JFrame {
 
         jLabel3.setText("Edit Gateway Settings");
 
-        allowAnonymousAE_check_box.setText("Allow Retrieval From Anonymous Remote AEs");
+        allowAnonymousAE_check_box.setText("Allow C-GET Retrieve From Anonymous Remote AEs");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);

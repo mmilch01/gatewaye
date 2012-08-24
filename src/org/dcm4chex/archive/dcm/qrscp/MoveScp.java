@@ -134,7 +134,6 @@ public class MoveScp extends DcmServiceBase implements AssociationListener
 			{
 				perfMon.start(assoc, rq, PerfCounterEnum.C_MOVE_SCP_QUERY_DB);
 				perfMon.setProperty(assoc, rq, PerfPropertyEnum.REQ_DIMSE, rq);
-
 				aeData = service.queryAEData(dest, thirdPartyMove ? null : a
 						.getSocket().getInetAddress());
 				fileInfos = (FileInfo[][]) service.server.invoke(

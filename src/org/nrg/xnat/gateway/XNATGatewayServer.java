@@ -36,7 +36,6 @@ import org.nrg.xnat.gui.InitialProperties;
 
 public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 {
-	private static String m_ver = "Aug 18, 2010";
 	// private static QueryRetrieveScpService m_qrServ;
 	private Server m_dcmServer;	
 	private boolean m_srvShutdown = false;
@@ -48,6 +47,7 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 	protected int m_maxCacheFiles = 50000;
 	protected static XNATGatewayServer m_this = null;
 	protected AEServer m_ael=new AEServer();
+	private GatewayEnvironment m_env=null;
 	
 	public static boolean bUseDICOMUIDs=true;
 	private static boolean bConsole=false;
@@ -60,7 +60,11 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
     {
         this.m_bStartFlag = b;
     }
-
+    public Boolean isAnonymousAEAllowed()
+    {
+    	if(m_env==null) return false;
+    	return m_env.get_anoymous_ae_allowed();
+    }
     public boolean is_running () 
     {
         return this.m_bStartFlag;
@@ -75,7 +79,7 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
         return getInstance().start_time;
     }
 
-	public static boolean isDICOMUID(){return bUseDICOMUIDs;}
+	public static boolean isDICOMUID(){return true; /*bUseDICOMUIDs;*/}
 	
 	public boolean test()
 	{
@@ -124,12 +128,13 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 	public XNATGatewayServer(GatewayEnvironment env) throws Exception
 	{            
 		if(!test()) return;
+		m_env=env;
 		this.l=env.make_logger();
 		
 		bUseDICOMUIDs=true;
 //			env.isdcmuid();		
 		
-		l.info(DateFormat.getDateTimeInstance().format(new Date())+" Server started");
+		l.info(DateFormat.getDateTimeInstance().format(new Date())+" XNAT Gateway server v. "+env.version+" started");
 
 		QueryRetrieveScpService srv = new QueryRetrieveScpService();
 		if(!initServerParams(srv)) throw new IOException();
@@ -177,14 +182,14 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 		if(xs==null || !xs.isValid())
 			throw new IOException ("Incorrect XNAT server configuration");
 		
-		m_XNATServer = xs.getHostname();
+		m_XNATServer = xs.getHostname();		
 		m_XNATUser = xs.getUsername();
 		m_XNATPass = xs.getPassword();
-		m_AETitle = env.get_calledae_title();
+		m_AETitle = env.get_calledae_title();		
 		m_this = this;
 		// m_dcmServer.start();
 		
-		m_localAE=new AEDTO(0, m_AETitle, "localhost", env.get_listening_port(),
+		m_localAE=new AEDTO(0, m_AETitle, "localhost", env.get_listening_port(),				
 				"", "", "", "", "","", "");
 		m_ael.setLocalAE(m_localAE);
 		srv.setAEManager(
@@ -335,7 +340,7 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
                         
 			if(bConsole)
 			{
-				System.err.println("XNAT/DICOM gateway, "+ m_ver);
+				System.err.println("XNAT/DICOM gateway, "+ GatewayEnvironment.version);
 				p.put(XnatServerProperties.XNATPass, "*****");
 				System.err.println("properties=" + p);
 			}

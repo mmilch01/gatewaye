@@ -320,7 +320,8 @@ public class XNATCMoveRsp
 					+ "&columns=ID,project,label,subject_ID,subject_label";
 		if(XNATGatewayServer.isDICOMUID())
 		{
-			p+=",xnat:imageSessionData/Scans/Scan/ID,xnat:imageSessionData/Scans/Scan/UID";
+//			p+=",xnat:imageSessionData/Scans/Scan/ID,xnat:imageSessionData/Scans/Scan/UID";
+			p+=",xnat:imagescandata/id,xnat:imagescandata/uid";
 		}
 		
 		p+="&format=xml";
@@ -339,8 +340,10 @@ public class XNATCMoveRsp
 			{
 				if(XNATGatewayServer.isDICOMUID())
 				{					
-					String scanUID=row.get("xnat:imagesessiondata/scans/scan/uid");
-					String[] ids={row.get("ID"),row.get("xnat:imagesessiondata/scans/scan/id")};
+//					String scanUID=row.get("xnat:imagesessiondata/scans/scan/uid");
+					String scanUID=row.get("xnat:imagescandata/uid");
+//					String[] ids={row.get("ID"),row.get("xnat:imagesessiondata/scans/scan/id")};
+					String[] ids={row.get("ID"),row.get("xnat:imagescandata/id")};
 					scanMap.put(scanUID,ids);
 				}
 				if (i == 0)
@@ -369,7 +372,7 @@ public class XNATCMoveRsp
 		{
 			// m_sdf=null;
 			String path = XNATQueryGenerator.getRESTQuery(
-					InformationEntity.SERIES, query);
+					InformationEntity.SERIES, query,false);
 			Tools.LogMessage(Priority.INFO_INT, "REST query: " + path);
 
 			if (path == null)

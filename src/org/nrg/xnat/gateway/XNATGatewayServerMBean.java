@@ -8,4 +8,5 @@ public interface XNATGatewayServerMBean
 {
 	public FileInfo[][] retrieveFiles(Dataset query);
 	public void instancesSent(ArrayList fileInfos);
+	public Boolean isAnonymousAEAllowed();
 }

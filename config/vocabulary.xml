@@ -1,154 +1,96 @@
 <vocabulary>
 <!--
-Based on available XNAT REST API variables, see: http://docs.xnat.org/XNAT+REST+XML+Path+Shortcuts
+based on available xnat rest api variables, see: http://docs.xnat.org/xnat+rest+xml+path+shortcuts
 
 dcm_tag: 
-DICOM tag (hex) group and element (not delimited), should be 8 chars long.
+dicom tag (hex) group and element (not delimited), should be 8 chars long.
 dcmid:
-DICOM vocabulary-based key that is used internally for entry indexing. This should not be changed.
+dicom vocabulary-based key that is used internally for entry indexing. this should not be changed.
 alias: 
-one or more captions (tags, HMTL table column headers) under which the given variable may appear in response returned by XNAT.
-rest_var: shortcut for the variable used in REST queries
-qLevel: DICOM query level (STUDY and SERIES are supported as of Aug 2012). STUDY=experiment level, SERIES=scan level.
+one or more captions (tags, hmtl table column headers) under which the given variable may appear in response returned by xnat.
+schema_path: shortcut for the variable used in rest queries
+qlevel: dicom query level (study and series are supported as of aug 2012). study=experiment level, series=scan level.
 
-NOTE (Aug 2012): SERIES-level attributes require full XNAT schema path for the rest_var (REST variable shortcuts wouldn't work).
+note (aug 2012): series-level attributes require full xnat schema path for the schema_path (rest variable shortcuts wouldn't work).
 
 -->
-<!-- Patient tags -->
-<!-- PatientID -->
-<entry dcm_tag="00100020" dcmid="patid"  rest_var="label" qLevel="STUDY">
-		<alias>xnat:experimentdata/label</alias>
-		<alias>label</alias>
-</entry>
+<!-- patient tags -->
+<!-- patientid -->
+<entry dcm_tag="00100020" dcmid="patid" schema_path="xnat:experimentdata/label" alias="label" qLevel="STUDY"/>
+<!--
+<entry dcm_tag="00100020" dcmid="patid" schema_path="xnat:subjectdata/id" qLevel="STUDY"/>
+-->
 
-<!-- Patient Name -->
-<entry dcm_tag="00100010" dcmid="patname" rest_var="subject_label" qLevel="STUDY">
-		<alias>xnat:subjectData/label</alias>
-		<alias>subject_label</alias>
-</entry>
+<!-- patient name -->
+<entry dcm_tag="00100010" dcmid="patname" schema_path="xnat:subjectdata/label" alias="subject_label" qLevel="STUDY"/>
 
-<!-- Patient Sex -->
+
+<!-- patient sex -->
 <entry dcm_tag="00100040" dcmid="patsex" 
-		rest_var="xnat:subjectData/demographics[@xsi:type=xnat:demographicData]/gender" qLevel="STUDY">
-	<alias>xnat:subjectData/demographics[@xsi:type=xnat:demographicData]/gender</alias>
+		schema_path="xnat:subjectdata/demographics[@xsi:type=xnat:demographicdata]/gender" qLevel="STUDY">
 	<value_map dcm_val="M" xnat_val="male"/>
 	<value_map dcm_val="F" xnat_val="female"/>
 </entry>
 
-<!-- Patient Birth Date -->
-<entry dcm_tag="00100030" dcmid="patdob" rest_var="xnat:subjectData/demographics[@xsi:type=xnat:demographicData]/dob" qLevel="STUDY">
-		<alias>xnat:subjectData/demographics[@xsi:type=xnat:demographicData]/dob</alias>
-		<alias>dob</alias>
-</entry>
+<!-- patient birth date -->
 
-<!-- Patient age -->
-<entry dcm_tag="00101010" dcmid="patage" rest_var="age" qLevel="STUDY">
-		<alias>xnat:subjectData/demographics[@xsi:type=xnat:demographicData]/age</alias>
-		<alias>age</alias>
-</entry>
+<entry dcm_tag="00100030" dcmid="patdob" schema_path="xnat:subjectdata/demographics[@xsi:type=xnat:demographicdata]/dob" alias="dob" qLevel="STUDY"/>
 
-<!-- Patient size -->
-<entry dcm_tag="00101020" dcmid="patsize" rest_var="height" qLevel="STUDY">
-		<alias>xnat:subjectData/demographics[@xsi:type=xnat:demographicData]/height</alias>
-		<alias>height</alias>
-</entry>
+<!-- patient age -->
+<entry dcm_tag="00101010" dcmid="patage" schema_path="xnat:subjectdata/demographics[@xsi:type=xnat:demographicdata]/age" alias="age" qLevel="STUDY"/>
+<!-- patient size -->
+<entry dcm_tag="00101020" dcmid="patsize" schema_path="xnat:subjectdata/demographics[@xsi:type=xnat:demographicdata]/height" alias="height" qLevel="STUDY"/>
+<!-- patient weight -->
+<entry dcm_tag="00101030" dcmid="patweight" schema_path="xnat:subjectdata/demographics[@xsi:type=xnat:demographicdata]/weight" alias="weight" qLevel="STUDY"/>
+<!-- patient ethnic group -->
+<entry dcm_tag="00102160" dcmid="patethnogroup" schema_path="xnat:subjectdata/demographics[@xsi:type=xnat:demographicdata]/ethnicity" alias="ethnicity" qLevel="STUDY"/>
+<!-- study tags -->
 
-<!-- Patient weight -->
-<entry dcm_tag="00101030" dcmid="patweight" rest_var="weight" qLevel="STUDY">
-		<alias>xnat:subjectData/demographics[@xsi:type=xnat:demographicData]/weight</alias>
-		<alias>weight</alias>
-</entry>
-
-<!-- Patient ethnic group -->
-<entry dcm_tag="00102160" dcmid="patethnogroup" rest_var="ethnicity" qLevel="STUDY">
-		<alias>xnat:subjectData/demographics[@xsi:type=xnat:demographicData]/ethnicity</alias>
-		<alias>ethnicity</alias>
-</entry>
-
-<!-- Study tags -->
-
-<!-- Study instance UID for data that doesn't have real DICOM stinstuid -->
+<!-- study instance uid for data that doesn't have real dicom stinstuid -->
 <!--
-<entry dcm_tag="0020000D" rest_var="ID" dcmid="stinstuid">
-		 <alias>xnat:imageSessionData/ID</alias>
+<entry dcm_tag="0020000d" schema_path="xnat:imagesessiondata/id" dcmid="stinstuid">
 </entry>
 -->
 
-<!-- Admission ID (Aug 2012) -->
-<entry dcm_tag="00380010" dcmid="admissid" rest_var="visit_id" qLevel="STUDY">
-		 <alias>xnat:experimentdata/visit_id</alias>
-		 <alias>visit_id</alias>
-</entry>
+<!-- admission id (aug 2012) -->
+<entry dcm_tag="00380010" dcmid="admissid" schema_path="xnat:experimentdata/visit_id" alias="visit_id" qLevel="STUDY"/>
 
-<!-- Study instance UID (as of Jan 2012) (real DICOM UID should be populated)  -->
-<entry dcm_tag="0020000D" dcmid="stinstuid" rest_var="UID" qLevel="STUDY">
-		 <alias>xnat:imageSessionData/UID</alias>
-		 <alias>UID</alias>
-</entry>
+<!-- study instance uid (as of jan 2012) (real dicom uid should be populated)  -->
+<entry dcm_tag="0020000d" dcmid="stinstuid" schema_path="xnat:imagesessiondata/uid" alias="uid" qLevel="STUDY"/>
 
-<!-- Study accession number  -->
-<entry dcm_tag="00080050" dcmid="staccessionnum" rest_var="project" qLevel="STUDY">
-		<alias>xnat:projectData/ID</alias>
-		<alias>ID</alias>
-</entry>
 
-<!-- Study description -->
-<entry dcm_tag="00081030" dcmid="stdescr" rest_var="session_type" qLevel="STUDY">
-		<alias>xnat:imageSessionData/session_type</alias>
-		<alias>session_type</alias>
-</entry>
+<!-- study accession number  -->
+<entry dcm_tag="00080050" dcmid="staccessionnum" schema_path="project" alias="xnat:projectdata/id" qLevel="STUDY"/>
+
+<!-- study description -->
+<entry dcm_tag="00081030" dcmid="stdescr" schema_path="xnat:experimentdata/project" alias="project" qLevel="STUDY"/>
 
 <!-- old study modality
-<entry dcm_tag="00080061" rest_var="MODALITY"	dcmid="stmodality">
-		<alias>xnat:imageSessionData/modality</alias>
-</entry>
+<entry dcm_tag="00080061" schema_path="xnat:imagesessiondata/modality"	dcmid="stmodality"/>
  -->
-<!-- new (as of Jan 2012) Study modality -->
-<entry dcm_tag="00080061" dcmid="stmodality" rest_var="xsiType" qLevel="STUDY">
-		<alias>xsiType</alias>
-</entry>
+<!-- new (as of jan 2012) study modality -->
+<entry dcm_tag="00080061" dcmid="stmodality" schema_path="xsitype" alias="xsitype" qLevel="STUDY"/>
 
+<!-- study date -->
+<entry dcm_tag="00080020" dcmid="stdate" schema_path="xnat:imagesessiondata/date" alias="date" qLevel="STUDY"/>
 
-<!-- Study date -->
-<entry dcm_tag="00080020" dcmid="stdate" rest_var="date" qLevel="STUDY">
-		<alias>xnat:imageSessionData/date</alias>
-		<alias>date</alias>
-</entry>
+<!-- study time -->
+<entry dcm_tag="00080030" dcmid="sttime" schema_path="xnat:imagesessiondata/time" alias="time" qLevel="STUDY"/>
 
-<!-- Study time -->
-<entry dcm_tag="00080030" dcmid="sttime" rest_var="time" qLevel="STUDY">
-		<alias>xnat:imageSessionData/time</alias>
-		<alias>time</alias>
-</entry>
+<!-- series tags -->
+<!-- series instance uid --> 
+<entry dcm_tag="0020000e" dcmid="serinstuid" schema_path="xnat:imagescandata/uid" alias="uid" qLevel="SERIES"/>
 
-<!-- Series tags -->
-<!-- Series instance UID --> 
-<entry dcm_tag="0020000E" dcmid="serinstuid" rest_var="xnat:imageScanData/UID" qLevel="SERIES">
-		<alias>xnat:imagescandata/uid</alias>
-		<alias>UID</alias>
-</entry>
+<!-- series modality --> 
+<entry dcm_tag="00080060" dcmid="sermodality" schema_path="xnat:imagescandata/modality" qLevel="SERIES"/>
 
-<!-- Series modality --> 
-<entry dcm_tag="00080060" dcmid="sermodality" rest_var="xnat:imageScanData/modality" qLevel="SERIES">
-		<alias>xnat:imagescandata/modality</alias>
-</entry>
+<!-- series number  -->
+<entry dcm_tag="00200011" schema_path="xnat:imagescandata/id" dcmid="sernum" alias="id" qLevel="SERIES"/>
 
-<!-- Series number  -->
-<entry dcm_tag="00200011" rest_var="xnat:imageScanData/ID" dcmid="sernum" qLevel="SERIES">
-		<alias>xnat:imageScanData/ID</alias>
-		<alias>ID</alias>
-</entry>
+<!-- series description --> 
+<entry dcm_tag="0008103e" dcmid="series_description" schema_path="xnat:imagescandata/series_description" qLevel="SERIES" alias="series_description"/>
 
-<!-- Series description --> 
-<entry dcm_tag="0008103E" dcmid="series_description" rest_var="xnat:imageScanData/series_description" qLevel="SERIES">
-		<alias>xnat:imageScanData/series_description</alias>
-		<alias>series_description</alias>
-</entry>
-
-<!-- Number of frames for multi-frame acquisitions --> 
-<entry dcm_tag="00280008" dcmid="numframes" rest_var="xnat:imageScanData/frames" qLevel="SERIES">
-		<alias>xnat:imageScanData/frames</alias>
-		<alias>frames</alias>
-</entry>
+<!-- number of frames for multi-frame acquisitions --> 
+<entry dcm_tag="00280008" dcmid="numframes" schema_path="xnat:imagescandata/frames" qLevel="SERIES" alias="frames"/>
 
 </vocabulary>

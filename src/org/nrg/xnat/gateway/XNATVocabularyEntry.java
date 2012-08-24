@@ -23,10 +23,13 @@ public class XNATVocabularyEntry
 	public String m_type = "";
 	public String m_restvar="";
 	public String m_dcmid = "";
+	public String m_xnatElementName="";
 	public static final int PATIENT=1,STUDY=2,SERIES=3;
 	public int m_qLevel=0;
-	public Collection<criterion> m_criteria = null;
-	public Collection<String> m_aliases = null;
+	//used by the xml search.
+	public String m_schema_path = "";
+	//column header aliase.
+	public String m_alias = null;
 
 	public boolean isDateTag()
 	{
@@ -66,7 +69,15 @@ public class XNATVocabularyEntry
 		.parseInt(tag.substring(4,8), 16);		
 		m_DICOMTag = tagFromGrElem(group, elem);
 		m_type = "string";
-		m_restvar=el.attributeValue("rest_var");
+		m_schema_path=el.attributeValue("schema_path");
+		int ind=m_schema_path.indexOf('/', 0);
+		
+		if(ind>0)
+			m_xnatElementName=m_schema_path.substring(0,ind);
+		else
+			m_xnatElementName=m_schema_path;
+		
+		m_restvar=m_schema_path;
 		m_dcmid = el.attributeValue("dcmid");
 		String qLevel=el.attributeValue("qLevel");
 		if(qLevel==null) m_qLevel=PATIENT;
@@ -74,21 +85,8 @@ public class XNATVocabularyEntry
 		else if(qLevel.compareTo("STUDY")==0) m_qLevel=STUDY;
 		else if(qLevel.compareTo("SERIES")==0) m_qLevel=SERIES;
 		else throw new Exception("Unsupported query level value for entry: tag="+m_DICOMTag+", dcmid="+m_dcmid);				
-
-		LinkedList<criterion> llsw = new LinkedList<criterion>();
-		LinkedList<String> fid=new LinkedList<String>();
-		for (Iterator it = el.elementIterator(); it.hasNext();)
-		{
-			Element se = (Element) it.next();
-			if (se.getName().compareTo("criterion") == 0)
-				llsw.add(new criterion(se));
-			if (se.getName().compareTo("alias") == 0)
-				fid.add(se.getText());				
-		}
-		if (llsw.size() > 0)
-			m_criteria = llsw;
-		if (fid.size() > 0) 
-			m_aliases = fid;
+		m_alias=el.attributeValue("alias");
+		if(m_alias==null) m_alias=m_xnatElementName;
 	}
 	public void toElement(Element el)
 	{
@@ -96,22 +94,7 @@ public class XNATVocabularyEntry
 		el.addAttribute("xnat_type", m_type);
 		el.addAttribute("rest_var", m_restvar);
 		el.addAttribute("dcmid", m_dcmid);
-		if (m_criteria != null)
-		{
-			for (criterion c : m_criteria)
-			{
-				Element sub = el.addElement("criterion");
-				c.fillElement(sub);
-			}
-		}
-		if (m_aliases != null)
-		{
-			for (String s : m_aliases)
-			{
-				Element sub = el.addElement("alias");
-				sub.setText(s);
-			}
-		}			
+		el.addAttribute("alias", m_alias);
 	}
 	public String getDcmTag()
 	{
@@ -121,19 +104,15 @@ public class XNATVocabularyEntry
 	}
 	public XdatCriteriaSetBean getCriteriaSet(String val)
 	{
-		if (m_criteria == null)
-			return null;
+//		if (m_criteria == null)
+//			return null;
 		XdatCriteriaSetBean xcsb = new XdatCriteriaSetBean();
-		xcsb.setMethod("AND");
-
-		for (criterion c : m_criteria)
-		{
-			XdatCriteriaBean xcb = new XdatCriteriaBean();
-			xcb.setSchemaField(c.m_search_schema_field);
-			xcb.setValue(val);
-			xcb.setComparisonType(c.m_comparison_type);
-			xcsb.addCriteria(xcb);
-		}
+		xcsb.setMethod("LIKE");
+		XdatCriteriaBean xcb = new XdatCriteriaBean();
+		xcb.setSchemaField(m_schema_path);
+		xcb.setValue(val);
+		xcb.setComparisonType("OR");
+		xcsb.addCriteria(xcb);
 		return xcsb;
 	}
 	public class criterion

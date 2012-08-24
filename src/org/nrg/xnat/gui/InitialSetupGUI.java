@@ -110,7 +110,7 @@ public class InitialSetupGUI extends javax.swing.JFrame {
             }
         });
 
-        allowAnonymousAE_check_box.setText(" Allow Retrieve From Anonymous Remote AEs");
+        allowAnonymousAE_check_box.setText(" Allow C-GET Retrieve From Anonymous Remote AEs");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
