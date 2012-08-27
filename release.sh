@@ -5,15 +5,15 @@ LIN=/cygdrive/c/Workspace/GatewaySetup/linux
 MACOS=/cygdrive/c/Workspace/GatewaySetup/MacOS/Gateway-GUI.app/Contents/MacOS/Gateway
 SRC=/cygdrive/c/Workspace/xnd_stable/gatewaye
 
-cp -rf gatewaye.jar $WIN/dist
+cp -rf gatewaye.jar README.TXT $WIN/dist
 cp -rf config $WIN
 cp -rf lib $WIN/dist
 
-cp -rf gatewaye.jar $LIN/dist
+cp -rf gatewaye.jar README.TXT $LIN/dist
 cp -rf config $LIN
 cp -rf lib $LIN/dist
 
-cp -rf gatewaye.jar $MACOS/dist
+cp -rf gatewaye.jar README.TXT $MACOS/dist
 cp -rf config $MACOS
 cp -rf lib $MACOS/dist
 
