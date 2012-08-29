@@ -111,11 +111,17 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 	{
 		return m_this;
 	}
-
+	
+	//retrieve the entire set directly (slow)
+	public FileInfo[][] retrieveFiles(Dataset query)
+	{
+		return new XNATCMoveRsp(m_XNATServer, m_XNATUser, m_XNATPass,
+		m_StoreFolder).performRetrieve(query);		
+	}
+	
+	//retrieve series, has to be preceded by call to getSeriesRequests (faster, doesn't work for C-GET).
 	public FileInfo[][] retrieveSeries(Dataset query, TreeMap scanMap)
 	{
-//		return new XNATCMoveRsp(m_XNATServer, m_XNATUser, m_XNATPass,
-//				m_StoreFolder).performRetrieve(query);
 		return new XNATCMoveRsp(m_XNATServer, m_XNATUser, m_XNATPass,
 				m_StoreFolder).retrieveSeries(query,scanMap);
 	}

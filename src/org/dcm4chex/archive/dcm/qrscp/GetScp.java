@@ -137,40 +137,19 @@ public class GetScp extends DcmServiceBase
 					UIDs.StudyRootQueryRetrieveInformationModelGET,
 					UIDs.PatientStudyOnlyQueryRetrieveInformationModelGET);
 			qrLevel.checkRetrieveRQ(rqData);
-			FileInfo[][] fileInfos = null;									
+			FileInfo[][] fileInfos = null;
 			try
 			{
-				//Split the request into series requests.
-				LinkedList<Object> llo = (LinkedList<Object>) service.server.invoke(
-						new ObjectName("org.nrg.xnag.gateway:type=GatewayServer"),
-						"getSeriesRequests", new Object[]{rqData}, new String[]{Dataset.class.getName()});
-				Dataset[] requests = (Dataset[]) llo.get(1);
-				TreeMap<String,String[]> scanMap=(TreeMap<String,String[]>)llo.get(0);
-				
-				for (Dataset ds:requests)
-				{
-					fileInfos = (FileInfo[][]) service.server.invoke(
-							new ObjectName("org.nrg.xnag.gateway:type=GatewayServer"),
-							"retrieveSeries", new Object[]{ds,scanMap},	new String[]{Dataset.class.getName(),TreeMap.class.getName()});	
-					checkPermission(a, fileInfos);	
-					new Thread(new GetTask(service, assoc, pcid, rqCmd, ds,
-							fileInfos)).start();
-				}
-/*				
-				//now, try to split send in two parts.
-				int l1=fileInfos.length/2;
-				int l2=fileInfos.length-l1;								
-				FileInfo[][] fi1=new FileInfo[l1][];
-				FileInfo[][] fi2=new FileInfo[l2][];
-				for (int i=0; i<l1+l2; i++)
-				{
-					if(i<l1) fi1[i]=fileInfos[i];
-					else fi2[i-l1]=fileInfos[i-l1];
-				}							
+				fileInfos = 
+					(FileInfo[][]) service.server.invoke(
+							new ObjectName(
+									"org.nrg.xnag.gateway:type=GatewayServer"),
+							"retrieveFiles", new Object[]{rqData},
+							new String[]{Dataset.class.getName()});												
+//				RetrieveCmd.create(rqData).getFileInfos();
 				checkPermission(a, fileInfos);
 				new Thread(new GetTask(service, assoc, pcid, rqCmd, rqData,
-						fileInfos)).start();
-*/						
+						fileInfos)).start();			
 			} catch (DcmServiceException e)
 			{
 				throw e;
