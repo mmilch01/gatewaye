@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.log4j.Priority;
 import org.dcm4che.data.Dataset;
 import org.dcm4che.data.DcmElement;
 import org.dcm4che.dict.Tags;
@@ -101,14 +102,17 @@ public class XNATQueryGenerator
 	public static String getRESTQuery(InformationEntity ie, Dataset query, boolean bDefineColumns)
 	{
 		if (ie.compareTo(InformationEntity.SERIES) == 0)
-		{
+		{			
 			String path = "/experiments";
 			if(!XNATGatewayServer.isDICOMUID())
 			{
 				// get experiment ID
 				String expID = GetValueFromAttributeList("stinstuid", query);
 				if (expID == null)
+				{
+					Tools.LogMessage(Priority.INFO_INT, "getRESTQuery: Could not identify experiment ID. Query:" + query.toString());
 					return null;
+				}
 				path += "/"+expID + "/scans";
 				if(bDefineColumns) 
 					path+="&columns=xnat:imagesessiondata/scans/scan/type,";
@@ -117,7 +121,11 @@ public class XNATQueryGenerator
 			else
 			{
 				String uid=query.getString(Tags.StudyInstanceUID);
-				if(uid==null) return null;
+				if(uid==null) 
+				{
+					Tools.LogMessage(Priority.INFO_INT, "getRESTQuery: Could not identify Study Instance UID. DICOM query:" + query.toString());
+					return null;
+				}
 				path+="?xsiType=xnat:imageSessionData&xnat:imageSessionData/UID="+uid;
 //				path+="&columns=xnat:imagesessiondata/scans/scan/uid,xnat:imagesessiondata/scans/scan/type,";
 				path+="&columns=xnat:imagescandata/uid,xnat:imagescandata/type,";
@@ -172,6 +180,7 @@ public class XNATQueryGenerator
 //			if(bDefineColumns)
 //				path+="columns=studyInstanceUID,subject_ID,date,xsiType,label,subject_label,ID";
 		}
+		Tools.LogMessage(Priority.INFO_INT, "getRESTQuery: Query level is neither SERIES nor STUDY. DICOM query:" + query.toString());
 		return null;
 	}
 

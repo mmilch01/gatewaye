@@ -489,6 +489,7 @@ QueryRetrieveScp service.</description>
          <value value="
            Dcm4cheStudyRootQueryRetrieveInformationModelFIND
            Dcm4cheBlockedStudyRootQueryRetrieveInformationModelFIND
+           1.3.12.2.1107.5.9.1
            "/>
       </descriptors>
    </attribute>
