@@ -35,7 +35,7 @@ import org.nrg.xnat.util.Utils;
  */
 
 public class GatewayEnvironment {
-	public static final String version="Aug 2012";
+	public static final String version="Oct 2017";
     private int listening_port;
     private String ae_title;
 

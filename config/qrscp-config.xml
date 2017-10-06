@@ -14,7 +14,7 @@
 <attribute name="PIXQueryDefaultIssuerOfPatientID" type="java.lang.String">DCM4CHEE</attribute>
 <attribute name="CoerceRequestPatientIds" type="java.lang.Boolean">false</attribute>
 <attribute name="CoerceRequestPatientIdsAETitles" type="java.lang.String">NONE</attribute>
-<attribute name="UnrestrictedQueryPermissionsToAETitles" type="java.lang.String">ANY</attribute>
+<attribute name="UnrestrictedQueryPermissionsToAETitles" type="java.lang.String">NONE</attribute>
 <attribute name="UnrestrictedReadPermissionsToAETitles" type="java.lang.String">ANY</attribute>
 <attribute name="UnrestrictedExportPermissionsToAETitles" type="java.lang.String">ANY</attribute>
 <attribute name="HideWithoutIssuerOfPatientIDFromAETitles" type="java.lang.String">NONE</attribute>

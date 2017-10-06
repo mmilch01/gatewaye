@@ -239,7 +239,7 @@ QueryRetrieveScp service.</description>
       <name>UnrestrictedQueryPermissionsToAETitles</name>
       <type>java.lang.String</type>
       <descriptors>
-         <value value="ANY" />
+         <value value="ANY1" />
       </descriptors>
    </attribute>
    <attribute access="read-write"

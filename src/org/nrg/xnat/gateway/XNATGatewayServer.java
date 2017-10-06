@@ -145,7 +145,7 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 		this.l=env.make_logger();
 		
 		bUseDICOMUIDs=true;
-//			env.isdcmuid();		
+//			env.isdcmuid();
 		
 		l.info(DateFormat.getDateTimeInstance().format(new Date())+" XNAT Gateway server v. "+env.version+" started");
 
@@ -163,7 +163,16 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 		if(aets!=null)
 		{
 			aets = aets.replace(' ', '\\');
-			srv.setCallingAETs(aets);		
+			srv.setCallingAETs(aets);
+			String perm=srv.getUnrestrictedQueryPermissionsToAETitles();
+			
+			if (perm.compareTo("ANY")!=0)
+			{
+				srv.setUnrestrictedQueryPermissionsToAETitles(aets);		
+				System.out.println("Unrestricted query permissions for all AEs are disabled");
+			}
+			else
+				System.out.println("Unrestricted query permissions for all AEs are enabled");
 		}
 		else 
 		{
@@ -227,7 +236,8 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 		);
 
 		XNATQueryGenerator.LoadVocabulary("./config/vocabulary.xml");
-		System.out.println("Anonymous AE allowed: " + env.get_anoymous_ae_allowed());
+		//this attribute does not affect the behavior and the statement below is therefore misleading.
+//		System.out.println("Anonymous AE allowed: " + env.get_anoymous_ae_allowed());
 		start_time = new Date().getTime();		
 		new Thread(this).start();		
 	}

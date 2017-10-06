@@ -420,12 +420,12 @@ public class QueryRetrieveScpService extends AbstractScpService
 	final boolean hasUnrestrictedQueryPermissions(String aet)
 	{
 	
-		return true;
+//		return true;
 		//uncomment to tune query permissions to specific AE titles.
-/*		return unrestrictedQueryPermissionsToAETitles == null
+		return unrestrictedQueryPermissionsToAETitles == null
 				|| Arrays.asList(unrestrictedQueryPermissionsToAETitles)
 						.contains(aet);
-*/						
+						
 	}
 
 	public final String getUnrestrictedReadPermissionsToAETitles()

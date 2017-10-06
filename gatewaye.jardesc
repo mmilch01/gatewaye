@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="WINDOWS-1252" standalone="no"?>
 <jardesc>
-    <jar path="C:/Workspace/xnd_stable/gatewaye/gatewaye.jar"/>
-    <options buildIfNeeded="true" compress="true" descriptionLocation="/gatewayE/gatewaye.jardesc" exportErrors="false" exportWarnings="true" includeDirectoryEntries="true" overwrite="true" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
+    <jar path="C:/src/eclipse/gatewaye/gatewaye.jar"/>
+    <options buildIfNeeded="true" compress="true" descriptionLocation="/gatewaye/gatewaye.jardesc" exportErrors="false" exportWarnings="true" includeDirectoryEntries="false" overwrite="false" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
     <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
     <selectedProjects/>
-    <manifest generateManifest="false" mainClassHandleIdentifier="=gatewayE/src&lt;org.nrg.xnat.gateway{XNATGatewayServer.java[XNATGatewayServer" manifestLocation="/gatewayE/target/classes/META-INF/MANIFEST.MF" manifestVersion="1.0" reuseManifest="false" saveManifest="true" usesManifest="true">
+    <manifest generateManifest="false" manifestLocation="/gatewaye/target/classes/META-INF/MANIFEST.MF" manifestVersion="1.0" reuseManifest="false" saveManifest="true" usesManifest="true">
         <sealing sealJar="false">
             <packagesToSeal/>
             <packagesToUnSeal/>
         </sealing>
     </manifest>
     <selectedElements exportClassFiles="true" exportJavaFiles="false" exportOutputFolder="false">
-        <folder path="/gatewayE/target"/>
-        <javaElement handleIdentifier="=gatewayE/src"/>
+        <javaElement handleIdentifier="=gatewaye/src"/>
     </selectedElements>
 </jardesc>
