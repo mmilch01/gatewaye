@@ -35,6 +35,7 @@ import org.nrg.xnat.util.Utils;
  */
 
 public class GatewayEnvironment {
+	public static final String version="Oct 2017";
     private int listening_port;
     private String ae_title;
 
@@ -438,6 +439,14 @@ public class GatewayEnvironment {
 
     public String get_calledae_title () {
         return this.settings.getName();
+    }
+
+    public boolean get_anoymous_ae_allowed() {
+        return this.settings.getAllowAnonymousAERetrieve();
+    }
+
+    public void set_anonymous_ae_allowed(boolean b) throws IOException {
+        this.settings.setAllowAnonymousAERetrieve(b);
     }
 
     public List get_log_messages () throws IOException {

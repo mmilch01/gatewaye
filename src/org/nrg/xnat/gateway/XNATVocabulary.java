@@ -1,6 +1,9 @@
 package org.nrg.xnat.gateway;
 import java.io.File;
+import java.util.Calendar;
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.TreeMap;
 
 import org.dcm4che.data.Dataset;
@@ -15,11 +18,18 @@ import com.pixelmed.dicom.InformationEntity;
 public class XNATVocabulary
 {
 	// index by DICOM tag
-	private TreeMap<Integer, XNATVocabularyEntry> m_dcm_entries = new TreeMap<Integer, XNATVocabularyEntry>();
+	private TreeMap<Integer, XNATVocabularyEntry> m_dcmtag_map = new TreeMap<Integer, XNATVocabularyEntry>();
 
-	// index by XNAT field ID
-	private TreeMap<String, XNATVocabularyEntry> m_xnat_entries = new TreeMap<String, XNATVocabularyEntry>();
+	// index by dcmid field ID
+	public TreeMap<String, XNATVocabularyEntry> m_dcmid_map = new TreeMap<String, XNATVocabularyEntry>();
+	
+	//index by XNAT path or alias.
+	public TreeMap<String, String> m_alias_dcmidStudy = new TreeMap<String, String>();
+	public TreeMap<String, String> m_alias_dcmidSeries = new TreeMap<String, String>();
 
+	public Collection<String> m_dcmFieldsStudy=new LinkedList<String>();
+	public Collection<String> m_dcmFieldsSeries=new LinkedList<String>();
+	
 	public XNATVocabulary(File f)
 	{
 		try
@@ -34,8 +44,20 @@ public class XNATVocabulary
 				if (el.getName().compareTo("entry") == 0)
 				{
 					xve = new XNATVocabularyEntry(el);
-					m_dcm_entries.put(new Integer(xve.m_DICOMTag), xve);
-					m_xnat_entries.put(xve.m_search_column_alias, xve);
+					m_dcmtag_map.put(new Integer(xve.m_DICOMTag), xve);
+					m_dcmid_map.put(xve.m_dcmid, xve);
+					if(xve.m_qLevel==XNATVocabularyEntry.PATIENT || xve.m_qLevel==XNATVocabularyEntry.STUDY)
+					{
+						m_alias_dcmidStudy.put(xve.m_alias.toLowerCase(), xve.m_dcmid);
+						m_alias_dcmidStudy.put(xve.m_schema_path.toLowerCase(), xve.m_dcmid);		
+						m_dcmFieldsStudy.add(xve.m_dcmid);
+					}
+					else
+					{
+						m_alias_dcmidSeries.put(xve.m_alias.toLowerCase(), xve.m_dcmid);
+						m_alias_dcmidSeries.put(xve.m_schema_path.toLowerCase(), xve.m_dcmid);
+						m_dcmFieldsSeries.add(xve.m_dcmid);
+					}
 				}
 			}
 		} catch (Exception e)
@@ -51,109 +73,86 @@ public class XNATVocabulary
 		Dataset list = DcmObjectFactory.getInstance().newDataset();
 		// AttributeList list=new AttributeList();
 		String val;
-		TreeMap<String, String> stMap = new TreeMap<String, String>();
 		String nm;
 
 		// for now, special-case the STUDY level as new functionality
 		// (05/19/2009)
 		if (ie.compareTo(InformationEntity.STUDY) == 0)
-		{
-
-			//synonyms for study instance uid.
-//			stMap.put("UID", "stinstuid");
-			if(XNATGatewayServer.isDICOMUID())
-			{
-				stMap.put("UID","stinstuid");
-			}
-			else
-				stMap.put("ID", "stinstuid");
-//			stMap.put("session_ID","stinstuid");
-			
-			stMap.put("date", "stdate");
-			stMap.put("xsiType", "stmodality");
-			stMap.put("subject_ID", "patid");
-			stMap.put("label", "staccessionnum");
-			stMap.put("subject_label", "patname");
-			
-			//check if Study Instance UID is contained in response and if yes populate the resulting dataset.
-//			boolean bStInstUIDDefined=false;
-//			String temp=row.get("UID");
-//			if(temp!=null && temp.length()>0)
-//			{
-//				bStInstUIDDefined=true;
-//			}
-			
+		{			
 			for (String s : row.keySet())
 			{
 				XNATVocabularyEntry xve;
-				nm = stMap.get(s);
+				nm = m_alias_dcmidStudy.get(s.toLowerCase());
 				if (nm == null)
-					continue;
-				//if Study instance UID was defined, skip its replacements.
-//				if((s.compareTo("ID")==0 || s.compareTo("session_ID")==0) && bStInstUIDDefined) continue;
-					
-				xve = m_xnat_entries.get(nm);
+					continue;					
+				xve = m_dcmid_map.get(nm);
 				if (xve != null)
 				{
 					val = xnatTodcm(row.get(s), nm);
 					xve.putDICOMAttribute(list, val);
-					// list.putXX( xve.m_DICOMTag,val);
-					// Attribute a=xve.GetDICOMAttribute(val);
-					// if(a!=null) list.put(a);
 				}
 			}
 		} else if (ie.compareTo(InformationEntity.SERIES) == 0)
 		{
+			TreeMap<String, String> stMap = new TreeMap<String, String>();			
 			if(!XNATGatewayServer.isDICOMUID())				
 				stMap.put("ID", "id");
 			else
 			{
-				stMap.put("xnat:imagesessiondata/scans/scan/uid","id");
-				stMap.put("xnat:imagesessiondata/scans/scan/type","series_description");
+//				stMap.put("xnat:imagesessiondata/scans/scan/uid","serinstuid");
+//				stMap.put("xnat:imagesessiondata/scans/scan/type","series_description");
+				stMap.put("xnat:imagescandata/uid","serinstuid");
+				stMap.put("xnat:imagescandata/type","series_description");
 			}
 			
-			stMap.put("xsiType", "sermodality");
-			stMap.put("subject_ID", "patid");
-			stMap.put("label", "staccessionnum");
-			stMap.put("subject_label", "patname");
 			for (String s : row.keySet())
 			{
 				XNATVocabularyEntry xve;
-				nm = stMap.get(s);
+				nm=m_alias_dcmidSeries.get(s);				
 				if (nm == null)
-					continue;
-				xve = m_xnat_entries.get(nm);
+					nm=m_alias_dcmidStudy.get(s);
+				if (nm==null) 
+					nm=stMap.get(s);
+				if (nm==null)
+						continue;
+				xve = m_dcmid_map.get(nm);
 				if (xve != null)
 				{
 					val = xnatTodcm(row.get(s), nm);
 					list.putXX(xve.m_DICOMTag, val);
-					// Attribute a=xve.GetDICOMAttribute(val);
-					// if(a!=null) list.put(a);
 				}
 			}
 		}
 		for (String s : row.keySet())
 		{
-			XNATVocabularyEntry xve = m_xnat_entries.get(s);
+			XNATVocabularyEntry xve = m_dcmid_map.get(s);
 			if (xve != null)
 			{
 				val = row.get(s);
 				list.putXX(xve.m_DICOMTag, val);
-				// Attribute a=xve.GetDICOMAttribute(val);
-				// if(a!=null) list.put(a);
 			}
 		}
 		return list;
 	}
-	public static String xnatTodcm(String val, String alias)
+	public static String xnatTodcm(String val, String dcmid)
 	{
-		if(alias.compareTo("stinstuid")==0 || alias.compareTo("id")==0)
+		if(dcmid.compareTo("stinstuid")==0 || dcmid.compareTo("serinstuid")==0)
 		{
 			if(val==null) return val;
 			if(XNATGatewayServer.isDICOMUID()) return val;
 			else return Utils.String2UID(val);
 		}
-		if (alias.compareTo("stmodality") == 0)
+		if(dcmid.compareTo("patdob")==0 || dcmid.compareTo("stdate")==0)
+		{
+			return val.replace("-", "");
+		}
+		if(dcmid.compareTo("patsex")==0)
+		{
+			if(val.toLowerCase().startsWith("m")) return "M";
+			if(val.toLowerCase().startsWith("f")) return "F";
+			return val;
+		}
+		if (dcmid.compareTo("stmodality") == 0)
 		{
 			if (val == null || val.length() < 1)
 				return val;
@@ -165,7 +164,7 @@ public class XNATVocabulary
 				return val.substring(5, ind).toUpperCase();
 			} else
 				return val;
-		} else if (alias.compareTo("sermodality") == 0)
+		} else if (dcmid.compareTo("sermodality") == 0)
 		{
 			if (val == null || val.length() < 1)
 				return val;
@@ -183,14 +182,32 @@ public class XNATVocabulary
 		}
 		return val;
 	}
-	public static String dcmToXNATField(String field, String dcmAlias)
+	private static String GetDateDcm(int AdjustYears)
 	{
-		if (dcmAlias.compareTo("stinstuid")==0 || dcmAlias.compareTo("id")==0)
+		Calendar c = Calendar.getInstance();
+		c.add(Calendar.YEAR, AdjustYears);
+		return String.format("%04d", c.get(Calendar.YEAR))+String.format("%02d", c.get(Calendar.MONTH))+
+			String.format("%02d", c.get(Calendar.DAY_OF_MONTH));		
+	}
+	private static String DcmDateToXNAT(String from)
+	{
+		String tmp;
+		if(from.startsWith("-")) return GetDateDcm(-100)+from;
+		else if (from.endsWith("-")) return from+GetDateDcm(100);
+		return from;
+	}
+	
+	public static String dcmToXNATField(String field, String dcmid)
 		{
-			if(field==null) return null;
-			return Utils.UID2String(field);
+		if(dcmid.compareTo("stdate")==0 || dcmid.compareTo("patdob")==0)
+			return DcmDateToXNAT(field);
+		if(dcmid.compareTo("patdob")==0 || dcmid.compareTo("stdate")==0)
+		{
+			if(field.length()!=8) return field;
+			String s=field.substring(0,3)+"-"+field.substring(4,6)+"-"+field.substring(7,9);
+			return s;
 		}
-		if (dcmAlias.compareTo("stmodality") == 0)
+		if (dcmid.compareTo("stmodality") == 0)
 		{
 			String allModalities = "xnat:imageSessionData";
 			if (field == null || field.length() < 1)
@@ -203,7 +220,7 @@ public class XNATVocabulary
 				return "xnat:petSessionData";
 			else
 				return allModalities;
-		} else if (dcmAlias.compareTo("stdate") == 0)
+		} else if (dcmid.compareTo("stdate") == 0)
 		{
 			return field;
 		}
@@ -212,9 +229,6 @@ public class XNATVocabulary
 
 	public void modifySOPInstUID(Dataset al, boolean toDicom)
 	{
-		// Attribute stInstUID=al.get(new AttributeTag(0x0020,0x000D));
-		// Attribute serInstUID=al.get(new AttributeTag(0x0020,0x000E));
-		// if(stInstUID==null || serInstUID==null) return;
 		String s1 = al.getString(Tags.StudyInstanceUID), // stInstUID.getSingleStringValueOrNull(),
 		s2 = al.getString(Tags.SeriesInstanceUID);// serInstUID.getSingleStringValueOrNull();
 		if (s1 == null || s2 == null)
@@ -226,18 +240,16 @@ public class XNATVocabulary
 			String res=toDicom ? (s1 + "_" + s2) : (s2
 					.substring(s1.length() + 1));
 			al.putXX(Tags.SeriesInstanceUID, Utils.String2UID(res));
-			// serInstUID.setValue(toDicom?(s1+"_"+s2):(s2.substring(s1.length()+1)));
-			// al.put(serInstUID);
 		} catch (Exception de)
 		{
 		}
 	}
 	public XNATVocabularyEntry GetDcmEntry(int tag)
 	{
-		return m_dcm_entries.get(new Integer(tag));
+		return m_dcmtag_map.get(new Integer(tag));
 	}
 	public XNATVocabularyEntry GetXNATEntry(String header)
 	{
-		return m_xnat_entries.get(header);
+		return m_dcmid_map.get(header);
 	}
 }

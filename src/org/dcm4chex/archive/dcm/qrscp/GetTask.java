@@ -342,7 +342,7 @@ class GetTask implements Runnable
 		service.updateStudyAccessTime(studyInfos);
 	}
 
-	private int status()
+	public int status()
 	{
 		return canceled ? Status.Cancel : failedIUIDs.isEmpty()
 				? Status.Success

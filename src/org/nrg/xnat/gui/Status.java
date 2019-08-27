@@ -54,6 +54,8 @@ public class Status extends javax.swing.JFrame {
         // give the child windows a link back to the main parent window (this screen)
         server_windows.add_parent(root);
         aes_windows.add_parent(root);
+        
+        setTitle("XNAT Gateway, ver. "+GatewayEnvironment.version);
 
         // start the uptime monitor with a label that updates everytime the monitor
         // polls the Gateway
@@ -91,7 +93,7 @@ public class Status extends javax.swing.JFrame {
         uptime_label = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
-        setTitle("Gateway Status");
+//        setTitle("Gateway Status");
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosed(java.awt.event.WindowEvent evt) {
                 formWindowClosed(evt);

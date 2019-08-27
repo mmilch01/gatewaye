@@ -41,6 +41,8 @@ package org.dcm4chex.archive.dcm.qrscp;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.LinkedList;
+import java.util.TreeMap;
 
 import javax.management.ObjectName;
 
@@ -134,24 +136,42 @@ public class MoveScp extends DcmServiceBase implements AssociationListener
 			{
 				perfMon.start(assoc, rq, PerfCounterEnum.C_MOVE_SCP_QUERY_DB);
 				perfMon.setProperty(assoc, rq, PerfPropertyEnum.REQ_DIMSE, rq);
-
 				aeData = service.queryAEData(dest, thirdPartyMove ? null : a
 						.getSocket().getInetAddress());
+/*				
 				fileInfos = (FileInfo[][]) service.server.invoke(
-						new ObjectName(
-								"org.nrg.xnag.gateway:type=GatewayServer"),
-						"retrieveFiles", new Object[]{rqData},
-						new String[]{Dataset.class.getName()});
-
+						new ObjectName("org.nrg.xnag.gateway:type=GatewayServer"),
+						"retrieveSeries", new Object[]{rqData},	new String[]{Dataset.class.getName()});	
 				// RetrieveCmd.create(rqData).getFileInfos();
-
 				perfMon.setProperty(assoc, rq, PerfPropertyEnum.NUM_OF_RESULTS,
 						String.valueOf(fileInfos.length));
 				perfMon.stop(assoc, rq, PerfCounterEnum.C_MOVE_SCP_QUERY_DB);
-				checkPermission(a, thirdPartyMove, aeData, fileInfos);
-
+				checkPermission(a, thirdPartyMove, aeData, fileInfos);	
 				new Thread(createMoveTask(service, assoc, rq.pcid(), rqCmd,
 						rqData, fileInfos, aeData, dest)).start();
+*/
+				
+				//Split the request into series requests.
+				LinkedList<Object> llo = (LinkedList<Object>) service.server.invoke(
+						new ObjectName("org.nrg.xnag.gateway:type=GatewayServer"),
+						"getSeriesRequests", new Object[]{rqData}, new String[]{Dataset.class.getName()});
+				Dataset[] requests = (Dataset[]) llo.get(1);
+				TreeMap<String,String[]> scanMap=(TreeMap<String,String[]>)llo.get(0);
+				
+				for (Dataset ds:requests)
+				{
+					fileInfos = (FileInfo[][]) service.server.invoke(
+							new ObjectName("org.nrg.xnag.gateway:type=GatewayServer"),
+							"retrieveSeries", new Object[]{ds,scanMap},	new String[]{Dataset.class.getName(),TreeMap.class.getName()});	
+					// RetrieveCmd.create(rqData).getFileInfos();
+					perfMon.setProperty(assoc, rq, PerfPropertyEnum.NUM_OF_RESULTS,
+							String.valueOf(fileInfos.length));
+					perfMon.stop(assoc, rq, PerfCounterEnum.C_MOVE_SCP_QUERY_DB);
+					checkPermission(a, thirdPartyMove, aeData, fileInfos);	
+					new Thread(createMoveTask(service, assoc, rq.pcid(), rqCmd,
+							ds, fileInfos, aeData, dest)).start();
+				}
+				
 			} catch (DcmServiceException e)
 			{
 				throw e;

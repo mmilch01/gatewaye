@@ -63,6 +63,7 @@ public class InitialSetupGUI extends javax.swing.JFrame {
         initial_apply_button = new javax.swing.JButton();
         initial_cancel_button = new javax.swing.JButton();
         initial_xnat_password = new javax.swing.JPasswordField();
+        allowAnonymousAE_check_box = new javax.swing.JCheckBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -76,25 +77,19 @@ public class InitialSetupGUI extends javax.swing.JFrame {
         jLabel2.setText("Gateway Settings");
 
         jLabel3.setText("AE Title");
-        initial_ae_title.setText("GATEWAY");
 
         jLabel4.setText("Port");
-        initial_listening_port.setText("4008");
 
         jLabel5.setText("Default XNAT Server");
 
         jLabel6.setText("Name");
-        initial_xnat_name.setText("XNAT_Central");
 
         jLabel7.setText("Hostname");
-        initial_xnat_hostname.setText("http://central.xnat.org");
-        
+
         jLabel8.setText("Username");
-        initial_xnat_username.setText("guest");
-        
+
         jLabel9.setText("Password");
-        initial_xnat_password.setText("guest");
-        
+
         initial_apply_button.setText("Apply");
         initial_apply_button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mousePressed(java.awt.event.MouseEvent evt) {
@@ -115,6 +110,8 @@ public class InitialSetupGUI extends javax.swing.JFrame {
             }
         });
 
+        allowAnonymousAE_check_box.setText(" Allow C-GET Retrieve From Anonymous Remote AEs");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -128,7 +125,6 @@ public class InitialSetupGUI extends javax.swing.JFrame {
                         .addGap(22, 22, 22)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel2)
-                            .addComponent(jLabel5)
                             .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jLabel3)
@@ -137,7 +133,8 @@ public class InitialSetupGUI extends javax.swing.JFrame {
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                     .addComponent(initial_listening_port)
                                     .addComponent(initial_ae_title, javax.swing.GroupLayout.DEFAULT_SIZE, 227, Short.MAX_VALUE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 22, Short.MAX_VALUE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 51, Short.MAX_VALUE))
+                            .addComponent(jLabel5)
                             .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jLabel7)
@@ -153,13 +150,14 @@ public class InitialSetupGUI extends javax.swing.JFrame {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(initial_xnat_password, javax.swing.GroupLayout.DEFAULT_SIZE, 229, Short.MAX_VALUE)
-                                    .addComponent(initial_xnat_username)))))
+                                    .addComponent(initial_xnat_username)))
+                            .addComponent(allowAnonymousAE_check_box)))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(137, 137, 137)
                         .addComponent(initial_apply_button, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(initial_cancel_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(30, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -176,7 +174,9 @@ public class InitialSetupGUI extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
                     .addComponent(initial_listening_port, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(30, 30, 30)
+                .addGap(18, 18, 18)
+                .addComponent(allowAnonymousAE_check_box)
+                .addGap(22, 22, 22)
                 .addComponent(jLabel5)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -194,7 +194,7 @@ public class InitialSetupGUI extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel9)
                     .addComponent(initial_xnat_password, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 43, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 49, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(initial_apply_button)
                     .addComponent(initial_cancel_button))
@@ -202,7 +202,7 @@ public class InitialSetupGUI extends javax.swing.JFrame {
         );
 
         java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((screenSize.width-340)/2, (screenSize.height-437)/2, 340, 437);
+        setBounds((screenSize.width-399)/2, (screenSize.height-475)/2, 399, 475);
     }// </editor-fold>//GEN-END:initComponents
 
     private void initial_apply_buttonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_initial_apply_buttonMousePressed
@@ -272,6 +272,7 @@ public class InitialSetupGUI extends javax.swing.JFrame {
         _p.setProperty("XNATServers." + initial_xnat_name.getText() + ".ServerURL", initial_xnat_hostname.getText());
         _p.setProperty("XNATServers.default", initial_xnat_name.getText());
         _p.setProperty("XNATServers", initial_xnat_name.getText());
+        _p.setProperty("Dicom.AnonymousAEAllowed", Boolean.toString(allowAnonymousAE_check_box.isSelected()));
         return _p;
     }
 
@@ -303,6 +304,7 @@ public class InitialSetupGUI extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JCheckBox allowAnonymousAE_check_box;
     private javax.swing.JTextField initial_ae_title;
     private javax.swing.JButton initial_apply_button;
     private javax.swing.JButton initial_cancel_button;

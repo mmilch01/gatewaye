@@ -1,94 +1,96 @@
 <vocabulary>
 <!--
-Note: xnat_column_alias is a vocabulary-defined key that is used internally for 
-entry indexing. It should be unique throughout the vocabulary.
- -->
+based on available xnat rest api variables, see: http://docs.xnat.org/xnat+rest+xml+path+shortcuts
 
-<!-- PatientID -->
-<entry dicom_group="0010" dicom_element="0020" xnat_element_name="xnat:subjectData" 
-		xnat_field_id="xnat:subjectData/ID" xnat_header="PatientID" search_column_alias="patid" >
-	<criterion search_schema_field="xnat:subjectData/ID" method="OR" comparison_type="LIKE"/>
-</entry>
+dcm_tag: 
+dicom tag (hex) group and element (not delimited), should be 8 chars long.
+dcmid:
+dicom vocabulary-based key that is used internally for entry indexing. this should not be changed.
+alias: 
+one or more captions (tags, hmtl table column headers) under which the given variable may appear in response returned by xnat.
+schema_path: shortcut for the variable used in rest queries
+qlevel: dicom query level (study and series are supported as of aug 2012). study=experiment level, series=scan level.
 
-<!-- Patient Name -->
-<entry dicom_group="0010" dicom_element="0010" xnat_element_name="xnat:subjectData"
-		xnat_field_id="xnat:subjectData/label" xnat_header="PatientName" search_column_alias="patname">
-	<criterion search_schema_field="xnat:subjectData/label" method="OR" comparison_type="LIKE"/>
-</entry>
+note (aug 2012): series-level attributes require full xnat schema path for the schema_path (rest variable shortcuts wouldn't work).
 
-<!-- Patient Sex -->
-<entry dicom_group="0010" dicom_element="0040" xnat_element_name="xnat:subjectData"
-		xnat_field_id="xnat:demographicData/gender" xnat_header="PatientSex" search_column_alias="patsex">
-	<criterion search_schema_field="xnat:subjectData/gender" method="OR" comparison_type="LIKE"/>		
+-->
+<!-- patient tags -->
+<!-- patientid -->
+<entry dcm_tag="00100020" dcmid="patid" schema_path="xnat:experimentdata/label" alias="label" qLevel="STUDY"/>
+<!--
+<entry dcm_tag="00100020" dcmid="patid" schema_path="xnat:subjectdata/id" qLevel="STUDY"/>
+-->
+
+<!-- patient name -->
+<entry dcm_tag="00100010" dcmid="patname" schema_path="xnat:subjectdata/label" alias="subject_label" qLevel="STUDY"/>
+
+
+<!-- patient sex -->
+<entry dcm_tag="00100040" dcmid="patsex" 
+		schema_path="xnat:subjectdata/demographics[@xsi:type=xnat:demographicdata]/gender" qLevel="STUDY">
 	<value_map dcm_val="M" xnat_val="male"/>
 	<value_map dcm_val="F" xnat_val="female"/>
 </entry>
 
-<!-- Patient Birth Date -->
-<entry dicom_group="0010" dicom_element="0030" xnat_element_name="xnat:subjectData"
-		xnat_field_id="xnat:demographicData/dob" xnat_header="PatientDOB" search_column_alias="patdob">
-	<criterion search_schema_field="xnat:subjectData/dob" method="OR" comparison_type="LIKE"/>
-</entry>
+<!-- patient birth date -->
 
-<!-- Study instance UID  -->
-<entry dicom_group="0020" dicom_element="000D" xnat_element_name="xnat:imageSessionData" 
-		 xnat_field_id="xnat:imageSessionData/ID" xnat_header="ID" search_column_alias="stinstuid">
-</entry>
+<entry dcm_tag="00100030" dcmid="patdob" schema_path="xnat:subjectdata/demographics[@xsi:type=xnat:demographicdata]/dob" alias="dob" qLevel="STUDY"/>
 
-<!-- Study accession number  -->
-<entry dicom_group="0008" dicom_element="0050" xnat_element_name="xnat:mrSessionData" 
-		xnat_field_id="xnat:imageSessionData/label" xnat_header="Label" search_column_alias="staccessionnum">
-</entry>
+<!-- patient age -->
+<entry dcm_tag="00101010" dcmid="patage" schema_path="xnat:subjectdata/demographics[@xsi:type=xnat:demographicdata]/age" alias="age" qLevel="STUDY"/>
+<!-- patient size -->
+<entry dcm_tag="00101020" dcmid="patsize" schema_path="xnat:subjectdata/demographics[@xsi:type=xnat:demographicdata]/height" alias="height" qLevel="STUDY"/>
+<!-- patient weight -->
+<entry dcm_tag="00101030" dcmid="patweight" schema_path="xnat:subjectdata/demographics[@xsi:type=xnat:demographicdata]/weight" alias="weight" qLevel="STUDY"/>
+<!-- patient ethnic group -->
+<entry dcm_tag="00102160" dcmid="patethnogroup" schema_path="xnat:subjectdata/demographics[@xsi:type=xnat:demographicdata]/ethnicity" alias="ethnicity" qLevel="STUDY"/>
+<!-- study tags -->
 
-<!-- Referring physician -->
-<entry dicom_group="0008" dicom_element="0090" xnat_element_name="xnat:mrSessionData"
-		xnat_field_id="xnat:imageSessionData/investigator/lastname" xnat_header="Investigator"	search_column_alias="strefphysician">
-</entry>
-
-<!-- Study description -->
-<entry dicom_group="0008" dicom_element="1030" xnat_element_name="xnat:mrSessionData"
-		xnat_field_id="xnat:imageSessionData/session_type" xnat_header="TYPE"	search_column_alias="stdescr">
-</entry>
-
-<!-- Study modality -->
-<entry dicom_group="0008" dicom_element="0061" xnat_element_name="xnat:mrSessionData"
-		xnat_field_id="xnat:imageSessionData/modality" xnat_header="MODALITY"	search_column_alias="stmodality">
-</entry>
-
-<!-- Study date -->
-<entry dicom_group="0008" dicom_element="0020" xnat_element_name="xnat:mrSessionData"
-		xnat_field_id="xnat:imageSessionData/date" xnat_header="DATE"	search_column_alias="stdate">
-</entry>
-
-<!-- Study time -->
-<entry dicom_group="0008" dicom_element="0030" xnat_element_name="xnat:mrSessionData"
-		xnat_field_id="xnat:imageSessionData/time" xnat_header="TIME"	search_column_alias="sttime">
-</entry>
-
-<!-- Series instance UID --> 
-<entry dicom_group="0020" dicom_element="000E" xnat_element_name="xnat:mrScanData"
-		xnat_field_id="xnat:imageScanData/ID" xnat_header="Scan"	search_column_alias="id">
-</entry>
-
-<!-- Series modality --> 
-<entry dicom_group="0008" dicom_element="0060" xnat_element_name="xnat:mrScanData"
-		xnat_field_id="xnat:imageScanData/modality" xnat_header="modality"	search_column_alias="sermodality">
-</entry>
-
-<!-- Series number  
-<entry dicom_group="0020" dicom_element="0011" xnat_element_name="xnat:mrScanData"
-		xnat_field_id="xnat:imageScanData/ID" xnat_header="Scan" search_column_alias="id">
+<!-- study instance uid for data that doesn't have real dicom stinstuid -->
+<!--
+<entry dcm_tag="0020000d" schema_path="xnat:imagesessiondata/id" dcmid="stinstuid">
 </entry>
 -->
 
-<!-- Series description --> 
-<entry dicom_group="0008" dicom_element="103E" xnat_element_name="xnat:mrScanData"
-		xnat_field_id="xnat:imageScanData/type" xnat_header="type"	search_column_alias="series_description">
-</entry>
+<!-- admission id (aug 2012) -->
+<entry dcm_tag="00380010" dcmid="admissid" schema_path="xnat:experimentdata/visit_id" alias="visit_id" qLevel="STUDY"/>
 
-<!-- Series number of images --> 
-<entry dicom_group="0020" dicom_element="1209" xnat_element_name="xnat:mrScanData"
-		xnat_field_id="xnat:imageScanData/frames" xnat_header="Files"	search_column_alias="sernumimages">
-</entry>
+<!-- study instance uid (as of jan 2012) (real dicom uid should be populated)  -->
+<entry dcm_tag="0020000d" dcmid="stinstuid" schema_path="xnat:imagesessiondata/uid" alias="uid" qLevel="STUDY"/>
+
+
+<!-- study accession number  -->
+<entry dcm_tag="00080050" dcmid="staccessionnum" schema_path="project" alias="xnat:projectdata/id" qLevel="STUDY"/>
+
+<!-- study description -->
+<entry dcm_tag="00081030" dcmid="stdescr" schema_path="xnat:experimentdata/project" alias="project" qLevel="STUDY"/>
+
+<!-- old study modality
+<entry dcm_tag="00080061" schema_path="xnat:imagesessiondata/modality"	dcmid="stmodality"/>
+ -->
+<!-- new (as of jan 2012) study modality -->
+<entry dcm_tag="00080061" dcmid="stmodality" schema_path="xsitype" alias="xsitype" qLevel="STUDY"/>
+
+<!-- study date -->
+<entry dcm_tag="00080020" dcmid="stdate" schema_path="xnat:imagesessiondata/date" alias="date" qLevel="STUDY"/>
+
+<!-- study time -->
+<entry dcm_tag="00080030" dcmid="sttime" schema_path="xnat:imagesessiondata/time" alias="time" qLevel="STUDY"/>
+
+<!-- series tags -->
+<!-- series instance uid --> 
+<entry dcm_tag="0020000e" dcmid="serinstuid" schema_path="xnat:imagescandata/uid" alias="uid" qLevel="SERIES"/>
+
+<!-- series modality --> 
+<entry dcm_tag="00080060" dcmid="sermodality" schema_path="xnat:imagescandata/modality" qLevel="SERIES"/>
+
+<!-- series number  -->
+<entry dcm_tag="00200011" schema_path="xnat:imagescandata/id" dcmid="sernum" alias="id" qLevel="SERIES"/>
+
+<!-- series description --> 
+<entry dcm_tag="0008103e" dcmid="series_description" schema_path="xnat:imagescandata/series_description" qLevel="SERIES" alias="series_description"/>
+
+<!-- number of frames for multi-frame acquisitions --> 
+<entry dcm_tag="00280008" dcmid="numframes" schema_path="xnat:imagescandata/frames" qLevel="SERIES" alias="frames"/>
 
 </vocabulary>

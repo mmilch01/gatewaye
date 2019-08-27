@@ -20,14 +20,16 @@ import org.nrg.xdat.bean.XdatCriteriaSetBean;
 public class XNATVocabularyEntry
 {
 	public int m_DICOMTag;
-	public String m_elementName = "";
-	public String m_field_id = "";
 	public String m_type = "";
-	// public String m_header="";
-	public String m_search_column_alias = "";
-	public String m_rest_column_alias = "";
-
-	public Collection<criterion> m_criteria = null;
+	public String m_restvar="";
+	public String m_dcmid = "";
+	public String m_xnatElementName="";
+	public static final int PATIENT=1,STUDY=2,SERIES=3;
+	public int m_qLevel=0;
+	//used by the xml search.
+	public String m_schema_path = "";
+	//column header aliase.
+	public String m_alias = null;
 
 	public boolean isDateTag()
 	{
@@ -39,18 +41,10 @@ public class XNATVocabularyEntry
 	{
 		try
 		{
-			// Attribute attr=AttributeFactory.newAttribute(m_DICOMTag);
-
-			// if(attr instanceof DateAttribute)
-
-			// workaround for overly-sensitive parser that doesn't accept dashes
-			// for dates.
 			if (isDateTag())
 			{
 				val = val.replace("-", "");
 			}
-
-			// for now, we only support string values.
 			ds.putXX(m_DICOMTag, val);
 		} catch (Exception de)
 		{
@@ -68,63 +62,57 @@ public class XNATVocabularyEntry
 	{
 		return tag & 0xffff;
 	}
-	public XNATVocabularyEntry(Element el)
+	public XNATVocabularyEntry(Element el) throws Exception
 	{
-		int group = Integer.parseInt(el.attributeValue("dicom_group"), 16), elem = Integer
-				.parseInt(el.attributeValue("dicom_element"), 16);
+		String tag=el.attributeValue("dcm_tag");
+		int group = Integer.parseInt(tag.substring(0,4), 16), elem = Integer
+		.parseInt(tag.substring(4,8), 16);		
 		m_DICOMTag = tagFromGrElem(group, elem);
-		// m_DICOMTag=new AttributeTag(group,elem);
-		m_elementName = el.attributeValue("xnat_element_name");
-		m_field_id = el.attributeValue("xnat_field_id");
 		m_type = "string";
-		// m_header=el.attributeValue("xnat_header");
-		m_search_column_alias = el.attributeValue("search_column_alias");
-
-		LinkedList<criterion> llsw = new LinkedList<criterion>();
-		for (Iterator it = el.elementIterator(); it.hasNext();)
-		{
-			Element se = (Element) it.next();
-			if (se.getName().compareTo("criterion") == 0)
-				llsw.add(new criterion(se));
-		}
-		if (llsw.size() > 0)
-			m_criteria = llsw;
+		m_schema_path=el.attributeValue("schema_path");
+		int ind=m_schema_path.indexOf('/', 0);
+		
+		if(ind>0)
+			m_xnatElementName=m_schema_path.substring(0,ind);
+		else
+			m_xnatElementName=m_schema_path;
+		
+		m_restvar=m_schema_path;
+		m_dcmid = el.attributeValue("dcmid");
+		String qLevel=el.attributeValue("qLevel");
+		if(qLevel==null) m_qLevel=PATIENT;
+		if(qLevel.compareTo("PATIENT")==0) m_qLevel=PATIENT;
+		else if(qLevel.compareTo("STUDY")==0) m_qLevel=STUDY;
+		else if(qLevel.compareTo("SERIES")==0) m_qLevel=SERIES;
+		else throw new Exception("Unsupported query level value for entry: tag="+m_DICOMTag+", dcmid="+m_dcmid);				
+		m_alias=el.attributeValue("alias");
+		if(m_alias==null) m_alias=m_xnatElementName;
 	}
 	public void toElement(Element el)
 	{
-		el.addAttribute("dicom_group", Integer
-				.toHexString(getGroup(m_DICOMTag)));
-		el.addAttribute("dicom_element", Integer
-				.toHexString(getElem(m_DICOMTag)));
-		el.addAttribute("xnat_element_name", m_elementName);
-		el.addAttribute("xnat_field_id", m_field_id);
+		el.addAttribute("dcm_tag",getDcmTag());
 		el.addAttribute("xnat_type", m_type);
-		// el.addAttribute("xnat_header", m_header);
-		el.addAttribute("search_column_alias", m_search_column_alias);
-		if (m_criteria != null)
-		{
-			for (criterion c : m_criteria)
-			{
-				Element sub = el.addElement("criterion");
-				c.fillElement(sub);
-			}
-		}
+		el.addAttribute("rest_var", m_restvar);
+		el.addAttribute("dcmid", m_dcmid);
+		el.addAttribute("alias", m_alias);
+	}
+	public String getDcmTag()
+	{
+		return Integer
+		.toHexString(getGroup(m_DICOMTag)).concat(
+				Integer.toHexString(getElem(m_DICOMTag)));
 	}
 	public XdatCriteriaSetBean getCriteriaSet(String val)
 	{
-		if (m_criteria == null)
-			return null;
+//		if (m_criteria == null)
+//			return null;
 		XdatCriteriaSetBean xcsb = new XdatCriteriaSetBean();
-		xcsb.setMethod("AND");
-
-		for (criterion c : m_criteria)
-		{
-			XdatCriteriaBean xcb = new XdatCriteriaBean();
-			xcb.setSchemaField(c.m_search_schema_field);
-			xcb.setValue(val);
-			xcb.setComparisonType(c.m_comparison_type);
-			xcsb.addCriteria(xcb);
-		}
+		xcsb.setMethod("LIKE");
+		XdatCriteriaBean xcb = new XdatCriteriaBean();
+		xcb.setSchemaField(m_schema_path);
+		xcb.setValue(val);
+		xcb.setComparisonType("OR");
+		xcsb.addCriteria(xcb);
 		return xcsb;
 	}
 	public class criterion

@@ -38,9 +38,16 @@
 package org.dcm4chex.archive.dcm.qrscp;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.sql.SQLException;
+import java.util.LinkedList;
+import java.util.TreeMap;
 
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanException;
+import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
+import javax.management.ReflectionException;
 
 import org.apache.log4j.Logger;
 import org.dcm4che.data.Command;
@@ -52,6 +59,8 @@ import org.dcm4che.net.Association;
 import org.dcm4che.net.DcmServiceBase;
 import org.dcm4che.net.DcmServiceException;
 import org.dcm4che.net.Dimse;
+import org.dcm4chex.archive.perf.PerfCounterEnum;
+import org.dcm4chex.archive.perf.PerfPropertyEnum;
 import org.nrg.xnat.gateway.FileInfo;
 
 /**
@@ -79,7 +88,26 @@ public class GetScp extends DcmServiceBase
 		this.service = service;
 		this.log = service.getLog();
 	}
+	private boolean isLocalAddress(InetAddress ia)
+	{		
+        try {
+            //check 127.0.0.1
+            InetAddress localhost = InetAddress.getByName("127.0.0.1");
+            if( ia.equals(localhost))
+                return true;
 
+            //this really is the way you have to check all IP addresses to see if one is local
+            InetAddress[] allMyIps = InetAddress.getAllByName(localhost.getCanonicalHostName());
+            if (allMyIps != null && allMyIps.length > 1) {
+                for(InetAddress ip : allMyIps) { 
+                    if( ia.equals(ip) )
+                        return true; //success!! it's local
+                }
+            }
+        }
+        catch(Exception e){}
+        return false;
+	}	
 	@Override
 	public void c_get(ActiveAssociation assoc, Dimse rq) throws IOException
 	{
@@ -88,6 +116,16 @@ public class GetScp extends DcmServiceBase
 		Association a = assoc.getAssociation();
 		try
 		{
+			boolean bAnonAEAllowed =  (Boolean) service.server.invoke(
+					new ObjectName("org.nrg.xnag.gateway:type=GatewayServer"),
+										"isAnonymousAEAllowed",null,null);
+			
+			
+			if (!bAnonAEAllowed && !isLocalAddress(a.getSocket().getInetAddress()))
+			{
+				throw new DcmServiceException(
+						Status.UnableToProcess, "C-GET is only allowed from the local host");
+			}
 			Dataset rqData = rq.getDataset();
 			if (log.isDebugEnabled())
 			{
@@ -108,10 +146,10 @@ public class GetScp extends DcmServiceBase
 									"org.nrg.xnag.gateway:type=GatewayServer"),
 							"retrieveFiles", new Object[]{rqData},
 							new String[]{Dataset.class.getName()});												
-//					RetrieveCmd.create(rqData).getFileInfos();
+//				RetrieveCmd.create(rqData).getFileInfos();
 				checkPermission(a, fileInfos);
 				new Thread(new GetTask(service, assoc, pcid, rqCmd, rqData,
-						fileInfos)).start();
+						fileInfos)).start();			
 			} catch (DcmServiceException e)
 			{
 				throw e;
@@ -125,7 +163,8 @@ public class GetScp extends DcmServiceBase
 				log.error("Unexpected exception:", e);
 				throw new DcmServiceException(Status.UnableToProcess, e);
 			}
-		} catch (DcmServiceException e)
+		} 
+		catch (DcmServiceException e)
 		{
 			Command rspCmd = objFact.newCommand();
 			rspCmd.initCGetRSP(rqCmd.getMessageID(), rqCmd
@@ -134,6 +173,26 @@ public class GetScp extends DcmServiceBase
 			Dimse rsp = fact.newDimse(pcid, rspCmd);
 			a.write(rsp);
 		}
+		catch (MBeanException e)
+		{
+			log.error("MBean exception:", e);
+		} catch (InstanceNotFoundException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (MalformedObjectNameException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ReflectionException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NullPointerException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
 	}
 
 	private void checkPermission(Association a, FileInfo[][] fileInfos)

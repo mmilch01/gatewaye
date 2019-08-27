@@ -13,6 +13,7 @@ import org.nrg.xnat.util.Utils;
 class GatewayDevice  {
     private String name;
     private int port = 104;
+    private boolean allowAnonymousAERetrieve = false;
     private final String hostname = "127.0.0.1";
     private final String group_name = "Dicom";
     private boolean usedcmuid=true;
@@ -83,6 +84,15 @@ class GatewayDevice  {
         }
     }
 
+    public void setAllowAnonymousAERetrieve(Boolean b) throws IOException {
+        write_property("AnonymousAEAllowed", Boolean.toString(b));
+        this.allowAnonymousAERetrieve = b;
+    }
+
+    public boolean getAllowAnonymousAERetrieve() {
+        return this.allowAnonymousAERetrieve;
+    }
+
     public void setCacheFolder (String name) throws IOException {
         if (!Utils.has_content(name)) {
 //            write_property("Application.SavedImagesFolderName",name);
@@ -109,6 +119,7 @@ class GatewayDevice  {
     public void populate() throws IOException {
         String _name = this.p.getProperty(this.group_name + "." + "CallingAETitle");
         String _port = this.p.getProperty(this.group_name + "." + "ListeningPort");
+        String _allowAnonymousRetrieve = this.p.getProperty(this.group_name+ "." + "AnonymousAEAllowed");
         String _cache = System.getProperty("user.home")+"/.xnatgateway/tmp";      	
 //        	this.p.getProperty("Application.SavedImagesFolderName");
 
@@ -122,6 +133,9 @@ class GatewayDevice  {
 
         if (!Utils.has_content(_port)) {
             this.l.addWarning("Gateway port is missing, defaulting to port " + Integer.toString(this.port));
+        }
+        if (!Utils.has_content(_allowAnonymousRetrieve)) {
+            this.l.addWarning("Anonymous AE Retrive setting is missing, defaulting to " + Boolean.toString(this.allowAnonymousAERetrieve));
         }
         
         String usedcm=p.getProperty("Xnat.UseDICOMUIDs");
@@ -137,6 +151,12 @@ class GatewayDevice  {
             this.l.addWarning("Could not read the Gateway port, " +
                               "defaulting to port " + Integer.toString(getPort()));
             setPort(this.port);
+        }
+        if (_allowAnonymousRetrieve == null) {
+            setAllowAnonymousAERetrieve(this.allowAnonymousAERetrieve);   
+        }
+        else {
+            setAllowAnonymousAERetrieve(Boolean.parseBoolean(_allowAnonymousRetrieve));
         }
     }
 }

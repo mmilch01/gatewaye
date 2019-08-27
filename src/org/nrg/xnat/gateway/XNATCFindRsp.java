@@ -42,28 +42,8 @@ public class XNATCFindRsp implements MultiDimseRsp
 		HttpMethodBase method = null;
 		InformationEntity ieWanted = Utils
 				.getInformationEntityForQueryRetieveLevel(qLevel);
-		// if(qLevel.toLowerCase().compareTo("patient")==0)
-		if (ieWanted.compareTo(InformationEntity.PATIENT) == 0)
-		{
-			// now, for Patient/Study level, use generic xml search.
-			try
-			{
-				String xml = XNATQueryGenerator.getQueryXML(ieWanted, m_query);
-				// verify the query xml
-				Tools.LogMessage(Priority.INFO_INT,
-						"XNAT Search engine query xml body:\n" + xml);
-				if (!m_xre.VerifyConnection())
-					return -1;
-				bGenSearch = true;
-				method = m_xre.PerformConnection(XNATRestAdapter.POST,
-						"/search", xml);
-			} catch (Exception e)
-			{
-				System.err.println("Exception " + e.getClass().toString()
-						+ ", message: " + e.getMessage());
-			}
-		} else if (ieWanted.compareTo(InformationEntity.SERIES) <= 0)
-		// else if(ieWanted.compareTo(InformationEntity.SERIES)==0)
+		//first, find XNAT session ID.
+		if (ieWanted.compareTo(InformationEntity.STUDY)>=0)
 		{
 			String path = XNATQueryGenerator.getRESTQuery(ieWanted, m_query,true);
 			Tools.LogMessage(Priority.INFO_INT, "REST query string:\n" + path);
@@ -73,34 +53,38 @@ public class XNATCFindRsp implements MultiDimseRsp
 				return -1;
 			}
 			method = m_xre.PerformConnection(XNATRestAdapter.GET, path, "");
-		} else
-			return 0;
+		} 
+		else
+		{
+			String path = XNATQueryGenerator.getRESTQuery(ieWanted, m_query,true);
+			Tools.LogMessage(Priority.INFO_INT, "REST query string:\n" + path);
+			if (path == null)
+			{
+				Tools.LogMessage(Priority.ERROR_INT, "Error generating REST query");
+				return -1;
+			}
+			method = m_xre.PerformConnection(XNATRestAdapter.GET, path, "");
+		}
 		if (method == null)
+		{
+			Tools.LogMessage(Priority.INFO_INT, "XML search request returned null");
 			return 0;
-		/*
-		 * try { // String resp=method.getResponseBodyAsString(); //
-		 * System.err.println(resp); } catch(Exception e){return;}
-		 * method.releaseConnection();
-		 */
+		}
 		try
 		{
 			// 2. parse the response - using XND's classes
 			LinkedList<TreeMap<String, String>> row_map = XNATTableParser
 					.GetRows(new SAXReader().read(method
 							.getResponseBodyAsStream()), !bGenSearch, "header");// bGenSearch?"header":null);
+			row_map=XNATQueryGenerator.FilterRowMap(row_map,ieWanted);
 			for (TreeMap<String, String> row : row_map)
 			{
 				// 3. translate the response to DICOM's AttributeList
 				Dataset resp = DcmObjectFactory.getInstance().newDataset();
-				// AttributeList al=new AttributeList();
 				resp.putAll(m_query);
-				// al.putAll(queryIdentifier);
 				Dataset received = XNATQueryGenerator.GetVocabulary()
 						.GetDicomEntry(row, ieWanted);
 				resp.putAll(received);
-				// al.putAll(received);
-				if(!XNATGatewayServer.isDICOMUID())
-					XNATQueryGenerator.GetVocabulary().modifySOPInstUID(resp, true);
 				if (resp.size() > 0)
 					m_curLst.add(resp);
 			}

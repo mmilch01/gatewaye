@@ -6,6 +6,7 @@
 
 package org.nrg.xnat.gui;
 
+import java.util.Set;
 import org.nrg.xnat.env.GatewayEnvironment;
 
 /**
@@ -25,6 +26,7 @@ public class GatewayAESettings extends javax.swing.JFrame {
         this.c = c;
         this.my_ae_title.setText(env.get_callingaetitle());
         this.my_listening_port.setText(Integer.toString(env.get_listening_port()));
+        this.allowAnonymousAE_check_box.setSelected(env.get_anoymous_ae_allowed());
     }
 
     /** This method is called from within the constructor to
@@ -43,6 +45,7 @@ public class GatewayAESettings extends javax.swing.JFrame {
         my_ae_title = new javax.swing.JTextField();
         my_listening_port = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
+        allowAnonymousAE_check_box = new javax.swing.JCheckBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -71,6 +74,8 @@ public class GatewayAESettings extends javax.swing.JFrame {
 
         jLabel3.setText("Edit Gateway Settings");
 
+        allowAnonymousAE_check_box.setText("Allow C-GET Retrieve From Anonymous Remote AEs");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -87,18 +92,22 @@ public class GatewayAESettings extends javax.swing.JFrame {
                             .addComponent(jLabel2))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(my_listening_port, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(my_ae_title, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(apply_button, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(cancel_button, javax.swing.GroupLayout.DEFAULT_SIZE, 66, Short.MAX_VALUE))
-                            .addComponent(my_listening_port, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(my_ae_title, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap())
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(cancel_button, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(allowAnonymousAE_check_box))))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(21, 21, 21)
+                .addContainerGap()
                 .addComponent(jLabel3)
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -108,15 +117,17 @@ public class GatewayAESettings extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
                     .addComponent(my_listening_port, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(allowAnonymousAE_check_box)
+                .addGap(28, 28, 28)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(cancel_button)
                     .addComponent(apply_button))
-                .addContainerGap(15, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((screenSize.width-256)/2, (screenSize.height-214)/2, 256, 214);
+        setBounds((screenSize.width-348)/2, (screenSize.height-246)/2, 348, 246);
     }// </editor-fold>//GEN-END:initComponents
 
     private void cancel_buttonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_cancel_buttonMousePressed
@@ -128,12 +139,13 @@ public class GatewayAESettings extends javax.swing.JFrame {
     }//GEN-LAST:event_formWindowClosed
 
     private void apply_buttonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_apply_buttonMousePressed
-        if (this.t.update_gateway(this.my_ae_title.getText(),this.my_listening_port.getText())) {
+        if (this.t.update_gateway(this.my_ae_title.getText(),this.my_listening_port.getText(), this.allowAnonymousAE_check_box.isSelected())) {
             this.dispose();
         }
     }//GEN-LAST:event_apply_buttonMousePressed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JCheckBox allowAnonymousAE_check_box;
     private javax.swing.JButton apply_button;
     private javax.swing.JButton cancel_button;
     private javax.swing.JLabel jLabel1;

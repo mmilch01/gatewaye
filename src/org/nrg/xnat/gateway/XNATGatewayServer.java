@@ -36,7 +36,6 @@ import org.nrg.xnat.gui.InitialProperties;
 
 public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 {
-	private static String m_ver = "Aug 18, 2010";
 	// private static QueryRetrieveScpService m_qrServ;
 	private Server m_dcmServer;	
 	private boolean m_srvShutdown = false;
@@ -48,10 +47,11 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 	protected int m_maxCacheFiles = 50000;
 	protected static XNATGatewayServer m_this = null;
 	protected AEServer m_ael=new AEServer();
+	private GatewayEnvironment m_env=null;
 	
 	public static boolean bUseDICOMUIDs=true;
 	private static boolean bConsole=false;
-	
+		
 	private boolean m_bStartFlag=false;
 	private long start_time = 0;
         private Logger l;
@@ -60,7 +60,11 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
     {
         this.m_bStartFlag = b;
     }
-
+    public Boolean isAnonymousAEAllowed()
+    {
+    	if(m_env==null) return false;
+    	return m_env.get_anoymous_ae_allowed();
+    }
     public boolean is_running () 
     {
         return this.m_bStartFlag;
@@ -75,7 +79,7 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
         return getInstance().start_time;
     }
 
-	public static boolean isDICOMUID(){return bUseDICOMUIDs;}
+	public static boolean isDICOMUID(){return true; /*bUseDICOMUIDs;*/}
 	
 	public boolean test()
 	{
@@ -107,11 +111,24 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 	{
 		return m_this;
 	}
-
+	
+	//retrieve the entire set directly (slow)
 	public FileInfo[][] retrieveFiles(Dataset query)
 	{
 		return new XNATCMoveRsp(m_XNATServer, m_XNATUser, m_XNATPass,
-				m_StoreFolder).performRetrieve(query);
+		m_StoreFolder).performRetrieve(query);		
+	}
+	
+	//retrieve series, has to be preceded by call to getSeriesRequests (faster, doesn't work for C-GET).
+	public FileInfo[][] retrieveSeries(Dataset query, TreeMap scanMap)
+	{
+		return new XNATCMoveRsp(m_XNATServer, m_XNATUser, m_XNATPass,
+				m_StoreFolder).retrieveSeries(query,scanMap);
+	}
+	public LinkedList<Object> getSeriesRequests(Dataset query)
+	{
+		return new XNATCMoveRsp(m_XNATServer, m_XNATUser, m_XNATPass,
+				m_StoreFolder).getSeriesRequests(query);		
 	}
 	public XNATCFindRsp getMultiCFindRsp(Dataset query)
 	{
@@ -124,11 +141,13 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 	public XNATGatewayServer(GatewayEnvironment env) throws Exception
 	{            
 		if(!test()) return;
+		m_env=env;
 		this.l=env.make_logger();
 		
-		bUseDICOMUIDs=env.isdcmuid();		
+		bUseDICOMUIDs=true;
+//			env.isdcmuid();
 		
-		l.info(DateFormat.getDateTimeInstance().format(new Date())+" Server started");
+		l.info(DateFormat.getDateTimeInstance().format(new Date())+" XNAT Gateway server v. "+env.version+" started");
 
 		QueryRetrieveScpService srv = new QueryRetrieveScpService();
 		if(!initServerParams(srv)) throw new IOException();
@@ -144,7 +163,16 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 		if(aets!=null)
 		{
 			aets = aets.replace(' ', '\\');
-			srv.setCallingAETs(aets);		
+			srv.setCallingAETs(aets);
+			String perm=srv.getUnrestrictedQueryPermissionsToAETitles();
+			
+			if (perm.compareTo("ANY")!=0)
+			{
+				srv.setUnrestrictedQueryPermissionsToAETitles(aets);		
+				System.out.println("Unrestricted query permissions for all AEs are disabled");
+			}
+			else
+				System.out.println("Unrestricted query permissions for all AEs are enabled");
 		}
 		else 
 		{
@@ -208,6 +236,8 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 		);
 
 		XNATQueryGenerator.LoadVocabulary("./config/vocabulary.xml");
+		//this attribute does not affect the behavior and the statement below is therefore misleading.
+//		System.out.println("Anonymous AE allowed: " + env.get_anoymous_ae_allowed());
 		start_time = new Date().getTime();		
 		new Thread(this).start();		
 	}
@@ -333,7 +363,7 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
                         
 			if(bConsole)
 			{
-				System.err.println("XNAT/DICOM gateway, "+ m_ver);
+				System.err.println("XNAT/DICOM gateway, "+ GatewayEnvironment.version);
 				p.put(XnatServerProperties.XNATPass, "*****");
 				System.err.println("properties=" + p);
 			}

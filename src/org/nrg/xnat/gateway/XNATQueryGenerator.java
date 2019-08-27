@@ -1,8 +1,13 @@
 package org.nrg.xnat.gateway;
 
 import java.io.File;
+import java.net.URLEncoder;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.TreeMap;
 
+import org.apache.log4j.Priority;
 import org.dcm4che.data.Dataset;
 import org.dcm4che.data.DcmElement;
 import org.dcm4che.dict.Tags;
@@ -31,7 +36,7 @@ public class XNATQueryGenerator
 		if (ie == InformationEntity.PATIENT)
 			res = "xnat:subjectData";
 		else if (ie == InformationEntity.STUDY)
-			res = "xnat:mrsessionData";
+			res = "xnat:imagesessionData";
 		else if (ie == InformationEntity.SERIES)
 			res = "xnat:scanData";
 		else
@@ -44,7 +49,7 @@ public class XNATQueryGenerator
 		{
 			// get series path
 			String path = getRESTQuery(ie, ds,false);
-			String scanID = GetValueFromAttributeList("id", ds);
+			String scanID = GetValueFromAttributeList("serinstuid", ds);
 			if (scanID == null)
 				return null;
 			path += "/" + scanID + "/files";
@@ -52,18 +57,62 @@ public class XNATQueryGenerator
 		}
 		return null;
 	}
+	private static String getAttrClause(String att, Dataset ds)
+	{
+		String s=GetValueFromAttributeList(att,ds);
+		if (s==null) return s;
+		String s1=null;
+		try
+		{
+			s1=m_vcbl.GetXNATEntry(att).m_restvar;
+		}
+		catch(Exception e) 
+		{
+			return null;
+		}
+		
+		return s1+"="+s;
+	}
 
+	public static LinkedList<TreeMap<String, String>> FilterRowMap(LinkedList<TreeMap<String, String>> row_map, InformationEntity ie)
+	{
+		String key="ID";
+		if(ie.compareTo(InformationEntity.STUDY)==0) key="UID";
+		else key="xnat:imagescandata/uid";
+		
+		TreeMap<String, String> keys=new TreeMap<String, String>();
+		String cur_key;
+		TreeMap<String, String> row;
+		LinkedList<TreeMap<String, String>> new_rows=new LinkedList<TreeMap<String, String>>(); 
+		for (int i=0; i<row_map.size(); i++)			
+		{
+			row=row_map.get(i);
+			cur_key=row.get(key);
+			if(cur_key==null) { new_rows.add(row); continue; }
+			if(keys.get(cur_key) == null)
+			{
+				keys.put(cur_key,cur_key);
+				new_rows.add(row);
+			}						
+		}
+		return new_rows;
+	}
+	
+	
 	public static String getRESTQuery(InformationEntity ie, Dataset query, boolean bDefineColumns)
 	{
 		if (ie.compareTo(InformationEntity.SERIES) == 0)
-		{
+		{			
 			String path = "/experiments";
 			if(!XNATGatewayServer.isDICOMUID())
 			{
 				// get experiment ID
 				String expID = GetValueFromAttributeList("stinstuid", query);
 				if (expID == null)
+				{
+					Tools.LogMessage(Priority.INFO_INT, "getRESTQuery: Could not identify experiment ID. Query:" + query.toString());
 					return null;
+				}
 				path += "/"+expID + "/scans";
 				if(bDefineColumns) 
 					path+="&columns=xnat:imagesessiondata/scans/scan/type,";
@@ -72,64 +121,66 @@ public class XNATQueryGenerator
 			else
 			{
 				String uid=query.getString(Tags.StudyInstanceUID);
-				if(uid==null) return null;
+				if(uid==null) 
+				{
+					Tools.LogMessage(Priority.INFO_INT, "getRESTQuery: Could not identify Study Instance UID. DICOM query:" + query.toString());
+					return null;
+				}
 				path+="?xsiType=xnat:imageSessionData&xnat:imageSessionData/UID="+uid;
-				path+="&columns=xnat:imagesessiondata/scans/scan/uid,xnat:imagesessiondata/scans/scan/type,";
+//				path+="&columns=xnat:imagesessiondata/scans/scan/uid,xnat:imagesessiondata/scans/scan/type,";
+				path+="&columns=xnat:imagescandata/uid,xnat:imagescandata/type,";
 			}
-			path+="type,xsiType,series_description,subject_ID,label,subject_label";
+//			path+="type,xsiType,series_description,subject_ID,label,subject_label";
+			
+			if (bDefineColumns)
+			{
+				//Adding more schema-like fields leads to returning multiple rows per series (Aug 2012).
+//				path+="type,xsiType,series_description,subject_ID,label,subject_label,ID";
+
+				int i=0;
+				for (String s : m_vcbl.m_dcmFieldsSeries)
+				{
+					path += m_vcbl.GetXNATEntry(s).m_restvar;
+					if(i<m_vcbl.m_dcmid_map.keySet().size()-1) path+=",";
+					i++;
+				}
+			
+			}			
 			return path;
+			
 			
 		} else if (ie.compareTo(InformationEntity.STUDY) == 0)
 		{
-			String path = "/experiments";
-			String expID = GetValueFromAttributeList("stinstuid", query);
-			String label = GetValueFromAttributeList("staccessionnum", query);
-			String modality = GetValueFromAttributeList("stmodality", query);
-			String date = GetValueFromAttributeList("stdate", query);
-			String patname = GetValueFromAttributeList("patname", query);
-			String patid = GetValueFromAttributeList("patid", query);
-			boolean bFirst = true;
-
-			if (expID != null)
-			{
-				path += (bFirst ? "?" : "&") + "ID=" + expID;
-				bFirst = false;
-			}
-			if (label != null)
-			{
-				path += (bFirst ? "?" : "&") + "label=" + label;
-				bFirst = false;
-			}
-			if (modality != null)
-			{
-				path += (bFirst ? "?" : "&") + "xsiType=" + modality;
-				bFirst = false;
-			}
-			if (date != null)
-			{
-				path += (bFirst ? "?" : "&") + "date=" + date;
-				bFirst = false;
-			}
-			if (patname != null)
-			{
-				path += (bFirst ? "?" : "&") + "subject_label=" + patname;
-				bFirst = false;
-			}
-			if (patid != null)
-			{
-				path += (bFirst ? "?" : "&") + "subject_ID=" + patid;
-				bFirst = false;
-			}
-			if(!bFirst)
-			{
-				path+="&";
-				bFirst=false;
-			}
-			if(bDefineColumns)
-				path+="columns=studyInstanceUID,subject_ID,date,xsiType,label,subject_label,ID";
+			String path = "/experiments?";
+			String param=null;
+			boolean bFirst=true;
 			
+			for (String s : m_vcbl.m_dcmid_map.keySet())
+			{
+				param=getAttrClause(s,query);
+				if(param!=null)
+				{
+					path += ((bFirst)? "" : "&") + param;
+					bFirst=false;
+				}
+			}
+			if (bDefineColumns)
+			{
+				path+="&columns=";
+				int i=0;
+				for (String s:m_vcbl.m_dcmFieldsStudy)
+				{
+					path+=m_vcbl.GetXNATEntry(s).m_restvar;
+					if(i<m_vcbl.m_dcmFieldsStudy.size()-1) path+=",";
+					i++;
+				}
+			}
 			return path;
+						
+//			if(bDefineColumns)
+//				path+="columns=studyInstanceUID,subject_ID,date,xsiType,label,subject_label,ID";
 		}
+		Tools.LogMessage(Priority.INFO_INT, "getRESTQuery: Query level is neither SERIES nor STUDY. DICOM query:" + query.toString());
 		return null;
 	}
 
@@ -142,12 +193,8 @@ public class XNATQueryGenerator
 		if (xve == null)
 			return null;
 		String val = ds.getString(xve.m_DICOMTag);
-		// Attribute attr=al.get(xve.m_DICOMTag);
-		// if(attr==null) return null;
-		// if(val==null) return null;
-		if(XNATGatewayServer.isDICOMUID()) return val;
+		if(val==null) return null;
 		return XNATVocabulary.dcmToXNATField(val, xnat_field_id);
-		// attr.getSingleStringValueOrNull(),xnat_field_id);
 	}
 
 	public static String getQueryXML(InformationEntity ie, Dataset query)
@@ -163,15 +210,6 @@ public class XNATQueryGenerator
 			DcmElement el = (DcmElement) i.next();
 			// for(Iterator it=dob.iterator(); it.hasNext();)
 			{
-				// DcmElement el=(DcmElement)it.next();
-
-				// Attribute a = (Attribute)i.next();
-				// AttributeTag at = a.getTag();
-				// InformationEntity ieAttribute =
-				// m_dd.getInformationEntityFromTag(at);
-				// if(ieAttribute==null) continue;
-				// add fields
-				// if(ieAttribute.compareTo(ie)<=0)
 				{
 					XNATVocabularyEntry xve = null;
 					try
@@ -185,10 +223,11 @@ public class XNATQueryGenerator
 					if (xve != null)
 					{
 						sf = new XdatSearchFieldBean();
-						sf.setElementName(xve.m_elementName);
-						sf.setFieldId(xve.m_field_id);
-						sf.setHeader(xve.m_search_column_alias);
-						sf.setType(xve.m_type);
+						sf.setElementName(xve.m_xnatElementName);
+						sf.setFieldId(xve.m_schema_path);
+						sf.setHeader(xve.m_dcmid);
+						sf.setType("string");
+						
 						sf.setSequence(0);
 						search.addSearchField(sf);
 
