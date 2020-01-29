@@ -1,23 +1,16 @@
 # This backup file was created because of the following errors in the original: 
-# Warning:Anonymous AE Retrive setting is missing, defaulting to false
+# Warning:No remote devices found in the config file
 
 #Auto-generated, please do not edit
-#Thu Feb 02 15:00:21 CST 2012
-Dicom.ListeningPort=4009
-Dicom.RemoteAEs=KPACS 
-XNATServers.CNDA.User=mmilch
-XNATServers.CNDA.Pass=619F22797511DC4DA67FE3DD4C7B5CEA
+#Wed Jan 29 15:03:45 CST 2020
+Application.SavedImagesFolderName=/home/mmilchenko/.xnatgateway/tmp/
+Dicom.CalledAETitle=aaa
+XNATServers.CNDA.User=user
+Dicom.ListeningPort=104
 XNATServers.CNDA.ServerURL=https\://cnda.wustl.edu
+Dicom.CallingAETitle=aaa
+XNATServers=CNDA 
 Dicom.AnonymousAEAllowed=false
-Dicom.RemoteAEs.KPACS.Port=104
-XNATServers.XNAT_Central.User=mmilch
-XNATServers.XNAT_Central.Pass=619F22797511DC4DA67FE3DD4C7B5CEA
-XNATServers=CNDA XNAT_Central 
+XNATServers.CNDA.Pass=C41D759137454AC33E1B0D367EAFF899
 Logger.Output=file
-Dicom.CallingAETitle=GATEWAY
-Dicom.RemoteAEs.KPACS.CalledAETitle=KPACS
-Dicom.CalledAETitle=GATEWAY
-Dicom.RemoteAEs.KPACS.HostNameOrIPAddress=localhost
-XNATServers.XNAT_Central.ServerURL=http\://central.xnat.org
 XNATServers.default=CNDA
-Application.SavedImagesFolderName=./tmp/
