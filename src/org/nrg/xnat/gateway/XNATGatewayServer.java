@@ -430,17 +430,14 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 		else
 			bConsole=false;
 		new File(System.getProperty("user.home")+"/.xnatgateway/tmp").mkdirs();
-		String propFile;		
+		String propFile=System.getProperty("user.home")+"/.xnatgateway/gateway.properties.test";
+		System.out.println ("using properties file "+propFile);			
 		if(bConsole)			
 		{			
-			propFile=System.getProperty("user.home")+"/.xnatgateway/gateway.properties.console";
-			System.out.println ("using properties file "+propFile);			
 			System.err.println(start(propFile));
 		}
 		else
-		{
-			propFile=System.getProperty("user.home")+"/.xnatgateway/gateway.properties.test";
-			System.out.println ("using properties file "+propFile);			
+		{			
 			InitialProperties i = new InitialProperties(new File(propFile));
 		}		
 	}
