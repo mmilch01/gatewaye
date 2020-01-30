@@ -54,9 +54,6 @@ public class GatewayEnvironment {
     public GatewayEnvironment(File f) throws IOException {
         if (!initialized) {
             this.f = f;
-            //??
-            //System.out.println(System.getProperty("user.home"));
-            System.out.println("GatewayEnvironment.line 57: " + f.toString());
             this.p = read_props(this.f);
             initialize(this.p);
         }

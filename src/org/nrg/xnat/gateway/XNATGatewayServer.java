@@ -390,6 +390,7 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 		catch(Exception e)
 		{
 			System.out.println ("Error reading properties file "+prop);
+			e.printStackTrace();
 			return Result.PROPERTIES_FILE_ERROR;
 		}
 		XNATGatewayServer srv;
