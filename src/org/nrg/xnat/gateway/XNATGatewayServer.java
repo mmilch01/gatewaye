@@ -1,4 +1,5 @@
 package org.nrg.xnat.gateway;
+import java.lang.System;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -388,6 +389,7 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 		}
 		catch(Exception e)
 		{
+			System.out.println ("Error reading properties file "+prop);
 			return Result.PROPERTIES_FILE_ERROR;
 		}
 		XNATGatewayServer srv;
@@ -397,6 +399,7 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 		}
 		catch(Exception e)
 		{
+			System.out.println("Error initializing environment from properties file "+prop);
 			return Result.INITIALIZATION_EXCEPTION;
 		}
 		srv.m_bStartFlag=true;
@@ -426,13 +429,18 @@ public class XNATGatewayServer implements Runnable, XNATGatewayServerMBean
 		else
 			bConsole=false;
 		new File(System.getProperty("user.home")+"/.xnatgateway/tmp").mkdirs();
-		if(bConsole)
+		String propFile;		
+		if(bConsole)			
 		{			
-			System.err.println(start("/config/gateway.properties"));
+			propFile=System.getProperty("user.home")+"/.xnatgateway/gateway.properties.console";
+			System.out.println ("using properties file "+propFile);			
+			System.err.println(start(propFile));
 		}
 		else
 		{
-			InitialProperties i = new InitialProperties(new File(System.getProperty("user.home")+"/.xnatgateway/gateway.properties.test"));
+			propFile=System.getProperty("user.home")+"/.xnatgateway/gateway.properties.test";
+			System.out.println ("using properties file "+propFile);			
+			InitialProperties i = new InitialProperties(new File(propFile));
 		}		
 	}
 	@Override
