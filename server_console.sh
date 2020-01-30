@@ -3,8 +3,8 @@
 pushd ~/.xnatgateway &> /dev/null; gd=`pwd`; popd &> /dev/null
 
 if [ ! -f "$gd/gateway.properties.test" ]; then
-	echo "XNAT gateway error: no configuration file."
-	echo "Please run server_gui.sh to create initial configuration."
+	echo "XNAT gateway error: cannot find configuration file $gd/gateway.properties.console"
+	echo "Copy ./config/gateway.properties.default to $gd/gateway.properties.console and manually edit it"
 	exit -1
 fi
 

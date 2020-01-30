@@ -2,7 +2,7 @@
 # Warning:No remote devices found in the config file
 
 #Auto-generated, please do not edit
-#Wed Jan 29 15:03:45 CST 2020
+#Wed Jan 29 15:07:06 CST 2020
 Application.SavedImagesFolderName=/home/mmilchenko/.xnatgateway/tmp/
 Dicom.CalledAETitle=aaa
 XNATServers.CNDA.User=user

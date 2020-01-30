@@ -56,14 +56,12 @@ Dicom.CallingAETitle=SERVERTEST
 # each AE may be named anything unique (in this file) without a space or comma; the name
 # does not need to be the same as the actual AE title.
 #
-#Dicom.RemoteAEs=osirix helgray
-
-Dicom.RemoteAEs=MOVESCU MISHA
+Dicom.RemoteAEs=osirix helgray
 
 Dicom.RemoteAEs.MOVESCU.HostNameOrIPAddress=localhost
 Dicom.RemoteAEs.MOVESCU.CalledAETitle=MOVESCU
 Dicom.RemoteAEs.MOVESCU.Port=4006
 
-Dicom.RemoteAEs.MISHA.HostNameOrIPAddress=nilpc154.neuroimage.wustl.edu
-Dicom.RemoteAEs.MISHA.CalledAETitle=NILPC154
-Dicom.RemoteAEs.MISHA.Port=104
+Dicom.RemoteAEs.osirix.HostNameOrIPAddress=nilpc154.neuroimage.wustl.edu
+Dicom.RemoteAEs.osirix.CalledAETitle=NILPC154
+Dicom.RemoteAEs.osirix.Port=104
