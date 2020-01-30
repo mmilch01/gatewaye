@@ -2,7 +2,7 @@
 # Warning:No remote devices found in the config file
 
 #Auto-generated, please do not edit
-#Wed Jan 29 15:07:06 CST 2020
+#Thu Jan 30 10:37:52 CST 2020
 Application.SavedImagesFolderName=/home/mmilchenko/.xnatgateway/tmp/
 Dicom.CalledAETitle=aaa
 XNATServers.CNDA.User=user
@@ -10,7 +10,7 @@ Dicom.ListeningPort=104
 XNATServers.CNDA.ServerURL=https\://cnda.wustl.edu
 Dicom.CallingAETitle=aaa
 XNATServers=CNDA 
-Dicom.AnonymousAEAllowed=false
 XNATServers.CNDA.Pass=C41D759137454AC33E1B0D367EAFF899
+Dicom.AnonymousAEAllowed=false
 Logger.Output=file
 XNATServers.default=CNDA
